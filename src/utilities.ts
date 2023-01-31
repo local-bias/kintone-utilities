@@ -56,3 +56,13 @@ export const getFieldValueAsString = (
   }
   return '';
 };
+
+/**
+ * デスクトップ版のイベントタイプを基に、モバイル版を追加し返却します
+ * @param events デスクトップのイベントタイプ
+ * @returns モバイルを含むイベントタイプ
+ */
+export const withMobileEvent = (events: string[]): string[] => {
+  const mobileEvents = events.filter((e) => !/^mobile/.test(e)).map((type) => 'mobile.' + type);
+  return [...events, ...mobileEvents];
+};
