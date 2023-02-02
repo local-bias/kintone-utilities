@@ -12,10 +12,10 @@ export const getFieldValueAsString = (
   field: kintoneAPI.Field,
   options?: {
     separator?: string;
-    ignoresNA?: boolean;
+    ignoresCalculationError?: boolean;
   }
 ): string => {
-  const { separator = ', ', ignoresNA = false } = options ?? {};
+  const { separator = ', ', ignoresCalculationError = false } = options ?? {};
 
   if (
     field.type === 'MULTI_LINE_TEXT' ||
@@ -40,8 +40,8 @@ export const getFieldValueAsString = (
     field.type === 'CALC'
   ) {
     const value = field.value ?? '';
-    if (ignoresNA) {
-      return value !== '#N/A!' ? value : '';
+    if (ignoresCalculationError) {
+      return /^#.*!$/.test(value) ? '' : value;
     }
     return value;
   } else if (
