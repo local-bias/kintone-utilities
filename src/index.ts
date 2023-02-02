@@ -1,5 +1,3 @@
-console.log('hello!');
+export type { kintoneAPI } from './api-types';
 
-export { kintoneAPI } from './api-types';
-
-export { getFieldValueAsString, withMobileEvent } from './utilities';
+export * from './utilities';

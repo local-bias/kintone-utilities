@@ -1,24 +1,30 @@
-import { kintoneAPI } from './api-types';
+import type { kintoneAPI } from './api-types';
 
+/**
+ * 各フィールドタイプの値を文字列として返却します
+ *
+ * 配列で取得されるような値は区切り文字で連結されます
+ * @param field
+ * @param options
+ * @returns
+ */
 export const getFieldValueAsString = (
   field: kintoneAPI.Field,
   options?: {
     separator?: string;
+    ignoresNA?: boolean;
   }
 ): string => {
-  const { separator = ', ' } = options ?? {};
+  const { separator = ', ', ignoresNA = false } = options ?? {};
 
   if (
-    field.type === 'SINGLE_LINE_TEXT' ||
     field.type === 'MULTI_LINE_TEXT' ||
     field.type === 'RICH_TEXT' ||
-    field.type === 'CALC' ||
     field.type === 'CREATED_TIME' ||
     field.type === 'DATE' ||
     field.type === 'DATETIME' ||
     field.type === 'DROP_DOWN' ||
     field.type === 'LINK' ||
-    field.type === 'NUMBER' ||
     field.type === 'RECORD_NUMBER' ||
     field.type === 'STATUS' ||
     field.type === 'RADIO_BUTTON' ||
@@ -28,6 +34,16 @@ export const getFieldValueAsString = (
     field.type === '__REVISION__'
   ) {
     return field.value ?? '';
+  } else if (
+    field.type === 'SINGLE_LINE_TEXT' ||
+    field.type === 'NUMBER' ||
+    field.type === 'CALC'
+  ) {
+    const value = field.value ?? '';
+    if (ignoresNA) {
+      return value !== '#N/A!' ? value : '';
+    }
+    return value;
   } else if (
     field.type === 'CATEGORY' ||
     field.type === 'CHECK_BOX' ||
@@ -62,7 +78,7 @@ export const getFieldValueAsString = (
  * @param events デスクトップのイベントタイプ
  * @returns モバイルを含むイベントタイプ
  */
-export const withMobileEvent = (events: string[]): string[] => {
+export const withMobileEvents = (events: string[]): string[] => {
   const mobileEvents = events.filter((e) => !/^mobile/.test(e)).map((type) => 'mobile.' + type);
   return [...events, ...mobileEvents];
 };

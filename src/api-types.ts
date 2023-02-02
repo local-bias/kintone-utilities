@@ -1,11 +1,11 @@
-import {
+import type {
   App as DefaultApp,
   Layout as DefaultLayout,
   Record as DefaultRecord,
   ViewForParameter,
   ViewForResponse,
 } from '@kintone/rest-api-client/lib/client/types';
-import {
+import type {
   Calc as CalcField,
   Category as CategoryField,
   CheckBox as CheckBoxField,
@@ -37,15 +37,15 @@ import {
   UpdatedTime as UpdatedTimeField,
   UserSelect as UserSelectField,
 } from '@kintone/rest-api-client/lib/KintoneFields/types/field';
-import {
+import type {
   Label as DefaultLayoutLabel,
   OneOf as DefaultLayoutField,
 } from '@kintone/rest-api-client/lib/KintoneFields/types/fieldLayout';
-import {
+import type {
   Group as DefaultGroup,
   Row as DefaultRow,
 } from '@kintone/rest-api-client/lib/KintoneFields/types/layout';
-import {
+import type {
   Calc as CalcProperty,
   Category as CategoryProperty,
   CheckBox as CheckBoxProperty,
