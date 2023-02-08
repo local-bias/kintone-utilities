@@ -19,7 +19,7 @@ export class KintoneEventListener {
 
   public add = <T = kintoneAPI.RecordData>(
     events: kintoneAPI.EventType[],
-    callback: (event: kintoneAPI.Event<T>) => kintoneAPI.Event<T>
+    callback: (event: kintoneAPI.Event<T>) => kintoneAPI.Event<T> | Promise<kintoneAPI.Event<T>>
   ) => {
     const mobileEvents = withMobileEvents(events);
 
