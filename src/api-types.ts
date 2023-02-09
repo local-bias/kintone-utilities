@@ -204,8 +204,7 @@ export declare namespace kintoneAPI {
     | 'mobile.app.record.edit.show'
     | 'mobile.app.record.edit.change'
     | 'mobile.app.record.edit.submit'
-    | 'mobile.app.record.edit.submit.success'
-    | string;
+    | 'mobile.app.record.edit.submit.success';
 
   type Event<T = RecordData> = {
     appId: number;
