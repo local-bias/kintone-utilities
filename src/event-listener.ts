@@ -21,9 +21,7 @@ export class KintoneEventListener {
     events: kintoneAPI.EventType[],
     callback: (event: kintoneAPI.Event<T>) => kintoneAPI.Event<T> | Promise<kintoneAPI.Event<T>>
   ) => {
-    const mobileEvents = withMobileEvents(events);
-
-    kintone.events.on([...events, ...mobileEvents], async (event) => {
+    kintone.events.on(withMobileEvents(events), async (event) => {
       try {
         return await callback(event);
       } catch (error) {
