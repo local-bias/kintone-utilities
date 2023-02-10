@@ -1,5 +1,5 @@
 {
-  "name": "@lb-ribbit/kintone-utilities",
+  "name": "@konomi-app/kintone-utilities",
   "version": "0.5.3",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
