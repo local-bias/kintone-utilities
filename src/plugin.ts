@@ -11,3 +11,17 @@ export const restoreStorage = <T = any>(id: string): T | null => {
     {}
   );
 };
+
+/**
+ * アプリにプラグインの設定情報を保存します
+ * @param target プラグインの設定情報
+ * @param callback 保存成功後に実行する処理
+ */
+export const storeStorage = (target: Record<string, any>, callback?: () => void): void => {
+  const converted = Object.entries(target).reduce(
+    (acc, [key, value]) => ({ ...acc, [key]: JSON.stringify(value) }),
+    {}
+  );
+
+  kintone.plugin.app.setConfig(converted, callback);
+};
