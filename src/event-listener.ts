@@ -17,17 +17,36 @@ export class KintoneEventListener {
     this.#commonErrorHandler = errorHandler;
   }
 
+  /**
+   * **この関数は`kintone.events.on`の代替関数です. 引数に互換性があります.**
+   *
+   * デスクトップ版のイベントを指定することで自動的に対応するモバイル版のイベントが登録されます.
+   * また、インスタンス作成時に指定したエラーハンドラが、コールバック関数のエラー発生時に実行されます
+   * @param events
+   * @param callback
+   */
   public add = <T = kintoneAPI.RecordData>(
     events: kintoneAPI.EventType[],
     callback: (event: kintoneAPI.Event<T>) => kintoneAPI.Event<T> | Promise<kintoneAPI.Event<T>>
   ) => {
     kintone.events.on(withMobileEvents(events), async (event) => {
       try {
+        window.addEventListener('beforeunload', this.beforeunload);
         return await callback(event);
       } catch (error) {
         await this.#commonErrorHandler(error, { event });
         throw error;
+      } finally {
+        window.removeEventListener('beforeunload', this.beforeunload);
       }
     });
   };
+
+  /**
+   * JavaScript中にページを離れようとした場合にアラートを表示します
+   */
+  private beforeunload(event: BeforeUnloadEvent) {
+    event.preventDefault();
+    event.returnValue = '';
+  }
 }
