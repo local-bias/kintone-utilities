@@ -112,10 +112,12 @@ export const convertHalfwidthKatakanaToFullwidth = (target: string) => {
  * 指定された文字列に以下の変換をかけて返却します
  *
  * - 全角英数字を半角英数字へ
+ * - アルファベットを大文字から小文字へ
  * - 全角カナと半角カナをひらがなへ
  */
-export const getYuruCaracter = (target: string) => {
+export const getYuruChara = (target: string) => {
   let converted = convertFullwidthAlphanumericToHalfwidth(target);
+  converted = converted.toLowerCase();
   converted = convertHalfwidthKatakanaToFullwidth(converted);
   return convertKatakanaToHiragana(converted);
 };
