@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "repository": "https://github.com/local-bias/kintone-utilities.git",
@@ -11,10 +11,10 @@
     "prepare": "yarn run build"
   },
   "dependencies": {
-    "@kintone/rest-api-client": "^3.3.1"
+    "@kintone/rest-api-client": "^3.3.3"
   },
   "devDependencies": {
-    "@kintone/dts-gen": "^6.1.19",
+    "@kintone/dts-gen": "^6.1.21",
     "typescript": "^4.9.5"
   },
   "prettier": {
