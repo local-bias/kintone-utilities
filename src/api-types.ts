@@ -38,8 +38,33 @@ import type {
   UserSelect as UserSelectField,
 } from '@kintone/rest-api-client/lib/KintoneFields/types/field';
 import type {
+  CheckBox as DefaultLayoutCheckBox,
+  CreatedTime as DefaultLayoutCreatedTime,
+  Creator as DefaultLayoutCreator,
+  Date as DefaultLayoutDate,
+  DateTime as DefaultLayoutDateTime,
+  Dropdown as DefaultLayoutDropdown,
+  File as DefaultLayoutFile,
+  GroupSelect as DefaultLayoutGroupSelect,
+  HR as DefaultLayoutHR,
+  InSubtable as DefaultLayoutInSubtable,
   Label as DefaultLayoutLabel,
+  Link as DefaultLayoutLink,
+  Modifier as DefaultLayoutModifier,
+  MultiLineText as DefaultLayoutMultiLineText,
+  MultiSelect as DefaultLayoutMultiSelect,
+  Number as DefaultLayoutNumber,
   OneOf as DefaultLayoutField,
+  OrganizationSelect as DefaultLayoutOrganizationSelect,
+  RadioButton as DefaultLayoutRadioButton,
+  RecordNumber as DefaultLayoutRecordNumber,
+  ReferenceTable as DefaultLayoutReferenceTable,
+  RichText as DefaultLayoutRichText,
+  SingleLineText as DefaultLayoutSingleLineText,
+  Spacer as DefaultLayoutSpacer,
+  Time as DefaultLayoutTime,
+  UpdatedTime as DefaultLayoutUpdatedTime,
+  UserSelect as DefaultLayoutUserSelect,
 } from '@kintone/rest-api-client/lib/KintoneFields/types/fieldLayout';
 import type {
   Group as DefaultGroup,
@@ -168,6 +193,31 @@ export declare namespace kintoneAPI {
     type Label = DefaultLayoutLabel;
     type Row = DefaultRow<LayoutField[]>;
     type Group = DefaultGroup<Row[]>;
+    type Spacer = DefaultLayoutSpacer;
+    type HR = DefaultLayoutHR;
+    type CheckBox = DefaultLayoutCheckBox;
+    type CreatedTime = DefaultLayoutCreatedTime;
+    type Creator = DefaultLayoutCreator;
+    type Date = DefaultLayoutDate;
+    type DateTime = DefaultLayoutDateTime;
+    type Dropdown = DefaultLayoutDropdown;
+    type File = DefaultLayoutFile;
+    type GroupSelect = DefaultLayoutGroupSelect;
+    type InSubtable = DefaultLayoutInSubtable;
+    type Link = DefaultLayoutLink;
+    type Modifier = DefaultLayoutModifier;
+    type MultiLineText = DefaultLayoutMultiLineText;
+    type MultiSelect = DefaultLayoutMultiSelect;
+    type Number = DefaultLayoutNumber;
+    type OrganizationSelect = DefaultLayoutOrganizationSelect;
+    type RadioButton = DefaultLayoutRadioButton;
+    type RecordNumber = DefaultLayoutRecordNumber;
+    type ReferenceTable = DefaultLayoutReferenceTable;
+    type RichText = DefaultLayoutRichText;
+    type SingleLineText = DefaultLayoutSingleLineText;
+    type Time = DefaultLayoutTime;
+    type UpdatedTime = DefaultLayoutUpdatedTime;
+    type UserSelect = DefaultLayoutUserSelect;
   }
 
   namespace response {
