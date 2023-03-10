@@ -10,6 +10,7 @@ export class LoadingOverlay {
   #html: string;
   #progress: number | null;
   #root: HTMLDivElement;
+  #variable: HTMLDivElement;
 
   public constructor(props: ConstructorProps = {}) {
     this.#shown = false;
@@ -24,6 +25,15 @@ export class LoadingOverlay {
     root.id = ROOT_ID;
     this.#root = root;
     document.body.append(root);
+
+    const container = document.createElement('div');
+    this.#root.append(container);
+    container.innerHTML = `<div class="loader"></div>`;
+
+    const variable = document.createElement('div');
+    container.append(variable);
+    this.#variable = variable;
+
     this.render();
   }
 
@@ -54,27 +64,18 @@ export class LoadingOverlay {
   private render(): void {
     if (this.#shown) {
       if (this.#html) {
-        this.#root.innerHTML = `
-        <div>
-          <div class="loader"></div>
-          <div>${this.#label}</div>
-          <div class="progress" style="width: ${this.#progress}%"></div>
-        </div>`;
+        this.#variable.innerHTML = `<div>${this.#label}</div><div class="progress" style="width: ${
+          this.#progress
+        }%"></div>`;
       } else {
         if (this.#label instanceof Array) {
-          this.#root.innerHTML = `
-          <div>
-            <div class="loader"></div>
-            <div>${this.#label.join('<br>')}</div>
-            <div class="progress" style="width: ${this.#progress}%"></div>
-          </div>`;
+          this.#variable.innerHTML = `<div>${this.#label.join(
+            '<br>'
+          )}</div><div class="progress" style="width: ${this.#progress}%"></div>`;
         } else {
-          this.#root.innerHTML = `
-          <div>
-            <div class="loader"></div>
-            <div>${this.#label}</div>
-            <div class="progress" style="width: ${this.#progress}%"></div>
-          </div>`;
+          this.#variable.innerHTML = `<div>${
+            this.#label
+          }</div><div class="progress" style="width: ${this.#progress}%"></div>`;
         }
       }
     }
