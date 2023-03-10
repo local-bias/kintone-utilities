@@ -6,13 +6,15 @@ const ROOT_ID = '__🐸__loading-overlay';
 
 export class LoadingOverlay {
   #shown: boolean;
-  #label: string;
+  #label: string | string[];
+  #html: string;
   #progress: number | null;
   #root: HTMLDivElement;
 
   public constructor(props: ConstructorProps = {}) {
     this.#shown = false;
     this.#label = props.label || '';
+    this.#html = '';
     this.#progress = props.progress ?? null;
 
     this.addStyle();
@@ -28,12 +30,14 @@ export class LoadingOverlay {
   public start(): void {
     this.#shown = true;
     window.removeEventListener('beforeunload', this.beforeunload);
+    document.body.style.overflow = 'hidden';
     this.render();
   }
 
   public stop(): void {
     this.#shown = false;
     window.removeEventListener('beforeunload', this.beforeunload);
+    document.body.style.overflow = 'auto';
     this.render();
   }
 
@@ -49,11 +53,30 @@ export class LoadingOverlay {
 
   private render(): void {
     if (this.#shown) {
-      this.#root.innerHTML = `
-      <div>
-        <div class="loader"></div>
-        <div>${this.#label}</div>
-      </div>`;
+      if (this.#html) {
+        this.#root.innerHTML = `
+        <div>
+          <div class="loader"></div>
+          <div>${this.#label}</div>
+          <div class="progress" style="width: ${this.#progress}%"></div>
+        </div>`;
+      } else {
+        if (this.#label instanceof Array) {
+          this.#root.innerHTML = `
+          <div>
+            <div class="loader"></div>
+            <div>${this.#label.join('<br>')}</div>
+            <div class="progress" style="width: ${this.#progress}%"></div>
+          </div>`;
+        } else {
+          this.#root.innerHTML = `
+          <div>
+            <div class="loader"></div>
+            <div>${this.#label}</div>
+            <div class="progress" style="width: ${this.#progress}%"></div>
+          </div>`;
+        }
+      }
     }
   }
 
@@ -100,15 +123,16 @@ export class LoadingOverlay {
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 16px;
+          gap: 32px;
           padding: 32px 64px;
           background-color: #fffc;
-          border: 1px solid #fff;
           border-radius: 8px;
           box-shadow: 0 5px 24px -6px #0002;
           min-width: 300px;
           max-width: 90vw;
           min-height: 200px;
+          position: relative;
+          overflow: hidden;
         }
 
         .loader {
@@ -125,14 +149,30 @@ export class LoadingOverlay {
             transform: rotate(0deg);
             border-radius: 1em;
           }
+          20% {
+            transform: rotate(0deg);
+          }
           30%,
           60% {
             border-radius: 0.25em;
+          }
+          70% {
+            transform: rotate(180deg);
           }
           100% {
             transform: rotate(180deg);
             border-radius: 1em;
           }
+        }
+
+        .progress {
+          position: absolute;
+          bottom: 0px;
+          left: 0;
+          width: 60%;
+          height: 3px;
+          background-color: #2563eb;
+          transition: all 250ms ease;
         }
       }
     `);
