@@ -1,4 +1,5 @@
 import type { kintoneAPI } from './api-types';
+import type { SavedFields } from './utility-types';
 
 /**
  * 各フィールドタイプの値を文字列として返却します
@@ -9,7 +10,7 @@ import type { kintoneAPI } from './api-types';
  * @returns
  */
 export const getFieldValueAsString = (
-  field: kintoneAPI.Field,
+  field: kintoneAPI.Field | SavedFields,
   options?: {
     separator?: string;
     ignoresCalculationError?: boolean;
@@ -71,6 +72,23 @@ export const getFieldValueAsString = (
       .join(separator);
   }
   return '';
+};
+
+export const compareField = (
+  field1: kintoneAPI.Field,
+  field2: kintoneAPI.Field,
+  options?: { ignoresType?: boolean }
+): boolean => {
+  const { ignoresType = false } = options ?? {};
+
+  if (!ignoresType && field1.type !== field2.type) {
+    return false;
+  }
+
+  const separator = '$';
+  return (
+    getFieldValueAsString(field1, { separator }) === getFieldValueAsString(field2, { separator })
+  );
 };
 
 /**
