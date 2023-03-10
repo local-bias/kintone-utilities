@@ -5,3 +5,4 @@ export * from './event-listener';
 export * from './plugin';
 export * from './utilities';
 export * from './utility-types';
+export * from './loading-overlay';
