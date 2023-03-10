@@ -66,16 +66,13 @@ export class LoadingOverlay {
   private addStyle() {
     document.body.classList.add(css`
       #${ROOT_ID} {
-        opacity: 0;
-
         font-family: 'Yu Gothic Medium', '游ゴシック', YuGothic, 'メイリオ',
           'Hiragino Kaku Gothic ProN', Meiryo, sans-serif;
         color: #356;
         font-size: 17px;
 
         overflow: hidden;
-        background-color: #fff3;
-        background-image: radial-gradient(#fff, transparent 50%);
+        background-color: #fff6;
         backdrop-filter: blur(10px);
         box-sizing: content-box;
 
@@ -103,6 +100,11 @@ export class LoadingOverlay {
           flex-direction: column;
           align-items: center;
           gap: 16px;
+          padding: 32px 64px;
+          background-color: #fffc;
+          border: 1px solid #fff;
+          border-radius: 8px;
+          box-shadow: 0 5px 24px -6px #0002;
         }
 
         .loader {
@@ -110,19 +112,8 @@ export class LoadingOverlay {
           width: 1em;
           height: 1em;
           position: relative;
-
-          &:before,
-          &:after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border: 2px solid #2563ebaa;
-            animation: spin 2s infinite ease;
-          }
-
-          &:after {
-            animation-delay: -1.25s;
-          }
+          border: 2px solid #2563ebaa;
+          animation: spin 2s infinite ease;
         }
 
         @keyframes spin {
@@ -130,7 +121,8 @@ export class LoadingOverlay {
             transform: rotate(0deg);
             border-radius: 1em;
           }
-          50% {
+          30%,
+          60% {
             border-radius: 0.25em;
           }
           100% {
