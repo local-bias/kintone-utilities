@@ -1,0 +1,14 @@
+{
+  "name": "playground",
+  "version": "0.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "dev": "kbuild --env dev",
+    "build": "kbuild --env prod"
+  },
+  "devDependencies": {
+    "@konomi-app/kbuild": "^1.2.0",
+    "@konomi-app/kintone-utilities": "^1.7.7"
+  }
+}
