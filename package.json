@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities",
-  "version": "1.6.0",
+  "version": "1.7.7",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "repository": "https://github.com/local-bias/kintone-utilities.git",
@@ -8,7 +8,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsc",
-    "prepare": "yarn run build"
+    "prepare": "yarn run build",
+    "play": "cd playground && yarn run dev"
   },
   "dependencies": {
     "@emotion/css": "^11.10.6",
