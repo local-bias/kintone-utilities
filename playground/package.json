@@ -9,6 +9,6 @@
   },
   "devDependencies": {
     "@konomi-app/kbuild": "^1.2.0",
-    "@konomi-app/kintone-utilities": "^1.7.7"
+    "@konomi-app/kintone-utilities": "^1.7.8"
   }
 }

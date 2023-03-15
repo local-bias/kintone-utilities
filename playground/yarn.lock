@@ -261,9 +261,9 @@
     typescript "^4.9.5"
     webpack "^5.75.0"
 
-"@konomi-app/kintone-utilities@^1.7.7":
-  version "1.7.7"
-  resolved "https://registry.yarnpkg.com/@konomi-app/kintone-utilities/-/kintone-utilities-1.7.7.tgz#95a881fcf444f577da2a06eb002a8b2558b0f734"
+"@konomi-app/kintone-utilities@^1.7.8":
+  version "1.7.8"
+  resolved "https://registry.yarnpkg.com/@konomi-app/kintone-utilities/-/kintone-utilities-1.7.8.tgz#4b337c9d929eee165a8681d8b5f606ffe2fb6605"
   dependencies:
     "@emotion/css" "^11.10.6"
     "@kintone/rest-api-client" "^3.3.4"
