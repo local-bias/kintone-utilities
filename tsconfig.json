@@ -12,7 +12,6 @@
     "esModuleInterop": true,
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
-    "importsNotUsedAsValues": "error",
     "skipLibCheck": true
   },
   "files": ["./node_modules/@kintone/dts-gen/kintone.d.ts"],
