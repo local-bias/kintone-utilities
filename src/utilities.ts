@@ -98,5 +98,5 @@ export const compareField = (
  */
 export const withMobileEvents = (events: string[]): string[] => {
   const mobileEvents = events.filter((e) => !/^mobile/.test(e)).map((type) => 'mobile.' + type);
-  return [...events, ...mobileEvents];
+  return [...new Set([...events, ...mobileEvents])];
 };
