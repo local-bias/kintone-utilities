@@ -45,7 +45,7 @@ export class KintoneEventListener {
       try {
         window.addEventListener('beforeunload', this.beforeunload);
         if (!this.#logDisabled) {
-          console.group(`%c${event.type}%c(${this.#uid})`, 'color: #1e40af;', 'color: #999');
+          console.group(`%c${event.type} %c(${this.#uid})`, 'color: #1e40af;', 'color: #aaa');
         }
         return await callback(event, { pluginId: this.#pluginId });
       } catch (error) {
@@ -75,7 +75,7 @@ export class KintoneEventListener {
       try {
         window.addEventListener('beforeunload', this.beforeunload);
         if (!this.#logDisabled) {
-          console.group(`%c${event.type}%c(${this.#uid})`, 'color: #1e40af;', 'color: #999');
+          console.group(`%c${event.type} %c(${this.#uid})`, 'color: #1e40af;', 'color: #aaa');
         }
         return callback(event, { pluginId: this.#pluginId });
       } catch (error) {
