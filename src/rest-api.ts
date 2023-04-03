@@ -35,6 +35,9 @@ const getRecursive = async <T extends Record<string, unknown>>(props: {
     fields,
     query,
   });
+  if (!records.length) {
+    return props.stored ?? [];
+  }
 
   const stored = [...(props.stored ?? []), ...records];
 
