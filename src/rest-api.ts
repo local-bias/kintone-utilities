@@ -1,11 +1,15 @@
+import { kintoneAPI } from './api-types';
+
 const CHUNK_SIZE = 500;
 
-export const getAllRecordsWithId = async <T extends { $id: unknown } & Record<string, any>>(props: {
+type WithId<T> = T & { $id: kintoneAPI.field.ID };
+
+export const getAllRecordsWithId = async <T extends Record<string, any>>(props: {
   app: number | string;
   fields?: string[];
   onStep?: (current: T[]) => void;
   condition?: string;
-}): Promise<T[]> => {
+}): Promise<WithId<T>[]> => {
   const { fields: initFields, condition: initCondition = '' } = props;
 
   const fields = initFields?.length ? [...new Set([...initFields, '$id'])] : undefined;
@@ -22,8 +26,8 @@ const getRecursive = async <T extends Record<string, unknown>>(props: {
   condition: string;
   onStep?: (current: T[]) => void;
   id?: string;
-  stored?: T[];
-}): Promise<T[]> => {
+  stored?: WithId<T>[];
+}): Promise<WithId<T>[]> => {
   const { app, fields, condition, id } = props;
 
   const newCondition = id ? `${condition ? `${condition} and ` : ''} $id < ${id}` : condition;
