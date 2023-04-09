@@ -176,10 +176,29 @@ export const getFormFields = async (props: {
 export const getFormLayout = async (props: {
   app: App;
   preview?: boolean;
-}): Promise<{ properties: kintoneAPI.Layout; revision: string }> => {
+}): Promise<{ layout: kintoneAPI.Layout; revision: string }> => {
   checkBrowser();
   const { app, preview = false } = props;
   return api(`${API_ENDPOINT_ROOT}/${preview ? 'preview/' : ''}app/form/layout`, 'GET', { app });
+};
+
+export const getViews = async (props: {
+  app: App;
+  lang?: 'ja' | 'en' | 'zh' | 'user' | 'default';
+  preview?: boolean;
+}): Promise<{ views: Record<string, kintoneAPI.view.Response>; revision: string }> => {
+  checkBrowser();
+  const { app, preview = false, lang = 'default' } = props;
+  return api(`${API_ENDPOINT_ROOT}/${preview ? 'preview/' : ''}app/views`, 'GET', { app, lang });
+};
+
+export const updateViews = async (props: {
+  app: App;
+  views: Record<string, kintoneAPI.view.Parameter>;
+}) => {
+  checkBrowser();
+  const { app, views } = props;
+  return api(`${API_ENDPOINT_ROOT}/preview/app/views`, 'PUT', { app, views });
 };
 
 const checkBrowser = () => {
