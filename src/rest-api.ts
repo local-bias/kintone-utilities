@@ -2,9 +2,16 @@ import { kintoneAPI } from './api-types';
 
 type App = number | string;
 const API_ENDPOINT_ROOT = '/k/v1';
-const API_ENDPOINT_CURSOR = `${API_ENDPOINT_ROOT}/records/cursor`;
+const API_ENDPOINT_RECORD = `${API_ENDPOINT_ROOT}/record`;
+const API_ENDPOINT_RECORDS = `${API_ENDPOINT_ROOT}/records`;
+const API_ENDPOINT_CURSOR = `${API_ENDPOINT_RECORDS}/cursor`;
 const API_LIMIT = {
   GET: 500,
+  APP: 100,
+};
+
+const api = (path: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: any) => {
+  return kintone.api(kintone.api.url(path, true), method, body);
 };
 
 export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.RecordData>(props: {
@@ -53,15 +60,11 @@ const getRecursive = async <T extends Record<string, unknown>>(props: {
 
   const query = `${newCondition} order by $id desc limit ${API_LIMIT.GET}`;
 
-  const { records } = await kintone.api(
-    kintone.api.url(`${API_ENDPOINT_ROOT}/records`, true),
-    'GET',
-    {
-      app,
-      fields,
-      query,
-    }
-  );
+  const { records } = await api(API_ENDPOINT_RECORDS, 'GET', {
+    app,
+    fields,
+    query,
+  });
   if (!records.length) {
     return props.stored ?? [];
   }
@@ -92,7 +95,7 @@ export const getAllRecordsWithCursor = async <T extends Record<string, any>>(pro
 
   const param = { app, fields, size: API_LIMIT.GET, query };
 
-  const cursor = await kintone.api(kintone.api.url(API_ENDPOINT_CURSOR, true), 'POST', param);
+  const cursor = await api(API_ENDPOINT_CURSOR, 'POST', param);
 
   if (onTotalGet) {
     onTotalGet(cursor.totalCount);
@@ -107,9 +110,7 @@ const getRecordsByCursorId = async <T>(props: {
   loadedData?: T[];
 }): Promise<T[]> => {
   const { id, onStep, loadedData = [] } = props;
-  const response = await kintone.api(kintone.api.url(API_ENDPOINT_CURSOR, true), 'GET', {
-    id,
-  });
+  const response = await api(API_ENDPOINT_CURSOR, 'GET', { id });
 
   const newRecords: T[] = [...loadedData, ...(response.records as T[])];
 
@@ -137,6 +138,48 @@ export const uploadFile = async (props: {
     body: formData,
   });
   return response.json();
+};
+
+export const getApp = async (props: { id: App }): Promise<kintoneAPI.App> => {
+  checkBrowser();
+  return api(`${API_ENDPOINT_ROOT}/app`, 'GET', props);
+};
+
+const getApps = async (props: {
+  limit: number;
+  offset: number;
+}): Promise<{ apps: kintoneAPI.App[] }> => {
+  return api(`${API_ENDPOINT_ROOT}/apps`, 'GET', props);
+};
+
+export const getAllApps = async (
+  offset: number = 0,
+  _apps: kintoneAPI.App[] = []
+): Promise<kintoneAPI.App[]> => {
+  checkBrowser();
+  const { apps } = await getApps({ limit: API_LIMIT.APP, offset });
+
+  const allApps = [..._apps, ...apps];
+
+  return apps.length === API_LIMIT.APP ? getAllApps(offset + API_LIMIT.APP, allApps) : allApps;
+};
+
+export const getFormFields = async (props: {
+  app: App;
+  preview?: boolean;
+}): Promise<{ properties: kintoneAPI.FieldProperties; revision: string }> => {
+  checkBrowser();
+  const { app, preview = false } = props;
+  return api(`${API_ENDPOINT_ROOT}/${preview ? 'preview/' : ''}app/form/fields`, 'GET', { app });
+};
+
+export const getFormLayout = async (props: {
+  app: App;
+  preview?: boolean;
+}): Promise<{ properties: kintoneAPI.Layout; revision: string }> => {
+  checkBrowser();
+  const { app, preview = false } = props;
+  return api(`${API_ENDPOINT_ROOT}/${preview ? 'preview/' : ''}app/form/layout`, 'GET', { app });
 };
 
 const checkBrowser = () => {

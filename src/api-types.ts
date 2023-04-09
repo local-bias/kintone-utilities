@@ -237,7 +237,6 @@ export declare namespace kintoneAPI {
   namespace js {
     type Event<T = RecordData> = {
       appId: number;
-      viewId: number;
       recordId: number;
       record: T;
       error: string;
@@ -251,9 +250,31 @@ export declare namespace kintoneAPI {
         row: any;
       };
       records?: T[];
-      viewType?: string;
+      /**
+       * 現在表示している一覧のID
+       * app.record.index.show イベントでのみ取得できます
+       */
+      viewId: number;
+      /**
+       * 現在表示している一覧の種類
+       * app.record.index.show イベントでのみ取得できます
+       */
+      viewType?: 'list' | 'calendar' | 'custom';
+      /**
+       * 現在表示している一覧の名前
+       * app.record.index.show イベントでのみ取得できます
+       */
       viewName?: string;
-      offset?: number;
+      /**
+       * 一覧のレコードのオフセット
+       * app.record.index.show イベントでのみ取得でき、viewTypeがCalendar以外の場合に取得できます
+       */
+      offset?: number | null;
+      /**
+       * 一覧のレコードの表示件数
+       * app.record.index.show イベントでのみ取得でき、viewTypeがCalendar以外の場合に取得できます
+       */
+      size?: number | null;
       /**
        * プロセス - 実行されたアクション
        * app.record.detail.process.proceed イベントで取得できます
