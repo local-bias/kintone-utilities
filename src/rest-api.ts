@@ -14,6 +14,16 @@ const api = (path: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: any)
   return kintone.api(kintone.api.url(path, true), method, body);
 };
 
+/**
+ * 対象アプリの指定されたクエリに一致するレコードを全件取得します
+ *
+ * クエリを解析し、order byが含まれている場合はカーソルAPIを使ってレコードを取得します
+ *
+ * order byが含まれていない場合は、レコードIDを使ってレコードを取得します
+ *
+ * @param props app: 対象アプリのID, query: 取得するレコードのクエリ, fields: 取得するフィールドコードの配列, onStep: 段階的にレコードを取得する過程で実行される関数
+ * @returns 取得したレコードの配列
+ */
 export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.RecordData>(props: {
   app: App;
   query?: string;
@@ -29,6 +39,12 @@ export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.R
 type WithId<T> = T & { $id: kintoneAPI.field.ID };
 type OnStep<T> = (records: T[]) => void;
 
+/**
+ * 対象アプリの指定されたクエリに一致するレコードを、レコードIDをもとに全件取得します
+ *
+ * @param props app: 対象アプリのID, query: 取得するレコードのクエリ, fields: 取得するフィールドコードの配列, onStep: 段階的にレコードを取得する過程で実行される関数
+ * @returns 取得したレコードの配列
+ */
 export const getAllRecordsWithId = async <T extends Record<string, any>>(props: {
   app: App;
   fields?: string[];
@@ -83,6 +99,12 @@ const getRecursive = async <T extends Record<string, unknown>>(props: {
 
 type OnTotalGet = (total: number) => void;
 
+/**
+ * 対象アプリの指定されたクエリに一致するレコードを、カーソルAPIを使って全件取得します
+ *
+ * @param props app: 対象アプリのID, query: 取得するレコードのクエリ, fields: 取得するフィールドコードの配列, onTotalGet: 取得するレコードの総数を取得した際に実行される関数, onStep: 段階的にレコードを取得する過程で実行される関数
+ * @returns 取得したレコードの配列
+ */
 export const getAllRecordsWithCursor = async <T extends Record<string, any>>(props: {
   app: App;
   fields?: string[];
@@ -121,6 +143,12 @@ const getRecordsByCursorId = async <T>(props: {
   return response.next ? getRecordsByCursorId({ id, onStep, loadedData: newRecords }) : newRecords;
 };
 
+/**
+ * kintoneへファイルをアップロードします
+ *
+ * @param props
+ * @returns
+ */
 export const uploadFile = async (props: {
   file: { name: string; data: Blob };
 }): Promise<{ fileKey: string }> => {
