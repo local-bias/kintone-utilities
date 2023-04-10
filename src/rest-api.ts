@@ -1,4 +1,4 @@
-import { kintoneAPI } from './api-types';
+import { kintoneAPI } from './types/api';
 
 type App = number | string;
 const API_ENDPOINT_ROOT = '/k/v1';

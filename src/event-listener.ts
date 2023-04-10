@@ -1,4 +1,4 @@
-import type { kintoneAPI } from './api-types';
+import type { kintoneAPI } from './types/api';
 import { withMobileEvents } from './utilities';
 
 type ErrorHandler = (error: any, props: { event: kintoneAPI.Event }) => void;

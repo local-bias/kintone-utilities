@@ -101,6 +101,8 @@ import type {
   UserSelect as UserSelectProperty,
 } from '@kintone/rest-api-client/lib/KintoneFields/types/property';
 
+import { Event as JsEvent } from './js';
+
 export declare namespace kintoneAPI {
   type App = DefaultApp;
 

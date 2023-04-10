@@ -1,4 +1,4 @@
-import type { kintoneAPI } from './api-types';
+import type { kintoneAPI } from './types/api';
 import type { SavedFields } from './utility-types';
 
 /**
