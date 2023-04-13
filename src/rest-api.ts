@@ -14,6 +14,15 @@ const api = (path: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: any)
   return kintone.api(kintone.api.url(path, true), method, body);
 };
 
+export const getRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  props: kintoneAPI.rest.RecordGetRequest
+): Promise<T> => {
+  checkBrowser();
+  const { app, id } = props;
+  const { record } = await api(API_ENDPOINT_RECORD, 'GET', { app, id });
+  return record;
+};
+
 /**
  * 対象アプリの指定されたクエリに一致するレコードを全件取得します
  *
@@ -24,12 +33,11 @@ const api = (path: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: any)
  * @param props app: 対象アプリのID, query: 取得するレコードのクエリ, fields: 取得するフィールドコードの配列, onStep: 段階的にレコードを取得する過程で実行される関数
  * @returns 取得したレコードの配列
  */
-export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.RecordData>(props: {
-  app: App;
-  query?: string;
-  fields?: string[];
-  onStep?: OnStep<T>;
-}) => {
+export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.RecordData>(
+  props: kintoneAPI.rest.RecordsGetRequest & {
+    onStep?: OnStep<T>;
+  }
+) => {
   if (props.query && props.query.includes('order by')) {
     return getAllRecordsWithCursor<T>(props);
   }
@@ -166,6 +174,18 @@ export const uploadFile = async (props: {
     body: formData,
   });
   return response.json();
+};
+
+export const downloadFile = async (props: { fileKey: string }): Promise<Blob> => {
+  checkBrowser();
+  const { fileKey } = props;
+
+  const headers = { 'X-Requested-With': 'XMLHttpRequest' };
+  const response = await fetch(`/k/v1/file.json?fileKey=${fileKey}`, {
+    method: 'GET',
+    headers,
+  });
+  return response.blob();
 };
 
 export const getApp = async (props: { id: App }): Promise<kintoneAPI.App> => {
