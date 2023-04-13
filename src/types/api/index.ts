@@ -327,5 +327,81 @@ export declare namespace kintoneAPI {
       | 'mobile.app.record.edit.submit'
       | 'mobile.app.record.edit.submit.success';
   }
-  namespace rest {}
+  namespace rest {
+    type AppID = string | number;
+    type RecordID = string | number;
+    type Revision = string | number;
+    type Frame = Record<string, any>;
+    type Method = 'GET' | 'PUT' | 'POST' | 'DELETE';
+
+    type TypeOmmited<T extends Record<string, any>> = {
+      [P in keyof T]: Omit<T[P], 'type'>;
+    };
+
+    type RecordToRequest<T extends Frame = kintoneAPI.RecordData> = Partial<TypeOmmited<T>>;
+
+    type RecordGetRequest = {
+      app: AppID;
+      id: RecordID;
+    };
+    type RecordGetResponse<T extends Frame = kintoneAPI.RecordData> = {
+      record: T;
+    };
+    type RecordPostRequest<T extends Frame = kintoneAPI.RecordData> = {
+      app: AppID;
+      record: RecordToRequest<T>;
+    };
+    type RecordPostResponse = {
+      id: string;
+      revision: string;
+    };
+    type RecordPutRequest<T extends Frame = kintoneAPI.RecordData> = {
+      app: AppID;
+      record: RecordToRequest<T>;
+      revision?: Revision;
+    } & (
+      | {
+          id: RecordID;
+        }
+      | {
+          updateKey: {
+            field: keyof T;
+            value: string | number;
+          };
+        }
+    );
+    type RecordPutResponse = {
+      revision: string;
+    };
+
+    type RecordsGetRequest = {
+      app: AppID;
+      query?: string;
+      fields?: string[];
+      totalCount?: boolean | 'true' | 'false';
+    };
+    type RecordsPostRequest<T extends Frame = kintoneAPI.RecordData> = {
+      app: AppID;
+      records: RecordToRequest<T>[];
+    };
+    type RecordsPostResponse<T extends Frame = kintoneAPI.RecordData> = {
+      records: RecordToRequest<T>[];
+    };
+    type RecordsPutRequest<T extends Frame = kintoneAPI.RecordData> = {
+      app: AppID;
+      records: RecordToRequest<T>[];
+    };
+
+    type BulkRequest<T extends Frame = kintoneAPI.RecordData> = {
+      method: Method;
+      api: string;
+      payloads: (
+        | RecordGetRequest
+        | RecordPostRequest<T>
+        | RecordPutRequest<T>
+        | RecordsPostRequest<T>
+        | RecordsPutRequest<T>
+      )[];
+    }[];
+  }
 }
