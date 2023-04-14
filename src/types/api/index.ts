@@ -564,4 +564,5 @@ export declare namespace kintoneAPI {
       };
     }
   }
+  namespace cybozu {}
 }
