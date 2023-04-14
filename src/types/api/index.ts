@@ -564,5 +564,70 @@ export declare namespace kintoneAPI {
       };
     }
   }
-  namespace cybozu {}
+  namespace cybozu {
+    type CustomItemValue = {
+      code: string;
+      value: string;
+    };
+
+    type CybozuUser = {
+      id: number;
+      code: string;
+      ctime: string;
+      mtime: string;
+      valid: boolean;
+      name: string;
+      surName: string;
+      givenName: string;
+      surNameReading: string;
+      givenNameReading: string;
+      localName: string;
+      localNameLocale: string;
+      timezone: string;
+      locale: string;
+      description: string;
+      phone: string;
+      mobilePhone: string;
+      extensionNumber: string;
+      email: string;
+      callto: string;
+      url: string;
+      employeeNumber: string;
+      birthDate: string;
+      joinDate: string;
+      primaryOrganization: number;
+      sortOrder: number;
+      customItemValues: CustomItemValue[];
+    };
+
+    type GetUsersRequest = {
+      ids?: string[];
+      codes?: string[];
+      size?: number;
+      offset?: number;
+    };
+    type GetUsersResponse = {
+      users: CybozuUser[];
+    };
+
+    type GetUsedServicesRequest = {
+      code: string[];
+      size?: number;
+      offset?: number;
+    };
+    type GetUsedServicesResponse = {
+      users: {
+        code: string;
+        services: string[];
+      };
+    };
+
+    type UpdateUsedServicesRequest = {
+      users: {
+        code: string;
+        services: string[];
+      };
+    };
+    type UpdateUsedServicesResponse = {};
+  }
 }
