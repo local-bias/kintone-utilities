@@ -1,17 +1,41 @@
-import { kintoneAPI } from './types/api';
+import { kintoneAPI } from '../types/api';
+import { api, checkBrowser } from './common';
 
 type App = number | string;
 const API_ENDPOINT_ROOT = '/k/v1';
-const API_ENDPOINT_RECORD = `${API_ENDPOINT_ROOT}/record`;
-const API_ENDPOINT_RECORDS = `${API_ENDPOINT_ROOT}/records`;
-const API_ENDPOINT_CURSOR = `${API_ENDPOINT_RECORDS}/cursor`;
-const API_LIMIT = {
-  GET: 500,
-  APP: 100,
-};
+const API_ENDPOINT_RECORD = `${API_ENDPOINT_ROOT}/record.json`;
+const API_ENDPOINT_RECORDS = `${API_ENDPOINT_ROOT}/records.json`;
+const API_ENDPOINT_CURSOR = `${API_ENDPOINT_ROOT}/records/cursor.json`;
+const API_ENDPOINT_BULK = `${API_ENDPOINT_ROOT}/bulkRequest.json`;
+const API_LIMIT_GET = 500;
+const API_LIMIT_PUT = 100;
+const API_LIMIT_POST = 100;
+const API_LIMIT_APP = 100;
+const API_LIMIT_BULK_REQUEST = 20;
 
-const api = (path: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE', body: any) => {
-  return kintone.api(kintone.api.url(path, true), method, body);
+export const backdoor = async (props: {
+  apiToken: string;
+  method: kintoneAPI.rest.Method;
+  path: string;
+  body?: any;
+}): Promise<any> => {
+  const { apiToken, method, path, body } = props;
+  const header: Record<string, string> = {
+    'X-Cybozu-API-Token': apiToken,
+  };
+  if (method !== 'GET') {
+    header['Content-Type'] = 'application/json';
+  }
+
+  const uri = kintone.api.url(path, true);
+
+  const response = await kintone.proxy(uri, method, header, body);
+
+  if (response[1] !== 200) {
+    throw new Error(`Backdoor API Error: ${response[1]} ${response[0]}`);
+  }
+
+  return JSON.parse(response[0]);
 };
 
 export const getRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
@@ -19,8 +43,38 @@ export const getRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.Rec
 ): Promise<T> => {
   checkBrowser();
   const { app, id } = props;
-  const { record } = await api(API_ENDPOINT_RECORD, 'GET', { app, id });
+  const { record } = await api<kintoneAPI.rest.RecordGetResponse<T>>(API_ENDPOINT_RECORD, 'GET', {
+    app,
+    id,
+  });
   return record;
+};
+export const backdoorGetRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  props: kintoneAPI.rest.RecordGetRequest & { apiToken: string }
+): Promise<T> => {
+  checkBrowser();
+  const { app, id, apiToken } = props;
+  const { record } = await backdoor({
+    apiToken,
+    method: 'GET',
+    path: API_ENDPOINT_RECORD,
+    body: { app, id },
+  });
+  return record;
+};
+
+export const updateRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  props: kintoneAPI.rest.RecordPutRequest<T>
+): Promise<kintoneAPI.rest.RecordPutResponse> => {
+  checkBrowser();
+  return api(API_ENDPOINT_RECORD, 'PUT', props);
+};
+
+export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  props: kintoneAPI.rest.RecordPostRequest<T>
+): Promise<kintoneAPI.rest.RecordPostResponse> => {
+  checkBrowser();
+  return api(API_ENDPOINT_RECORD, 'POST', props);
 };
 
 /**
@@ -82,13 +136,13 @@ const getRecursive = async <T extends Record<string, unknown>>(props: {
 
   const newCondition = id ? `${condition ? `${condition} and ` : ''} $id < ${id}` : condition;
 
-  const query = `${newCondition} order by $id desc limit ${API_LIMIT.GET}`;
+  const query = `${newCondition} order by $id desc limit ${API_LIMIT_GET}`;
 
-  const { records } = await api(API_ENDPOINT_RECORDS, 'GET', {
-    app,
-    fields,
-    query,
-  });
+  const { records } = await api<kintoneAPI.rest.RecordsGetResponse<WithId<T>>>(
+    API_ENDPOINT_RECORDS,
+    'GET',
+    { app, fields, query }
+  );
   if (!records.length) {
     return props.stored ?? [];
   }
@@ -102,7 +156,7 @@ const getRecursive = async <T extends Record<string, unknown>>(props: {
   const lastRecord = stored[stored.length - 1];
   const lastId = lastRecord.$id.value;
 
-  return records.length === API_LIMIT.GET ? getRecursive({ ...props, id: lastId, stored }) : stored;
+  return records.length === API_LIMIT_GET ? getRecursive({ ...props, id: lastId, stored }) : stored;
 };
 
 type OnTotalGet = (total: number) => void;
@@ -113,7 +167,7 @@ type OnTotalGet = (total: number) => void;
  * @param props app: 対象アプリのID, query: 取得するレコードのクエリ, fields: 取得するフィールドコードの配列, onTotalGet: 取得するレコードの総数を取得した際に実行される関数, onStep: 段階的にレコードを取得する過程で実行される関数
  * @returns 取得したレコードの配列
  */
-export const getAllRecordsWithCursor = async <T extends Record<string, any>>(props: {
+export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(props: {
   app: App;
   fields?: string[];
   query?: string;
@@ -123,24 +177,30 @@ export const getAllRecordsWithCursor = async <T extends Record<string, any>>(pro
   checkBrowser();
   const { app, fields = [], query = '', onTotalGet = null, onStep = null } = props;
 
-  const param = { app, fields, size: API_LIMIT.GET, query };
+  const param: kintoneAPI.rest.CursorCreateRequest = { app, fields, size: API_LIMIT_GET, query };
 
-  const cursor = await api(API_ENDPOINT_CURSOR, 'POST', param);
+  const cursor = await api<kintoneAPI.rest.CursorCreateResponse>(
+    API_ENDPOINT_CURSOR,
+    'POST',
+    param
+  );
 
   if (onTotalGet) {
-    onTotalGet(cursor.totalCount);
+    onTotalGet(Number(cursor.totalCount));
   }
 
   return getRecordsByCursorId<T>({ id: cursor.id, onStep });
 };
 
-const getRecordsByCursorId = async <T>(props: {
+const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(props: {
   id: string;
   onStep: OnStep<T> | null;
   loadedData?: T[];
 }): Promise<T[]> => {
   const { id, onStep, loadedData = [] } = props;
-  const response = await api(API_ENDPOINT_CURSOR, 'GET', { id });
+  const response = await api<kintoneAPI.rest.CursorGetResponse<T>>(API_ENDPOINT_CURSOR, 'GET', {
+    id,
+  });
 
   const newRecords: T[] = [...loadedData, ...(response.records as T[])];
 
@@ -205,11 +265,11 @@ export const getAllApps = async (
   _apps: kintoneAPI.App[] = []
 ): Promise<kintoneAPI.App[]> => {
   checkBrowser();
-  const { apps } = await getApps({ limit: API_LIMIT.APP, offset });
+  const { apps } = await getApps({ limit: API_LIMIT_APP, offset });
 
   const allApps = [..._apps, ...apps];
 
-  return apps.length === API_LIMIT.APP ? getAllApps(offset + API_LIMIT.APP, allApps) : allApps;
+  return apps.length === API_LIMIT_APP ? getAllApps(offset + API_LIMIT_APP, allApps) : allApps;
 };
 
 export const getFormFields = async (props: {
@@ -249,8 +309,65 @@ export const updateViews = async (props: {
   return api(`${API_ENDPOINT_ROOT}/preview/app/views`, 'PUT', { app, views });
 };
 
-const checkBrowser = () => {
-  if (typeof window === 'undefined') {
-    throw new Error('この関数はブラウザでのみ使用できます');
+export const bulkRequest = (
+  requests: (
+    | {
+        type: 'updateRecord';
+        props: kintoneAPI.rest.RecordPutRequest;
+      }
+    | {
+        type: 'addRecord';
+        props: kintoneAPI.rest.RecordPostRequest;
+      }
+    | {
+        type: 'updateRecords';
+        props: kintoneAPI.rest.RecordsPutRequest;
+      }
+    | {
+        type: 'addRecords';
+        props: kintoneAPI.rest.RecordsPostRequest;
+      }
+  )[]
+): Promise<kintoneAPI.rest.BulkResponse> => {
+  checkBrowser();
+  let reshapedRequests: kintoneAPI.rest.BulkRequest = [];
+  for (const request of requests) {
+    if (request.type === 'updateRecord') {
+      reshapedRequests.push({
+        method: 'PUT',
+        api: API_ENDPOINT_RECORD,
+        payloads: request.props,
+      });
+    } else if (request.type === 'addRecord') {
+      reshapedRequests.push({
+        method: 'POST',
+        api: API_ENDPOINT_RECORD,
+        payloads: request.props,
+      });
+    } else if (request.type === 'updateRecords') {
+      const records = request.props.records;
+      const requestsToPut = records.reduce((acc, record, index) => {
+        if (index % API_LIMIT_PUT === 0) {
+          acc.push({
+            api: API_ENDPOINT_RECORDS,
+            method: 'PUT',
+            payloads: {
+              app: request.props.app,
+              records: [],
+            },
+          });
+        }
+        acc[Math.floor(index / API_LIMIT_PUT)].payloads.records.push(record);
+        return acc;
+      }, [] as any[]);
+      reshapedRequests.push(...requestsToPut);
+    } else if (request.type === 'addRecords') {
+      reshapedRequests.push({
+        method: 'POST',
+        api: API_ENDPOINT_RECORDS,
+        payloads: request.props,
+      });
+    }
   }
+  return api<kintoneAPI.rest.BulkResponse>(API_ENDPOINT_BULK, 'POST', reshapedRequests);
 };

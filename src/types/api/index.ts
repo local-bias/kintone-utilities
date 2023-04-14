@@ -331,8 +331,13 @@ export declare namespace kintoneAPI {
     type AppID = string | number;
     type RecordID = string | number;
     type Revision = string | number;
+    type IDToRequest = string | number;
     type Frame = Record<string, any>;
     type Method = 'GET' | 'PUT' | 'POST' | 'DELETE';
+    type People = {
+      code: string;
+      name: string;
+    };
 
     type TypeOmmited<T extends Record<string, any>> = {
       [P in keyof T]: Omit<T[P], 'type'>;
@@ -380,28 +385,183 @@ export declare namespace kintoneAPI {
       fields?: string[];
       totalCount?: boolean | 'true' | 'false';
     };
+    type RecordsGetResponse<T extends Frame = kintoneAPI.RecordData> = {
+      records: T[];
+      totalCount?: string | null;
+    };
     type RecordsPostRequest<T extends Frame = kintoneAPI.RecordData> = {
       app: AppID;
       records: RecordToRequest<T>[];
     };
-    type RecordsPostResponse<T extends Frame = kintoneAPI.RecordData> = {
-      records: RecordToRequest<T>[];
+    type RecordsPostResponse = {
+      ids: string[];
+      revision: string[];
     };
     type RecordsPutRequest<T extends Frame = kintoneAPI.RecordData> = {
       app: AppID;
-      records: RecordToRequest<T>[];
+      records: ({
+        record: RecordToRequest<T>;
+        revision?: Revision;
+      } & (
+        | {
+            id: RecordID;
+          }
+        | {
+            updateKey: {
+              field: keyof T;
+              value: string | number;
+            };
+          }
+      ))[];
+    };
+    type RecordsPutResponse = {
+      records: {
+        id: string;
+        revision: string;
+      }[];
+    };
+    type RecordsDeleteRequest = {
+      app: AppID;
+      ids: number[];
+      revisions?: number[];
+    };
+    type RecordsDeleteResponse = {};
+
+    type CursorCreateRequest = {
+      app: AppID;
+      fields?: string[];
+      query?: string;
+      size?: number | string;
+    };
+    type CursorCreateResponse = {
+      id: string;
+      totalCount: string;
+    };
+    type CursorGetRequest = {
+      id: string;
+    };
+    type CursorGetResponse<T extends Frame = kintoneAPI.RecordData> = {
+      records: T[];
+      next: boolean;
     };
 
     type BulkRequest<T extends Frame = kintoneAPI.RecordData> = {
       method: Method;
       api: string;
-      payloads: (
-        | RecordGetRequest
+      payloads:
         | RecordPostRequest<T>
-        | RecordPutRequest<T>
         | RecordsPostRequest<T>
+        | RecordPutRequest<T>
         | RecordsPutRequest<T>
-      )[];
+        | RecordsDeleteRequest;
     }[];
+
+    type BulkResponse = (
+      | kintoneAPI.rest.RecordPutResponse
+      | kintoneAPI.rest.RecordPostResponse
+      | kintoneAPI.rest.RecordsPostResponse
+      | kintoneAPI.rest.RecordsPutResponse
+      | kintoneAPI.rest.RecordsDeleteResponse
+    )[];
+
+    namespace space {
+      type SpaceIdToRequest = string | number;
+      type GetSpaceRequest = { id: string | number };
+      type GetSpaceResponse = {
+        /** スペースID */
+        id: string;
+        /** スペース名 */
+        name: string;
+        /**
+         * スペースが作成されたときに初期作成されたスレッドのスレッド ID
+         *
+         * 1 つのスレッドのみ使用するスペースの場合はこのスレッドのみ存在します。
+         */
+        defaultThread: string;
+        /** 公開／非公開の区分 */
+        isPrivate: boolean;
+        creator: People;
+        modifier: People;
+        memberCount: string;
+        coverType: string;
+        /** スペースのカバー画像のキー文字列 */
+        coverKey: string;
+        /** スペースのカバー画像の URL */
+        coverUrl: string;
+        body: string;
+        useMultiThread: boolean;
+        isGuest: boolean;
+        attachedApps: {
+          threadId: string;
+          appId: string;
+          code: string;
+          name: string;
+          description: string;
+          createdAt: string;
+          creator: People;
+          modifiedAt: string;
+          modifier: People;
+          fixedMember: boolean;
+          showAnnouncement: boolean;
+          showThreadList: boolean;
+          showAppList: boolean;
+          showMemberList: boolean;
+          showRelatedLinkList: boolean;
+        }[];
+      };
+
+      type CreateSpaceRequest = {
+        id: SpaceIdToRequest;
+        name: string;
+        members: {
+          entity: {
+            type: 'USER' | 'GROUP' | 'ORGANIZATION';
+            code: string;
+          };
+          isAdmin: boolean;
+          includeSubs?: boolean;
+        }[];
+        isPrivate?: boolean;
+        isGuest?: boolean;
+        fixedMember?: boolean;
+      };
+      type CreateSpaceResponse = {
+        id: string;
+      };
+      type DeleteSpaceRequest = { id: SpaceIdToRequest };
+      type DeleteSpaceResponse = {};
+
+      type UpdateThreadRequest = {
+        /** 更新するスレッドのスレッドID */
+        id: IDToRequest;
+
+        /**
+         * スレッド名
+         *
+         * 1文字から128文字まで指定可能。省略した場合は、スレッド名は更新されません。
+         *
+         * シングルスレッドスペースのスレッドはスレッド名が存在しないため更新できません。
+         */
+        name?: string;
+
+        /**
+         * スレッドの本文
+         *
+         * 65535文字まで指定可能。省略した場合は、本文は更新されません。
+         *
+         * 許可されていない属性やタグは自動的に削除されます。
+         *
+         * アプリ貼り付け、ファイル添付、絵文字は HTML で指定します。
+         *
+         * 宛先を HTML 内で指定しても、その宛先には通知されません。
+         */
+        body?: string;
+      };
+      type UpdateThreadResponse = {};
+
+      type GetSpaceMembersRequest = {
+        id: IDToRequest;
+      };
+    }
   }
 }
