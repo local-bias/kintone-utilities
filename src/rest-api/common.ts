@@ -5,6 +5,7 @@ export const api = <T = any>(
   method: kintoneAPI.rest.Method,
   body: any
 ): Promise<T> => {
+  checkBrowser();
   return kintone.api(kintone.api.url(path, true), method, body) as Promise<T>;
 };
 
@@ -15,4 +16,12 @@ export const checkBrowser = () => {
   if (typeof kintone === 'undefined') {
     throw new Error('kintoneオブジェクトが見つかりません');
   }
+};
+
+export const sliceIntoChunks = <T>(array: T[], size: number): T[][] => {
+  const result = [];
+  for (let i = 0, j = array.length; i < j; i += size) {
+    result.push(array.slice(i, i + size));
+  }
+  return result;
 };

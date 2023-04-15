@@ -395,7 +395,7 @@ export declare namespace kintoneAPI {
     };
     type RecordsPostResponse = {
       ids: string[];
-      revision: string[];
+      revisions: string[];
     };
     type RecordsPutRequest<T extends Frame = kintoneAPI.RecordData> = {
       app: AppID;
@@ -448,7 +448,7 @@ export declare namespace kintoneAPI {
     type BulkRequest<T extends Frame = kintoneAPI.RecordData> = {
       method: Method;
       api: string;
-      payloads:
+      payload:
         | RecordPostRequest<T>
         | RecordsPostRequest<T>
         | RecordPutRequest<T>
@@ -456,13 +456,15 @@ export declare namespace kintoneAPI {
         | RecordsDeleteRequest;
     }[];
 
-    type BulkResponse = (
-      | kintoneAPI.rest.RecordPutResponse
-      | kintoneAPI.rest.RecordPostResponse
-      | kintoneAPI.rest.RecordsPostResponse
-      | kintoneAPI.rest.RecordsPutResponse
-      | kintoneAPI.rest.RecordsDeleteResponse
-    )[];
+    type BulkResponse = {
+      results: (
+        | kintoneAPI.rest.RecordsPutResponse
+        | kintoneAPI.rest.RecordPostResponse
+        | kintoneAPI.rest.RecordsPostResponse
+        | kintoneAPI.rest.RecordsPutResponse
+        | kintoneAPI.rest.RecordsDeleteResponse
+      )[];
+    };
 
     namespace space {
       type SpaceIdToRequest = string | number;

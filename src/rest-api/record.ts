@@ -1,5 +1,5 @@
 import { kintoneAPI } from '../types/api';
-import { api, checkBrowser } from './common';
+import { api, checkBrowser, sliceIntoChunks } from './common';
 
 type App = number | string;
 const API_ENDPOINT_ROOT = '/k/v1';
@@ -10,8 +10,11 @@ const API_ENDPOINT_BULK = `${API_ENDPOINT_ROOT}/bulkRequest.json`;
 const API_LIMIT_GET = 500;
 const API_LIMIT_PUT = 100;
 const API_LIMIT_POST = 100;
+const API_LIMIT_DELETE = 100;
 const API_LIMIT_APP = 100;
 const API_LIMIT_BULK_REQUEST = 20;
+
+type BulkRequestProgressProps = { total: number; done: number };
 
 export const backdoor = async (props: {
   apiToken: string;
@@ -19,6 +22,7 @@ export const backdoor = async (props: {
   path: string;
   body?: any;
 }): Promise<any> => {
+  checkBrowser();
   const { apiToken, method, path, body } = props;
   const header: Record<string, string> = {
     'X-Cybozu-API-Token': apiToken,
@@ -41,7 +45,6 @@ export const backdoor = async (props: {
 export const getRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   props: kintoneAPI.rest.RecordGetRequest
 ): Promise<T> => {
-  checkBrowser();
   const { app, id } = props;
   const { record } = await api<kintoneAPI.rest.RecordGetResponse<T>>(API_ENDPOINT_RECORD, 'GET', {
     app,
@@ -52,7 +55,6 @@ export const getRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.Rec
 export const backdoorGetRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   props: kintoneAPI.rest.RecordGetRequest & { apiToken: string }
 ): Promise<T> => {
-  checkBrowser();
   const { app, id, apiToken } = props;
   const { record } = await backdoor({
     apiToken,
@@ -66,15 +68,60 @@ export const backdoorGetRecord = async <T extends kintoneAPI.rest.Frame = kinton
 export const updateRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   props: kintoneAPI.rest.RecordPutRequest<T>
 ): Promise<kintoneAPI.rest.RecordPutResponse> => {
-  checkBrowser();
   return api(API_ENDPOINT_RECORD, 'PUT', props);
 };
 
 export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   props: kintoneAPI.rest.RecordPostRequest<T>
 ): Promise<kintoneAPI.rest.RecordPostResponse> => {
-  checkBrowser();
   return api(API_ENDPOINT_RECORD, 'POST', props);
+};
+
+export const updateAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  props: kintoneAPI.rest.RecordsPutRequest<T> & {
+    onProgress?: (props: BulkRequestProgressProps) => void;
+  }
+): Promise<kintoneAPI.rest.RecordsPutResponse> => {
+  const { onProgress, ...requestProps } = props;
+  const response: { results: kintoneAPI.rest.RecordsPutResponse[] } = (await bulkRequest<T>({
+    requests: [{ type: 'updateRecords', props: requestProps }],
+    onProgress,
+  })) as any;
+
+  return response.results.reduce<kintoneAPI.rest.RecordsPutResponse>(
+    (acc, result) => {
+      return { records: [...acc.records, ...result.records] };
+    },
+    { records: [] }
+  );
+};
+
+export const addAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  props: kintoneAPI.rest.RecordsPostRequest<T> & {
+    onProgress?: (props: BulkRequestProgressProps) => void;
+  }
+): Promise<kintoneAPI.rest.RecordsPostResponse> => {
+  const { onProgress, ...requestProps } = props;
+  const responses: { results: kintoneAPI.rest.RecordsPostResponse[] } = (await bulkRequest<T>({
+    requests: [{ type: 'addRecords', props: requestProps }],
+    onProgress,
+  })) as any;
+
+  return responses.results.reduce<kintoneAPI.rest.RecordsPostResponse>(
+    (acc, result) => {
+      return {
+        ids: [...acc.ids, ...result.ids],
+        revisions: [...acc.revisions, ...result.revisions],
+      };
+    },
+    { ids: [], revisions: [] }
+  );
+};
+
+export const deleteAllRecords = async (
+  props: kintoneAPI.rest.RecordsDeleteRequest
+): Promise<{ results: kintoneAPI.rest.RecordsDeleteResponse[] }> => {
+  return bulkRequest({ requests: [{ type: 'deleteRecords', props }] });
 };
 
 /**
@@ -113,7 +160,6 @@ export const getAllRecordsWithId = async <T extends Record<string, any>>(props: 
   onStep?: OnStep<T>;
   condition?: string;
 }): Promise<WithId<T>[]> => {
-  checkBrowser();
   const { fields: initFields, condition: initCondition = '' } = props;
 
   const fields = initFields?.length ? [...new Set([...initFields, '$id'])] : undefined;
@@ -174,7 +220,6 @@ export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(p
   onTotalGet?: OnTotalGet;
   onStep?: OnStep<T>;
 }): Promise<T[]> => {
-  checkBrowser();
   const { app, fields = [], query = '', onTotalGet = null, onStep = null } = props;
 
   const param: kintoneAPI.rest.CursorCreateRequest = { app, fields, size: API_LIMIT_GET, query };
@@ -220,7 +265,6 @@ const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(props: {
 export const uploadFile = async (props: {
   file: { name: string; data: Blob };
 }): Promise<{ fileKey: string }> => {
-  checkBrowser();
   const { file } = props;
 
   const formData = new FormData();
@@ -237,7 +281,6 @@ export const uploadFile = async (props: {
 };
 
 export const downloadFile = async (props: { fileKey: string }): Promise<Blob> => {
-  checkBrowser();
   const { fileKey } = props;
 
   const headers = { 'X-Requested-With': 'XMLHttpRequest' };
@@ -249,7 +292,6 @@ export const downloadFile = async (props: { fileKey: string }): Promise<Blob> =>
 };
 
 export const getApp = async (props: { id: App }): Promise<kintoneAPI.App> => {
-  checkBrowser();
   return api(`${API_ENDPOINT_ROOT}/app`, 'GET', props);
 };
 
@@ -264,7 +306,6 @@ export const getAllApps = async (
   offset: number = 0,
   _apps: kintoneAPI.App[] = []
 ): Promise<kintoneAPI.App[]> => {
-  checkBrowser();
   const { apps } = await getApps({ limit: API_LIMIT_APP, offset });
 
   const allApps = [..._apps, ...apps];
@@ -276,7 +317,6 @@ export const getFormFields = async (props: {
   app: App;
   preview?: boolean;
 }): Promise<{ properties: kintoneAPI.FieldProperties; revision: string }> => {
-  checkBrowser();
   const { app, preview = false } = props;
   return api(`${API_ENDPOINT_ROOT}/${preview ? 'preview/' : ''}app/form/fields`, 'GET', { app });
 };
@@ -285,7 +325,6 @@ export const getFormLayout = async (props: {
   app: App;
   preview?: boolean;
 }): Promise<{ layout: kintoneAPI.Layout; revision: string }> => {
-  checkBrowser();
   const { app, preview = false } = props;
   return api(`${API_ENDPOINT_ROOT}/${preview ? 'preview/' : ''}app/form/layout`, 'GET', { app });
 };
@@ -295,7 +334,6 @@ export const getViews = async (props: {
   lang?: 'ja' | 'en' | 'zh' | 'user' | 'default';
   preview?: boolean;
 }): Promise<{ views: Record<string, kintoneAPI.view.Response>; revision: string }> => {
-  checkBrowser();
   const { app, preview = false, lang = 'default' } = props;
   return api(`${API_ENDPOINT_ROOT}/${preview ? 'preview/' : ''}app/views`, 'GET', { app, lang });
 };
@@ -304,70 +342,111 @@ export const updateViews = async (props: {
   app: App;
   views: Record<string, kintoneAPI.view.Parameter>;
 }) => {
-  checkBrowser();
-  const { app, views } = props;
-  return api(`${API_ENDPOINT_ROOT}/preview/app/views`, 'PUT', { app, views });
+  return api(`${API_ENDPOINT_ROOT}/preview/app/views`, 'PUT', props);
 };
 
-export const bulkRequest = (
+export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(props: {
   requests: (
     | {
         type: 'updateRecord';
-        props: kintoneAPI.rest.RecordPutRequest;
+        props: kintoneAPI.rest.RecordPutRequest<T>;
       }
     | {
         type: 'addRecord';
-        props: kintoneAPI.rest.RecordPostRequest;
+        props: kintoneAPI.rest.RecordPostRequest<T>;
       }
     | {
         type: 'updateRecords';
-        props: kintoneAPI.rest.RecordsPutRequest;
+        props: kintoneAPI.rest.RecordsPutRequest<T>;
       }
     | {
         type: 'addRecords';
-        props: kintoneAPI.rest.RecordsPostRequest;
+        props: kintoneAPI.rest.RecordsPostRequest<T>;
       }
-  )[]
-): Promise<kintoneAPI.rest.BulkResponse> => {
-  checkBrowser();
-  let reshapedRequests: kintoneAPI.rest.BulkRequest = [];
+    | {
+        type: 'deleteRecords';
+        props: kintoneAPI.rest.RecordsDeleteRequest;
+      }
+  )[];
+  onProgress?: (props: BulkRequestProgressProps) => void;
+  debug?: boolean;
+}): Promise<kintoneAPI.rest.BulkResponse> => {
+  const { requests, debug = false } = props;
+  let reshapedRequests: kintoneAPI.rest.BulkRequest<T> = [];
   for (const request of requests) {
     if (request.type === 'updateRecord') {
       reshapedRequests.push({
         method: 'PUT',
         api: API_ENDPOINT_RECORD,
-        payloads: request.props,
+        payload: request.props,
       });
     } else if (request.type === 'addRecord') {
       reshapedRequests.push({
         method: 'POST',
         api: API_ENDPOINT_RECORD,
-        payloads: request.props,
+        payload: request.props,
       });
     } else if (request.type === 'updateRecords') {
-      const records = request.props.records;
-      const requestsToPut = records.reduce((acc, record, index) => {
-        if (index % API_LIMIT_PUT === 0) {
-          acc.push({
-            api: API_ENDPOINT_RECORDS,
-            method: 'PUT',
-            payloads: {
-              app: request.props.app,
-              records: [],
-            },
-          });
-        }
-        acc[Math.floor(index / API_LIMIT_PUT)].payloads.records.push(record);
-        return acc;
-      }, [] as any[]);
-      reshapedRequests.push(...requestsToPut);
+      const { records, ...rest } = request.props;
+      const recordChunks = sliceIntoChunks(request.props.records, API_LIMIT_PUT);
+      for (const records of recordChunks) {
+        reshapedRequests.push({
+          method: 'PUT',
+          api: API_ENDPOINT_RECORDS,
+          payload: {
+            ...rest,
+            records,
+          },
+        });
+      }
     } else if (request.type === 'addRecords') {
-      reshapedRequests.push({
-        method: 'POST',
-        api: API_ENDPOINT_RECORDS,
-        payloads: request.props,
+      const recordChunks = sliceIntoChunks(request.props.records, API_LIMIT_POST);
+      for (const records of recordChunks) {
+        reshapedRequests.push({
+          method: 'POST',
+          api: API_ENDPOINT_RECORDS,
+          payload: {
+            app: request.props.app,
+            records,
+          },
+        });
+      }
+    } else if (request.type === 'deleteRecords') {
+      const idChunks = sliceIntoChunks(request.props.ids, API_LIMIT_DELETE);
+      for (const ids of idChunks) {
+        reshapedRequests.push({
+          method: 'DELETE',
+          api: API_ENDPOINT_RECORDS,
+          payload: {
+            app: request.props.app,
+            ids,
+          },
+        });
+      }
+    }
+  }
+
+  const responses: kintoneAPI.rest.BulkResponse[] = [];
+  const requestChunks = sliceIntoChunks(reshapedRequests, API_LIMIT_BULK_REQUEST);
+  for (const requests of requestChunks) {
+    const response = await api<kintoneAPI.rest.BulkResponse>(API_ENDPOINT_BULK, 'POST', {
+      requests,
+    });
+    if (debug) {
+      console.log(`bulk request ${requests.length}/${reshapedRequests.length}`);
+    }
+    responses.push(response);
+    if (props.onProgress) {
+      props.onProgress({
+        total: reshapedRequests.length,
+        done: responses.reduce((acc, response) => acc + response.results.length, 0),
       });
     }
   }
-  return api<kintoneAPI.rest.BulkResponse>(API_ENDPOINT_BULK, 'POST', reshapedRequests);
+  return responses.reduce<kintoneAPI.rest.BulkResponse>(
+    (acc, response) => {
+      return { results: [...acc.results, ...response.results] };
+    },
+    { results: [] }
+  );
 };
