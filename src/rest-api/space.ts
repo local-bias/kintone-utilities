@@ -1,7 +1,5 @@
 import { kintoneAPI } from '../types/api';
-import { api, checkBrowser } from './common';
-
-const API_ENDPOINT_ROOT = '/k/v1';
+import { api, API_ENDPOINT_ROOT, checkBrowser } from './common';
 
 const API_ENDPOINT_SPACE = `${API_ENDPOINT_ROOT}/space.json`;
 const API_ENDPOINT_THREAD = `${API_ENDPOINT_ROOT}/space/thread.json`;

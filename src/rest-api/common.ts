@@ -1,5 +1,7 @@
 import { kintoneAPI } from '../types/api';
 
+export const API_ENDPOINT_ROOT = '/k/v1';
+
 export const api = <T = any>(
   path: string,
   method: kintoneAPI.rest.Method,

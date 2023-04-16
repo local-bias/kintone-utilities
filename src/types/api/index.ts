@@ -328,7 +328,7 @@ export declare namespace kintoneAPI {
       | 'mobile.app.record.edit.submit.success';
   }
   namespace rest {
-    type AppID = string | number;
+    type AppIDToRequest = string | number;
     type RecordID = string | number;
     type Revision = string | number;
     type IDToRequest = string | number;
@@ -338,6 +338,9 @@ export declare namespace kintoneAPI {
       code: string;
       name: string;
     };
+    type WithCommonRequestParams<T> = T & {
+      guestSpaceId?: string | number;
+    };
 
     type TypeOmmited<T extends Record<string, any>> = {
       [P in keyof T]: Omit<T[P], 'type'>;
@@ -345,60 +348,62 @@ export declare namespace kintoneAPI {
 
     type RecordToRequest<T extends Frame = kintoneAPI.RecordData> = Partial<TypeOmmited<T>>;
 
-    type RecordGetRequest = {
-      app: AppID;
+    type RecordGetRequest = WithCommonRequestParams<{
+      app: AppIDToRequest;
       id: RecordID;
-    };
+    }>;
     type RecordGetResponse<T extends Frame = kintoneAPI.RecordData> = {
       record: T;
     };
-    type RecordPostRequest<T extends Frame = kintoneAPI.RecordData> = {
-      app: AppID;
+    type RecordPostRequest<T extends Frame = kintoneAPI.RecordData> = WithCommonRequestParams<{
+      app: AppIDToRequest;
       record: RecordToRequest<T>;
-    };
+    }>;
     type RecordPostResponse = {
       id: string;
       revision: string;
     };
-    type RecordPutRequest<T extends Frame = kintoneAPI.RecordData> = {
-      app: AppID;
-      record: RecordToRequest<T>;
-      revision?: Revision;
-    } & (
-      | {
-          id: RecordID;
-        }
-      | {
-          updateKey: {
-            field: keyof T;
-            value: string | number;
-          };
-        }
-    );
+    type RecordPutRequest<T extends Frame = kintoneAPI.RecordData> = WithCommonRequestParams<
+      {
+        app: AppIDToRequest;
+        record: RecordToRequest<T>;
+        revision?: Revision;
+      } & (
+        | {
+            id: RecordID;
+          }
+        | {
+            updateKey: {
+              field: keyof T;
+              value: string | number;
+            };
+          }
+      )
+    >;
     type RecordPutResponse = {
       revision: string;
     };
 
-    type RecordsGetRequest = {
-      app: AppID;
+    type RecordsGetRequest = WithCommonRequestParams<{
+      app: AppIDToRequest;
       query?: string;
       fields?: string[];
       totalCount?: boolean | 'true' | 'false';
-    };
+    }>;
     type RecordsGetResponse<T extends Frame = kintoneAPI.RecordData> = {
       records: T[];
       totalCount?: string | null;
     };
-    type RecordsPostRequest<T extends Frame = kintoneAPI.RecordData> = {
-      app: AppID;
+    type RecordsPostRequest<T extends Frame = kintoneAPI.RecordData> = WithCommonRequestParams<{
+      app: AppIDToRequest;
       records: RecordToRequest<T>[];
-    };
+    }>;
     type RecordsPostResponse = {
       ids: string[];
       revisions: string[];
     };
-    type RecordsPutRequest<T extends Frame = kintoneAPI.RecordData> = {
-      app: AppID;
+    type RecordsPutRequest<T extends Frame = kintoneAPI.RecordData> = WithCommonRequestParams<{
+      app: AppIDToRequest;
       records: ({
         record: RecordToRequest<T>;
         revision?: Revision;
@@ -413,36 +418,110 @@ export declare namespace kintoneAPI {
             };
           }
       ))[];
-    };
+    }>;
     type RecordsPutResponse = {
       records: {
         id: string;
         revision: string;
       }[];
     };
-    type RecordsDeleteRequest = {
-      app: AppID;
+    type RecordsDeleteRequest = WithCommonRequestParams<{
+      app: AppIDToRequest;
       ids: number[];
       revisions?: number[];
-    };
+    }>;
     type RecordsDeleteResponse = {};
 
-    type CursorCreateRequest = {
-      app: AppID;
+    type CursorCreateRequest = WithCommonRequestParams<{
+      app: AppIDToRequest;
       fields?: string[];
       query?: string;
       size?: number | string;
-    };
+    }>;
     type CursorCreateResponse = {
       id: string;
       totalCount: string;
     };
-    type CursorGetRequest = {
+    type CursorGetRequest = WithCommonRequestParams<{
       id: string;
-    };
+    }>;
     type CursorGetResponse<T extends Frame = kintoneAPI.RecordData> = {
       records: T[];
       next: boolean;
+    };
+
+    type CommentsGetRequest = {
+      app: AppIDToRequest;
+      record: RecordID;
+      order?: 'asc' | 'desc';
+      offset?: number;
+      limit?: number;
+    };
+    type CommentsGetResponse = {
+      comments: {
+        id: string;
+        text: string;
+        createdAt: string;
+        creator: People;
+        mentions: People[];
+      }[];
+      older: boolean;
+      newer: boolean;
+    };
+    type CommentPostRequest = {
+      app: AppIDToRequest;
+      record: RecordID;
+      comment: {
+        text: string;
+        mentions?: {
+          code: string;
+          type?: 'USER' | 'ORGANIZATION' | 'GROUP';
+        }[];
+      };
+    };
+    type CommentPostResponse = {
+      id: number;
+    };
+    type CommentDeleteRequest = {
+      app: AppIDToRequest;
+      record: RecordID;
+      comment: string | number;
+    };
+    type CommentDeleteResponse = {};
+
+    type RecordAssigneesPutRequest = {
+      app: AppIDToRequest;
+      id: RecordID;
+      assignees: string[];
+      revision?: Revision;
+    };
+    type RecordAssigneesPutResponse = {
+      revision: string;
+    };
+
+    type RecordStatusToPut = {
+      action: string;
+      assignee?: string;
+      id: RecordID;
+      revision?: Revision;
+    };
+
+    type RecordStatusPutRequest = {
+      app: AppIDToRequest;
+    } & RecordStatusToPut;
+    type RecordStatusPutResponse = {
+      revision: string;
+    };
+
+    type RecordStatusesPutRequest = {
+      app: AppIDToRequest;
+      records: RecordStatusToPut[];
+    };
+    type RecordStatusesPutResponse = {
+      records: {
+        id: string;
+        revision: string;
+      }[];
     };
 
     type BulkRequest<T extends Frame = kintoneAPI.RecordData> = {
@@ -453,7 +532,10 @@ export declare namespace kintoneAPI {
         | RecordsPostRequest<T>
         | RecordPutRequest<T>
         | RecordsPutRequest<T>
-        | RecordsDeleteRequest;
+        | RecordsDeleteRequest
+        | RecordAssigneesPutRequest
+        | RecordStatusPutRequest
+        | RecordStatusesPutRequest;
     }[];
 
     type BulkResponse = {
@@ -463,6 +545,9 @@ export declare namespace kintoneAPI {
         | kintoneAPI.rest.RecordsPostResponse
         | kintoneAPI.rest.RecordsPutResponse
         | kintoneAPI.rest.RecordsDeleteResponse
+        | kintoneAPI.rest.RecordAssigneesPutResponse
+        | kintoneAPI.rest.RecordStatusPutResponse
+        | kintoneAPI.rest.RecordStatusesPutResponse
       )[];
     };
 

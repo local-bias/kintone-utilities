@@ -1,17 +1,21 @@
 import { kintoneAPI } from '../types/api';
-import { api, checkBrowser, sliceIntoChunks } from './common';
+import { api, API_ENDPOINT_ROOT, checkBrowser, sliceIntoChunks } from './common';
 
 type App = number | string;
-const API_ENDPOINT_ROOT = '/k/v1';
+
 const API_ENDPOINT_RECORD = `${API_ENDPOINT_ROOT}/record.json`;
 const API_ENDPOINT_RECORDS = `${API_ENDPOINT_ROOT}/records.json`;
 const API_ENDPOINT_CURSOR = `${API_ENDPOINT_ROOT}/records/cursor.json`;
+const API_ENDPOINT_ASSIGNEES = `${API_ENDPOINT_ROOT}/record/assignees.json`;
+const API_ENDPOINT_RECORD_STATUS = `${API_ENDPOINT_ROOT}/record/status.json`;
+const API_ENDPOINT_RECORD_STATUSES = `${API_ENDPOINT_ROOT}/records/status.json`;
 const API_ENDPOINT_BULK = `${API_ENDPOINT_ROOT}/bulkRequest.json`;
 const API_LIMIT_GET = 500;
 const API_LIMIT_PUT = 100;
 const API_LIMIT_POST = 100;
 const API_LIMIT_DELETE = 100;
 const API_LIMIT_APP = 100;
+const API_LIMIT_STATUS_PUT = 100;
 const API_LIMIT_BULK_REQUEST = 20;
 
 type BulkRequestProgressProps = { total: number; done: number };
@@ -146,7 +150,7 @@ export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.R
 };
 
 type WithId<T> = T & { $id: kintoneAPI.field.ID };
-type OnStep<T> = (records: T[]) => void;
+type OnStep<T> = (props: { records: T[] }) => void;
 
 /**
  * 対象アプリの指定されたクエリに一致するレコードを、レコードIDをもとに全件取得します
@@ -196,7 +200,7 @@ const getRecursive = async <T extends Record<string, unknown>>(props: {
   const stored = [...(props.stored ?? []), ...records];
 
   if (props.onStep) {
-    props.onStep(stored);
+    props.onStep({ records: stored });
   }
 
   const lastRecord = stored[stored.length - 1];
@@ -205,7 +209,7 @@ const getRecursive = async <T extends Record<string, unknown>>(props: {
   return records.length === API_LIMIT_GET ? getRecursive({ ...props, id: lastId, stored }) : stored;
 };
 
-type OnTotalGet = (total: number) => void;
+type OnTotalGet = (props: { total: number }) => void;
 
 /**
  * 対象アプリの指定されたクエリに一致するレコードを、カーソルAPIを使って全件取得します
@@ -231,7 +235,9 @@ export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(p
   );
 
   if (onTotalGet) {
-    onTotalGet(Number(cursor.totalCount));
+    onTotalGet({
+      total: Number(cursor.totalCount),
+    });
   }
 
   return getRecordsByCursorId<T>({ id: cursor.id, onStep });
@@ -250,7 +256,7 @@ const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(props: {
   const newRecords: T[] = [...loadedData, ...(response.records as T[])];
 
   if (onStep) {
-    onStep(newRecords);
+    onStep({ records: newRecords });
   }
 
   return response.next ? getRecordsByCursorId({ id, onStep, loadedData: newRecords }) : newRecords;
@@ -345,6 +351,34 @@ export const updateViews = async (props: {
   return api(`${API_ENDPOINT_ROOT}/preview/app/views`, 'PUT', props);
 };
 
+export const updateRecordAssignees = async (props: kintoneAPI.rest.RecordAssigneesPutRequest) => {
+  return api<kintoneAPI.rest.RecordAssigneesPutResponse>(API_ENDPOINT_ASSIGNEES, 'PUT', props);
+};
+
+export const updateRecordStatus = async (props: kintoneAPI.rest.RecordStatusPutRequest) => {
+  return api<kintoneAPI.rest.RecordStatusPutResponse>(API_ENDPOINT_RECORD_STATUS, 'PUT', props);
+};
+export const updateAllRecordStatuses = async (
+  props: kintoneAPI.rest.RecordStatusesPutRequest & {
+    onProgress?: (props: BulkRequestProgressProps) => void;
+  }
+): Promise<kintoneAPI.rest.RecordStatusesPutResponse> => {
+  const { onProgress, ...requestProps } = props;
+  const responses: { results: kintoneAPI.rest.RecordStatusesPutResponse[] } = (await bulkRequest({
+    requests: [{ type: 'updateRecordStatuses', props: requestProps }],
+    onProgress,
+  })) as any;
+
+  return responses.results.reduce<kintoneAPI.rest.RecordStatusesPutResponse>(
+    (acc, result) => {
+      return {
+        records: [...acc.records, ...result.records],
+      };
+    },
+    { records: [] }
+  );
+};
+
 export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(props: {
   requests: (
     | {
@@ -367,6 +401,18 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
         type: 'deleteRecords';
         props: kintoneAPI.rest.RecordsDeleteRequest;
       }
+    | {
+        type: 'updateRecordAssignees';
+        props: kintoneAPI.rest.RecordAssigneesPutRequest;
+      }
+    | {
+        type: 'updateRecordStatus';
+        props: kintoneAPI.rest.RecordStatusPutRequest;
+      }
+    | {
+        type: 'updateRecordStatuses';
+        props: kintoneAPI.rest.RecordStatusesPutRequest;
+      }
   )[];
   onProgress?: (props: BulkRequestProgressProps) => void;
   debug?: boolean;
@@ -387,16 +433,13 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
         payload: request.props,
       });
     } else if (request.type === 'updateRecords') {
-      const { records, ...rest } = request.props;
-      const recordChunks = sliceIntoChunks(request.props.records, API_LIMIT_PUT);
+      const { records: allRecords, ...commonRequestProps } = request.props;
+      const recordChunks = sliceIntoChunks(allRecords, API_LIMIT_PUT);
       for (const records of recordChunks) {
         reshapedRequests.push({
           method: 'PUT',
           api: API_ENDPOINT_RECORDS,
-          payload: {
-            ...rest,
-            records,
-          },
+          payload: { ...commonRequestProps, records },
         });
       }
     } else if (request.type === 'addRecords') {
@@ -405,10 +448,7 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
         reshapedRequests.push({
           method: 'POST',
           api: API_ENDPOINT_RECORDS,
-          payload: {
-            app: request.props.app,
-            records,
-          },
+          payload: { ...request.props, records },
         });
       }
     } else if (request.type === 'deleteRecords') {
@@ -417,10 +457,28 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
         reshapedRequests.push({
           method: 'DELETE',
           api: API_ENDPOINT_RECORDS,
-          payload: {
-            app: request.props.app,
-            ids,
-          },
+          payload: { ...request.props, ids },
+        });
+      }
+    } else if (request.type === 'updateRecordAssignees') {
+      reshapedRequests.push({
+        method: 'PUT',
+        api: API_ENDPOINT_ASSIGNEES,
+        payload: request.props,
+      });
+    } else if (request.type === 'updateRecordStatus') {
+      reshapedRequests.push({
+        method: 'PUT',
+        api: API_ENDPOINT_RECORD_STATUS,
+        payload: request.props,
+      });
+    } else if (request.type === 'updateRecordStatuses') {
+      const recordChunks = sliceIntoChunks(request.props.records, API_LIMIT_PUT);
+      for (const records of recordChunks) {
+        reshapedRequests.push({
+          method: 'PUT',
+          api: API_ENDPOINT_RECORD_STATUSES,
+          payload: { ...request.props, records },
         });
       }
     }
