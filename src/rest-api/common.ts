@@ -1,14 +1,53 @@
 import { kintoneAPI } from '../types/api';
 
-export const API_ENDPOINT_ROOT = '/k/v1';
+export const buildPath = (params: {
+  endpointName: string;
+  guestSpaceId?: number | string;
+  preview?: boolean;
+}) => {
+  const { endpointName, guestSpaceId, preview } = params;
+  const guestPath = guestSpaceId !== undefined ? `/guest/${guestSpaceId}` : '';
+  const previewPath = preview ? '/preview' : '';
+  return `/k${guestPath}/v1${previewPath}/${endpointName}.json`;
+};
 
-export const api = <T = any>(
-  path: string,
-  method: kintoneAPI.rest.Method,
-  body: any
-): Promise<T> => {
-  checkBrowser();
-  return kintone.api(kintone.api.url(path, true), method, body) as Promise<T>;
+export const api = async <T = any>(params: {
+  endpointName: string;
+  method: kintoneAPI.rest.Method;
+  body: any;
+  guestSpaceId?: number | string;
+  preview?: boolean;
+  debug?: boolean;
+}): Promise<T> => {
+  const { endpointName, method, body, guestSpaceId, preview, debug } = params;
+  try {
+    checkBrowser();
+    const path = buildPath({ endpointName, guestSpaceId, preview });
+    if (debug) {
+      console.groupCollapsed(
+        `%ckintone REST API %c(${endpointName})`,
+        'color: #1e40af;',
+        'color: #aaa'
+      );
+      console.log(`path: ${path}`);
+      console.log(`method: ${method}`);
+      console.log('body', body);
+    }
+    const response: T = await kintone.api(path, method, body);
+    if (debug) {
+      console.log('response', response);
+    }
+    return response;
+  } catch (error) {
+    if (debug) {
+      console.error(error);
+    }
+    throw error;
+  } finally {
+    if (debug) {
+      console.groupEnd();
+    }
+  }
 };
 
 export const checkBrowser = () => {
