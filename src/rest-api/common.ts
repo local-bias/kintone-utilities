@@ -66,3 +66,16 @@ export const sliceIntoChunks = <T>(array: T[], size: number): T[][] => {
   }
   return result;
 };
+
+export type WithDebug<T> = T & { debug?: boolean };
+export type WithGuestSpaceId<T> = T & { guestSpaceId?: number | string };
+export type WithCommonRequestParams<T> = WithDebug<WithGuestSpaceId<T>>;
+export type TypeOmmited<T extends Record<string, any>> = {
+  [P in keyof T]: Omit<T[P], 'type'>;
+};
+
+export type RecordFrame = Record<string, any>;
+
+export type RecordToRequest<T extends RecordFrame = kintoneAPI.RecordData> = Partial<
+  TypeOmmited<T>
+>;

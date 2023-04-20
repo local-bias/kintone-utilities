@@ -108,6 +108,9 @@ export declare namespace kintoneAPI {
 
   type RecordData = DefaultRecord;
 
+  type EntityType = 'USER' | 'GROUP' | 'ORGANIZATION';
+  type IDToRequest = string | number;
+
   namespace view {
     type Response = ViewForResponse;
     type Parameter = ViewForParameter;
@@ -334,11 +337,13 @@ export declare namespace kintoneAPI {
     type IDToRequest = string | number;
     type Frame = Record<string, any>;
     type Method = 'GET' | 'PUT' | 'POST' | 'DELETE';
+    type Lang = 'ja' | 'en' | 'zh' | 'user' | 'default';
     type People = {
       code: string;
       name: string;
     };
     type WithCommonRequestParams<T> = T & {
+      debug?: boolean;
       guestSpaceId?: string | number;
     };
 
@@ -450,13 +455,13 @@ export declare namespace kintoneAPI {
       next: boolean;
     };
 
-    type CommentsGetRequest = {
+    type CommentsGetRequest = WithCommonRequestParams<{
       app: AppIDToRequest;
       record: RecordID;
       order?: 'asc' | 'desc';
       offset?: number;
       limit?: number;
-    };
+    }>;
     type CommentsGetResponse = {
       comments: {
         id: string;
@@ -468,25 +473,22 @@ export declare namespace kintoneAPI {
       older: boolean;
       newer: boolean;
     };
-    type CommentPostRequest = {
+    type CommentPostRequest = WithCommonRequestParams<{
       app: AppIDToRequest;
       record: RecordID;
       comment: {
         text: string;
-        mentions?: {
-          code: string;
-          type?: 'USER' | 'ORGANIZATION' | 'GROUP';
-        }[];
+        mentions?: { code: string; type?: EntityType }[];
       };
-    };
+    }>;
     type CommentPostResponse = {
       id: number;
     };
-    type CommentDeleteRequest = {
+    type CommentDeleteRequest = WithCommonRequestParams<{
       app: AppIDToRequest;
       record: RecordID;
       comment: string | number;
-    };
+    }>;
     type CommentDeleteResponse = {};
 
     type RecordAssigneesPutRequest = {
@@ -524,19 +526,21 @@ export declare namespace kintoneAPI {
       }[];
     };
 
-    type BulkRequest<T extends Frame = kintoneAPI.RecordData> = {
-      method: Method;
-      api: string;
-      payload:
-        | RecordPostRequest<T>
-        | RecordsPostRequest<T>
-        | RecordPutRequest<T>
-        | RecordsPutRequest<T>
-        | RecordsDeleteRequest
-        | RecordAssigneesPutRequest
-        | RecordStatusPutRequest
-        | RecordStatusesPutRequest;
-    }[];
+    namespace bulkRequest {
+      type OneOfRequest<T extends Frame = kintoneAPI.RecordData> = {
+        method: Method;
+        api: string;
+        payload:
+          | RecordPostRequest<T>
+          | RecordsPostRequest<T>
+          | RecordPutRequest<T>
+          | RecordsPutRequest<T>
+          | RecordsDeleteRequest
+          | RecordAssigneesPutRequest
+          | RecordStatusPutRequest
+          | RecordStatusesPutRequest;
+      };
+    }
 
     type BulkResponse = {
       results: (
@@ -549,6 +553,69 @@ export declare namespace kintoneAPI {
         | kintoneAPI.rest.RecordStatusPutResponse
         | kintoneAPI.rest.RecordStatusesPutResponse
       )[];
+    };
+
+    type ChartType =
+      | 'BAR'
+      | 'COLUMN'
+      | 'PIE'
+      | 'LINE'
+      | 'PIVOT_TABLE'
+      | 'TABLE'
+      | 'AREA'
+      | 'SPLINE'
+      | 'SPLINE_AREA';
+    type ChartMode = 'NORMAL' | 'STACKED' | 'PERCENTAGE';
+    type ChartPeriod = 'YEAR' | 'QUARTER' | 'MONTH' | 'WEEK' | 'DAY' | 'HOUR' | 'MINUTE';
+    type ChartAggregationType = 'COUNT' | 'SUM' | 'AVERAGE' | 'MAX' | 'MIN';
+    type AppReportsGetRequest = WithCommonRequestParams<{
+      app: AppIDToRequest;
+      lang?: Lang;
+    }>;
+    type AppReportsGetResponse = {
+      reports: Record<
+        string,
+        {
+          chartType: ChartType;
+          chartMode: ChartMode;
+          id: string;
+          name: string;
+          index: string;
+          groups: {
+            code: string;
+            per: ChartPeriod;
+          }[];
+          aggregations: {
+            type: ChartAggregationType;
+            code: string;
+          }[];
+          filterCond: string;
+          sorts: {
+            by: 'TOTAL' | 'GROUP1' | 'GROUP2' | 'GROUP3';
+            order: 'ASC' | 'DESC';
+          }[];
+          periodicReport: {
+            active: boolean;
+            period: {
+              every: ChartPeriod;
+              month: string;
+              time: string;
+              pattern: 'JAN_APR_JUL_OCT' | 'FEB_MAY_AUG_NOV' | 'MAR_JUN_SEP_DEC';
+              dayOfMonth: string;
+              dayOfWeek:
+                | 'SUNDAY'
+                | 'MONDAY'
+                | 'TUESDAY'
+                | 'WEDNESDAY'
+                | 'THURSDAY'
+                | 'FRIDAY'
+                | 'SATURDAY';
+              minute: '0' | '10' | '20' | '30' | '40' | '50';
+            };
+          } | null;
+          revision: string;
+        }
+      >;
     };
 
     namespace space {
@@ -596,55 +663,6 @@ export declare namespace kintoneAPI {
           showRelatedLinkList: boolean;
         }[];
       };
-
-      type CreateSpaceRequest = {
-        id: SpaceIdToRequest;
-        name: string;
-        members: {
-          entity: {
-            type: 'USER' | 'GROUP' | 'ORGANIZATION';
-            code: string;
-          };
-          isAdmin: boolean;
-          includeSubs?: boolean;
-        }[];
-        isPrivate?: boolean;
-        isGuest?: boolean;
-        fixedMember?: boolean;
-      };
-      type CreateSpaceResponse = {
-        id: string;
-      };
-      type DeleteSpaceRequest = { id: SpaceIdToRequest };
-      type DeleteSpaceResponse = {};
-
-      type UpdateThreadRequest = {
-        /** 更新するスレッドのスレッドID */
-        id: IDToRequest;
-
-        /**
-         * スレッド名
-         *
-         * 1文字から128文字まで指定可能。省略した場合は、スレッド名は更新されません。
-         *
-         * シングルスレッドスペースのスレッドはスレッド名が存在しないため更新できません。
-         */
-        name?: string;
-
-        /**
-         * スレッドの本文
-         *
-         * 65535文字まで指定可能。省略した場合は、本文は更新されません。
-         *
-         * 許可されていない属性やタグは自動的に削除されます。
-         *
-         * アプリ貼り付け、ファイル添付、絵文字は HTML で指定します。
-         *
-         * 宛先を HTML 内で指定しても、その宛先には通知されません。
-         */
-        body?: string;
-      };
-      type UpdateThreadResponse = {};
 
       type GetSpaceMembersRequest = {
         id: IDToRequest;
