@@ -255,14 +255,22 @@ export const getAllRecordsWithId = async <T extends Record<string, any>>(
     condition?: string;
   }>
 ): Promise<WithId<T>[]> => {
-  const { fields: initFields, condition: initCondition = '' } = params;
+  const { fields: initFields, condition: initCondition = '', debug } = params;
 
   const fields = initFields?.length ? [...new Set([...initFields, '$id'])] : undefined;
 
   // order byは使用できないため、conditionに含まれている場合は除外する
   const condition = initCondition.replace(/order by.*/g, '');
 
-  return getRecursive<T>({ ...params, fields, condition });
+  if (debug) {
+    console.groupCollapsed('📦 %cgetAllRecordsWithId', 'color: #1e40af');
+  }
+  const records = await getRecursive<T>({ ...params, fields, condition });
+  if (debug) {
+    console.groupEnd();
+  }
+
+  return records;
 };
 
 const getRecursive = async <T extends Record<string, unknown>>(
@@ -333,6 +341,10 @@ export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(
     guestSpaceId,
   } = params;
 
+  if (debug) {
+    console.groupCollapsed('📦 %cgetAllRecordsWithCursor', 'color: #1e40af');
+  }
+
   const param: kintoneAPI.rest.CursorCreateRequest = { app, fields, size: API_LIMIT_GET, query };
 
   const cursor = await api<kintoneAPI.rest.CursorCreateResponse>({
@@ -349,7 +361,13 @@ export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(
     });
   }
 
-  return getRecordsByCursorId<T>({ id: cursor.id, onStep, debug, guestSpaceId });
+  const records = await getRecordsByCursorId<T>({ id: cursor.id, onStep, debug, guestSpaceId });
+
+  if (debug) {
+    console.groupEnd();
+  }
+
+  return records;
 };
 
 const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(
