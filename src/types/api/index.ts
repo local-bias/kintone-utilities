@@ -482,10 +482,7 @@ export declare namespace kintoneAPI {
     type ChartMode = 'NORMAL' | 'STACKED' | 'PERCENTAGE';
     type ChartPeriod = 'YEAR' | 'QUARTER' | 'MONTH' | 'WEEK' | 'DAY' | 'HOUR' | 'MINUTE';
     type ChartAggregationType = 'COUNT' | 'SUM' | 'AVERAGE' | 'MAX' | 'MIN';
-    type AppReportsGetRequest = WithCommonRequestParams<{
-      app: AppIDToRequest;
-      lang?: Lang;
-    }>;
+
     type AppReportsGetResponse = {
       reports: Record<
         string,
