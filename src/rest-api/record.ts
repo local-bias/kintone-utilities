@@ -19,6 +19,7 @@ const API_LIMIT_STATUS_PUT = 100;
 const API_LIMIT_BULK_REQUEST = 20;
 
 type BulkRequestProgressParams = { total: number; done: number };
+type WithBulkRequestCallback<T> = T & { onProgress?: (params: BulkRequestProgressParams) => void };
 
 export const backdoor = async (params: {
   apiToken: string;
@@ -46,20 +47,27 @@ export const backdoor = async (params: {
   return JSON.parse(response[0]);
 };
 
-type GetRecordParams = kintoneAPI.rest.RecordGetRequest;
+export type RecordGetRequest = {
+  app: kintoneAPI.IDToRequest;
+  id: kintoneAPI.IDToRequest;
+};
+type GetRecordParams = WithCommonRequestParams<RecordGetRequest>;
 
 export const getRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: GetRecordParams
 ): Promise<T> => {
+  const { debug, guestSpaceId, ...requestParams } = params;
   const { record } = await api<kintoneAPI.rest.RecordGetResponse<T>>({
     endpointName: API_ENDPOINT_RECORD,
     method: 'GET',
-    body: params,
+    body: requestParams,
+    debug,
+    guestSpaceId,
   });
   return record;
 };
 export const backdoorGetRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
-  params: kintoneAPI.rest.RecordGetRequest & { apiToken: string }
+  params: RecordGetRequest & { apiToken: string }
 ): Promise<T> => {
   const { app, id, apiToken } = params;
   const { record } = await backdoor({
@@ -71,18 +79,45 @@ export const backdoorGetRecord = async <T extends kintoneAPI.rest.Frame = kinton
   return record;
 };
 
+export type PrimaryKeyToUpdate<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
+  | {
+      id: kintoneAPI.IDToRequest;
+    }
+  | {
+      updateKey: {
+        field: keyof T;
+        value: string | number;
+      };
+    };
+
+export type RecordPutRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
+  app: kintoneAPI.IDToRequest;
+  record: kintoneAPI.rest.RecordToRequest<T>;
+  revision?: kintoneAPI.rest.Revision;
+} & PrimaryKeyToUpdate<T>;
+type UpdateRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
+  WithCommonRequestParams<RecordPutRequest<T>>;
+
 export const updateRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
-  params: kintoneAPI.rest.RecordPutRequest<T>
+  params: UpdateRecordParams<T>
 ): Promise<kintoneAPI.rest.RecordPutResponse> => {
+  const { debug, guestSpaceId, ...requestParams } = params;
   return api({
     endpointName: API_ENDPOINT_RECORD,
     method: 'PUT',
-    body: params,
+    body: requestParams,
+    debug,
+    guestSpaceId,
   });
 };
 
+export type RecordPostRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
+  app: kintoneAPI.IDToRequest;
+  record: kintoneAPI.rest.RecordToRequest<T>;
+};
+
 export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
-  params: kintoneAPI.rest.RecordPostRequest<T>
+  params: RecordPostRequest<T>
 ): Promise<kintoneAPI.rest.RecordPostResponse> => {
   return api({
     endpointName: API_ENDPOINT_RECORD,
@@ -91,15 +126,37 @@ export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.Rec
   });
 };
 
+export type RecordsPutRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
+  app: kintoneAPI.IDToRequest;
+  records: ({
+    record: kintoneAPI.rest.RecordToRequest<T>;
+    revision?: kintoneAPI.rest.Revision;
+  } & (
+    | {
+        id: kintoneAPI.IDToRequest;
+      }
+    | {
+        updateKey: {
+          field: keyof T;
+          value: string | number;
+        };
+      }
+  ))[];
+};
+export type UpdateAllRecordsParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
+  WithCommonRequestParams<RecordsPutRequest<T>>;
+
 export const updateAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
-  params: kintoneAPI.rest.RecordsPutRequest<T> & {
+  params: UpdateAllRecordsParams<T> & {
     onProgress?: (params: BulkRequestProgressParams) => void;
   }
 ): Promise<kintoneAPI.rest.RecordsPutResponse> => {
-  const { onProgress, ...requestParams } = params;
+  const { onProgress, debug, guestSpaceId, ...requestParams } = params;
   const response: { results: kintoneAPI.rest.RecordsPutResponse[] } = (await bulkRequest<T>({
     requests: [{ type: 'updateRecords', params: requestParams }],
     onProgress,
+    debug,
+    guestSpaceId,
   })) as any;
 
   return response.results.reduce<kintoneAPI.rest.RecordsPutResponse>(
@@ -110,15 +167,24 @@ export const updateAllRecords = async <T extends kintoneAPI.rest.Frame = kintone
   );
 };
 
+export type RecordsPostRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
+  app: kintoneAPI.IDToRequest;
+  records: kintoneAPI.rest.RecordToRequest<T>[];
+};
+export type AddAllRecordsParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
+  WithCommonRequestParams<RecordsPostRequest<T>>;
+
 export const addAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
-  params: kintoneAPI.rest.RecordsPostRequest<T> & {
+  params: AddAllRecordsParams<T> & {
     onProgress?: (params: BulkRequestProgressParams) => void;
   }
 ): Promise<kintoneAPI.rest.RecordsPostResponse> => {
-  const { onProgress, ...requestParams } = params;
+  const { onProgress, debug, guestSpaceId, ...requestParams } = params;
   const responses: { results: kintoneAPI.rest.RecordsPostResponse[] } = (await bulkRequest<T>({
     requests: [{ type: 'addRecords', params: requestParams }],
     onProgress,
+    debug,
+    guestSpaceId,
   })) as any;
 
   return responses.results.reduce<kintoneAPI.rest.RecordsPostResponse>(
@@ -132,10 +198,22 @@ export const addAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI
   );
 };
 
+export type RecordsDeleteRequest = {
+  app: kintoneAPI.IDToRequest;
+  ids: number[];
+  revisions?: number[];
+};
+export type DeleteAllRecordsParams = WithCommonRequestParams<RecordsDeleteRequest>;
+
 export const deleteAllRecords = async (
-  params: kintoneAPI.rest.RecordsDeleteRequest
+  params: DeleteAllRecordsParams
 ): Promise<{ results: kintoneAPI.rest.RecordsDeleteResponse[] }> => {
-  return bulkRequest({ requests: [{ type: 'deleteRecords', params }] });
+  const { debug, guestSpaceId, ...requestParams } = params;
+  return bulkRequest({
+    requests: [{ type: 'deleteRecords', params: requestParams }],
+    debug,
+    guestSpaceId,
+  });
 };
 
 /**
@@ -317,30 +395,69 @@ export const updateViews = async (params: {
   return api({ endpointName: API_ENDPOINT_VIEWS, method: 'PUT', body: params, preview: true });
 };
 
-export const updateRecordAssignees = async (params: kintoneAPI.rest.RecordAssigneesPutRequest) => {
+export type RecordAssigneesPutRequest = {
+  app: kintoneAPI.IDToRequest;
+  id: kintoneAPI.IDToRequest;
+  assignees: string[];
+  revision?: kintoneAPI.IDToRequest;
+};
+export type UpdateRecordAssigneesParams = WithCommonRequestParams<RecordAssigneesPutRequest>;
+
+export const updateRecordAssignees = async (
+  params: UpdateRecordAssigneesParams
+): Promise<kintoneAPI.rest.RecordAssigneesPutResponse> => {
+  const { debug, guestSpaceId, ...requestParams } = params;
   return api<kintoneAPI.rest.RecordAssigneesPutResponse>({
     endpointName: API_ENDPOINT_ASSIGNEES,
     method: 'PUT',
-    body: params,
+    body: requestParams,
+    debug,
+    guestSpaceId,
   });
 };
 
-export const updateRecordStatus = async (params: kintoneAPI.rest.RecordStatusPutRequest) => {
+export type RecordStatusToPut = {
+  action: string;
+  assignee?: string;
+  id: kintoneAPI.IDToRequest;
+  revision?: kintoneAPI.IDToRequest;
+};
+
+export type RecordStatusPutRequest = {
+  app: kintoneAPI.IDToRequest;
+} & RecordStatusToPut;
+export type UpdateRecordStatusParams = WithCommonRequestParams<RecordStatusPutRequest>;
+
+export const updateRecordStatus = async (
+  params: UpdateRecordStatusParams
+): Promise<kintoneAPI.rest.RecordStatusPutResponse> => {
+  const { debug, guestSpaceId, ...requestParams } = params;
   return api<kintoneAPI.rest.RecordStatusPutResponse>({
     endpointName: API_ENDPOINT_RECORD_STATUS,
     method: 'PUT',
-    body: params,
+    body: requestParams,
+    debug,
+    guestSpaceId,
   });
 };
+
+export type RecordStatusesPutRequest = {
+  app: kintoneAPI.IDToRequest;
+  records: RecordStatusToPut[];
+};
+export type UpdateAllRecordStatusesParams = WithBulkRequestCallback<
+  WithCommonRequestParams<RecordStatusesPutRequest>
+>;
+
 export const updateAllRecordStatuses = async (
-  params: kintoneAPI.rest.RecordStatusesPutRequest & {
-    onProgress?: (params: BulkRequestProgressParams) => void;
-  }
+  params: UpdateAllRecordStatusesParams
 ): Promise<kintoneAPI.rest.RecordStatusesPutResponse> => {
-  const { onProgress, ...requestParams } = params;
+  const { onProgress, debug, guestSpaceId, ...requestParams } = params;
   const responses: { results: kintoneAPI.rest.RecordStatusesPutResponse[] } = (await bulkRequest({
     requests: [{ type: 'updateRecordStatuses', params: requestParams }],
     onProgress,
+    debug,
+    guestSpaceId,
   })) as any;
 
   return responses.results.reduce<kintoneAPI.rest.RecordStatusesPutResponse>(
@@ -353,40 +470,54 @@ export const updateAllRecordStatuses = async (
   );
 };
 
+export type OneOfBulkRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
+  method: kintoneAPI.rest.Method;
+  api: string;
+  payload:
+    | RecordPostRequest<T>
+    | RecordsPostRequest<T>
+    | RecordPutRequest<T>
+    | RecordsPutRequest<T>
+    | RecordsDeleteRequest
+    | RecordAssigneesPutRequest
+    | RecordStatusPutRequest
+    | RecordStatusesPutRequest;
+};
+
 export type BulkRequestParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   WithCommonRequestParams<{
     requests: (
       | {
           type: 'updateRecord';
-          params: kintoneAPI.rest.RecordPutRequest<T>;
+          params: RecordPutRequest<T>;
         }
       | {
           type: 'addRecord';
-          params: kintoneAPI.rest.RecordPostRequest<T>;
+          params: RecordPostRequest<T>;
         }
       | {
           type: 'updateRecords';
-          params: kintoneAPI.rest.RecordsPutRequest<T>;
+          params: RecordsPutRequest<T>;
         }
       | {
           type: 'addRecords';
-          params: kintoneAPI.rest.RecordsPostRequest<T>;
+          params: RecordsPostRequest<T>;
         }
       | {
           type: 'deleteRecords';
-          params: kintoneAPI.rest.RecordsDeleteRequest;
+          params: RecordsDeleteRequest;
         }
       | {
           type: 'updateRecordAssignees';
-          params: kintoneAPI.rest.RecordAssigneesPutRequest;
+          params: RecordAssigneesPutRequest;
         }
       | {
           type: 'updateRecordStatus';
-          params: kintoneAPI.rest.RecordStatusPutRequest;
+          params: RecordStatusPutRequest;
         }
       | {
           type: 'updateRecordStatuses';
-          params: kintoneAPI.rest.RecordStatusesPutRequest;
+          params: RecordStatusesPutRequest;
         }
     )[];
     onProgress?: (params: BulkRequestProgressParams) => void;
@@ -411,7 +542,7 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
     updateRecordStatuses: { endpointName: API_ENDPOINT_RECORD_STATUSES, method: 'PUT' },
   };
 
-  let reshapedRequests: kintoneAPI.rest.bulkRequest.OneOfRequest<T>[] = [];
+  let reshapedRequests: OneOfBulkRequest<T>[] = [];
   for (const request of requests) {
     const { endpointName, method } = apiTable[request.type];
     const api = buildPath({ endpointName, guestSpaceId });
@@ -458,6 +589,8 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
       endpointName: API_ENDPOINT_BULK,
       method: 'POST',
       body: { requests },
+      debug,
+      guestSpaceId,
     });
     if (debug) {
       console.log(`bulk request ${requests.length}/${reshapedRequests.length}`);
