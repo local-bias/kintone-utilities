@@ -8,9 +8,6 @@ const API_ENDPOINT_ASSIGNEES = `record/assignees`;
 const API_ENDPOINT_RECORD_STATUS = `record/status`;
 const API_ENDPOINT_RECORD_STATUSES = `records/status`;
 const API_ENDPOINT_BULK = `bulkRequest`;
-const API_ENDPOINT_VIEWS = 'app/views';
-const API_ENDPOINT_FORM_FIELDS = 'app/form/fields';
-const API_ENDPOINT_FORM_LAYOUT = 'app/form/layout';
 const API_LIMIT_GET = 500;
 const API_LIMIT_PUT = 100;
 const API_LIMIT_POST = 100;
@@ -378,48 +375,6 @@ const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(
   }
 
   return response.next ? getRecordsByCursorId({ id, onStep, loadedData: newRecords }) : newRecords;
-};
-
-export const getFormFields = async (params: {
-  app: kintoneAPI.rest.AppIDToRequest;
-  preview?: boolean;
-}): Promise<{ properties: kintoneAPI.FieldProperties; revision: string }> => {
-  const { app, preview = false } = params;
-  return api({
-    endpointName: API_ENDPOINT_FORM_FIELDS,
-    method: 'GET',
-    body: { app },
-    preview,
-  });
-};
-
-export const getFormLayout = async (params: {
-  app: kintoneAPI.rest.AppIDToRequest;
-  preview?: boolean;
-}): Promise<{ layout: kintoneAPI.Layout; revision: string }> => {
-  const { app, preview = false } = params;
-  return api({
-    endpointName: API_ENDPOINT_FORM_LAYOUT,
-    method: 'GET',
-    body: { app },
-    preview,
-  });
-};
-
-export const getViews = async (params: {
-  app: kintoneAPI.rest.AppIDToRequest;
-  lang?: kintoneAPI.rest.Lang;
-  preview?: boolean;
-}): Promise<{ views: Record<string, kintoneAPI.view.Response>; revision: string }> => {
-  const { app, preview = false, lang = 'default' } = params;
-  return api({ endpointName: API_ENDPOINT_VIEWS, method: 'GET', body: { app, lang }, preview });
-};
-
-export const updateViews = async (params: {
-  app: kintoneAPI.rest.AppIDToRequest;
-  views: Record<string, kintoneAPI.view.Parameter>;
-}) => {
-  return api({ endpointName: API_ENDPOINT_VIEWS, method: 'PUT', body: params, preview: true });
 };
 
 export type RecordAssigneesPutRequest = {
