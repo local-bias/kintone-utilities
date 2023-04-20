@@ -225,6 +225,29 @@ export const deleteAllRecords = async (
   });
 };
 
+export const deleteAllRecordsByQuery = async (
+  params: WithBulkRequestCallback<
+    WithCommonRequestParams<{
+      app: kintoneAPI.IDToRequest;
+      query: string;
+    }>
+  >
+): Promise<{ results: kintoneAPI.rest.RecordsDeleteResponse[] }> => {
+  const { onProgress, debug, guestSpaceId, app, query } = params;
+  const fields = ['$id'];
+
+  const records = await getAllRecords({ app, query, fields, debug, guestSpaceId });
+
+  const ids = records.map((record) => Number(record.$id.value));
+
+  return bulkRequest({
+    requests: [{ type: 'deleteRecords', params: { app, ids } }],
+    onProgress,
+    debug,
+    guestSpaceId,
+  });
+};
+
 export type RecordsGetRequest = {
   app: kintoneAPI.IDToRequest;
   query?: string;
