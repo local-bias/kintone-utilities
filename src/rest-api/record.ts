@@ -76,6 +76,19 @@ export const backdoorGetRecord = async <T extends kintoneAPI.rest.Frame = kinton
   return record;
 };
 
+export const getRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  params: GetRecordsParams
+): Promise<kintoneAPI.rest.RecordsGetResponse<T>> => {
+  const { debug, guestSpaceId, ...requestParams } = params;
+  return await api<kintoneAPI.rest.RecordsGetResponse<T>>({
+    endpointName: API_ENDPOINT_RECORDS,
+    method: 'GET',
+    body: requestParams,
+    debug,
+    guestSpaceId,
+  });
+};
+
 export type PrimaryKeyToUpdate<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   | {
       id: kintoneAPI.IDToRequest;
@@ -218,6 +231,7 @@ export type RecordsGetRequest = {
   fields?: string[];
   totalCount?: boolean | 'true' | 'false';
 };
+export type GetRecordsParams = WithCommonRequestParams<RecordsGetRequest>;
 export type GetAllRecordsParams = WithCommonRequestParams<RecordsGetRequest>;
 
 /**
