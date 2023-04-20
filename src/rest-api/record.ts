@@ -626,7 +626,7 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
     if (debug) {
       done += requests.length;
       console.log(
-        `📦 %cbulk request in progress... ${done}/${reshapedRequests.length}`,
+        `%cbulk request in progress... ${done}/${reshapedRequests.length}`,
         'color: #999'
       );
     }
