@@ -144,12 +144,10 @@ export type RecordsPutRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Recor
   ))[];
 };
 export type UpdateAllRecordsParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
-  WithCommonRequestParams<RecordsPutRequest<T>>;
+  WithBulkRequestCallback<WithCommonRequestParams<RecordsPutRequest<T>>>;
 
 export const updateAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
-  params: UpdateAllRecordsParams<T> & {
-    onProgress?: (params: BulkRequestProgressParams) => void;
-  }
+  params: UpdateAllRecordsParams<T>
 ): Promise<kintoneAPI.rest.RecordsPutResponse> => {
   const { onProgress, debug, guestSpaceId, ...requestParams } = params;
   const response: { results: kintoneAPI.rest.RecordsPutResponse[] } = (await bulkRequest<T>({
@@ -172,12 +170,10 @@ export type RecordsPostRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Reco
   records: kintoneAPI.rest.RecordToRequest<T>[];
 };
 export type AddAllRecordsParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
-  WithCommonRequestParams<RecordsPostRequest<T>>;
+  WithBulkRequestCallback<WithCommonRequestParams<RecordsPostRequest<T>>>;
 
 export const addAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
-  params: AddAllRecordsParams<T> & {
-    onProgress?: (params: BulkRequestProgressParams) => void;
-  }
+  params: AddAllRecordsParams<T>
 ): Promise<kintoneAPI.rest.RecordsPostResponse> => {
   const { onProgress, debug, guestSpaceId, ...requestParams } = params;
   const responses: { results: kintoneAPI.rest.RecordsPostResponse[] } = (await bulkRequest<T>({
@@ -203,18 +199,29 @@ export type RecordsDeleteRequest = {
   ids: number[];
   revisions?: number[];
 };
-export type DeleteAllRecordsParams = WithCommonRequestParams<RecordsDeleteRequest>;
+export type DeleteAllRecordsParams = WithBulkRequestCallback<
+  WithCommonRequestParams<RecordsDeleteRequest>
+>;
 
 export const deleteAllRecords = async (
   params: DeleteAllRecordsParams
 ): Promise<{ results: kintoneAPI.rest.RecordsDeleteResponse[] }> => {
-  const { debug, guestSpaceId, ...requestParams } = params;
+  const { onProgress, debug, guestSpaceId, ...requestParams } = params;
   return bulkRequest({
     requests: [{ type: 'deleteRecords', params: requestParams }],
+    onProgress,
     debug,
     guestSpaceId,
   });
 };
+
+export type RecordsGetRequest = {
+  app: kintoneAPI.IDToRequest;
+  query?: string;
+  fields?: string[];
+  totalCount?: boolean | 'true' | 'false';
+};
+export type GetAllRecordsParams = WithCommonRequestParams<RecordsGetRequest>;
 
 /**
  * 対象アプリの指定されたクエリに一致するレコードを全件取得します
@@ -226,9 +233,7 @@ export const deleteAllRecords = async (
  * @returns 取得したレコードの配列
  */
 export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.RecordData>(
-  params: kintoneAPI.rest.RecordsGetRequest & {
-    onStep?: OnStep<T>;
-  }
+  params: GetAllRecordsParams & { onStep?: OnStep<T> }
 ) => {
   if (params.query && params.query.includes('order by')) {
     return getAllRecordsWithCursor<T>(params);
@@ -245,12 +250,14 @@ type OnStep<T> = (params: { records: T[] }) => void;
  * @param params app: 対象アプリのID, query: 取得するレコードのクエリ, fields: 取得するフィールドコードの配列, onStep: 段階的にレコードを取得する過程で実行される関数
  * @returns 取得したレコードの配列
  */
-export const getAllRecordsWithId = async <T extends Record<string, any>>(params: {
-  app: kintoneAPI.rest.AppIDToRequest;
-  fields?: string[];
-  onStep?: OnStep<T>;
-  condition?: string;
-}): Promise<WithId<T>[]> => {
+export const getAllRecordsWithId = async <T extends Record<string, any>>(
+  params: WithCommonRequestParams<{
+    app: kintoneAPI.rest.AppIDToRequest;
+    fields?: string[];
+    onStep?: OnStep<T>;
+    condition?: string;
+  }>
+): Promise<WithId<T>[]> => {
   const { fields: initFields, condition: initCondition = '' } = params;
 
   const fields = initFields?.length ? [...new Set([...initFields, '$id'])] : undefined;
@@ -261,15 +268,17 @@ export const getAllRecordsWithId = async <T extends Record<string, any>>(params:
   return getRecursive<T>({ ...params, fields, condition });
 };
 
-const getRecursive = async <T extends Record<string, unknown>>(params: {
-  app: kintoneAPI.rest.AppIDToRequest;
-  fields: (keyof T)[] | undefined;
-  condition: string;
-  onStep?: OnStep<T>;
-  id?: string;
-  stored?: WithId<T>[];
-}): Promise<WithId<T>[]> => {
-  const { app, fields, condition, id } = params;
+const getRecursive = async <T extends Record<string, unknown>>(
+  params: WithCommonRequestParams<{
+    app: kintoneAPI.rest.AppIDToRequest;
+    fields: (keyof T)[] | undefined;
+    condition: string;
+    onStep?: OnStep<T>;
+    id?: string;
+    stored?: WithId<T>[];
+  }>
+): Promise<WithId<T>[]> => {
+  const { app, fields, condition, id, debug, guestSpaceId } = params;
 
   const newCondition = id ? `${condition ? `${condition} and ` : ''} $id < ${id}` : condition;
 
@@ -279,6 +288,8 @@ const getRecursive = async <T extends Record<string, unknown>>(params: {
     endpointName: API_ENDPOINT_RECORDS,
     method: 'GET',
     body: { app, fields, query },
+    debug,
+    guestSpaceId,
   });
   if (!records.length) {
     return params.stored ?? [];
@@ -306,14 +317,24 @@ type OnTotalGet = (params: { total: number }) => void;
  * @param params app: 対象アプリのID, query: 取得するレコードのクエリ, fields: 取得するフィールドコードの配列, onTotalGet: 取得するレコードの総数を取得した際に実行される関数, onStep: 段階的にレコードを取得する過程で実行される関数
  * @returns 取得したレコードの配列
  */
-export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(params: {
-  app: kintoneAPI.rest.AppIDToRequest;
-  fields?: string[];
-  query?: string;
-  onTotalGet?: OnTotalGet;
-  onStep?: OnStep<T>;
-}): Promise<T[]> => {
-  const { app, fields = [], query = '', onTotalGet = null, onStep = null } = params;
+export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(
+  params: WithCommonRequestParams<{
+    app: kintoneAPI.rest.AppIDToRequest;
+    fields?: string[];
+    query?: string;
+    onTotalGet?: OnTotalGet;
+    onStep?: OnStep<T>;
+  }>
+): Promise<T[]> => {
+  const {
+    app,
+    fields = [],
+    query = '',
+    onTotalGet = null,
+    onStep = null,
+    debug,
+    guestSpaceId,
+  } = params;
 
   const param: kintoneAPI.rest.CursorCreateRequest = { app, fields, size: API_LIMIT_GET, query };
 
@@ -321,6 +342,8 @@ export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(p
     endpointName: API_ENDPOINT_CURSOR,
     method: 'POST',
     body: param,
+    debug,
+    guestSpaceId,
   });
 
   if (onTotalGet) {
@@ -329,19 +352,23 @@ export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(p
     });
   }
 
-  return getRecordsByCursorId<T>({ id: cursor.id, onStep });
+  return getRecordsByCursorId<T>({ id: cursor.id, onStep, debug, guestSpaceId });
 };
 
-const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(params: {
-  id: string;
-  onStep: OnStep<T> | null;
-  loadedData?: T[];
-}): Promise<T[]> => {
-  const { id, onStep, loadedData = [] } = params;
+const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(
+  params: WithCommonRequestParams<{
+    id: string;
+    onStep: OnStep<T> | null;
+    loadedData?: T[];
+  }>
+): Promise<T[]> => {
+  const { id, onStep, loadedData = [], debug, guestSpaceId } = params;
   const response = await api<kintoneAPI.rest.CursorGetResponse<T>>({
     endpointName: API_ENDPOINT_CURSOR,
     method: 'GET',
     body: { id },
+    debug,
+    guestSpaceId,
   });
 
   const newRecords: T[] = [...loadedData, ...(response.records as T[])];
@@ -527,6 +554,9 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
   params: BulkRequestParams<T>
 ): Promise<kintoneAPI.rest.BulkResponse> => {
   const { requests, debug, guestSpaceId } = params;
+  if (debug) {
+    console.groupCollapsed('📦 %cbulkRequest', 'color: #1e40af');
+  }
 
   const apiTable: Record<
     (typeof requests)[number]['type'],
@@ -584,6 +614,7 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
 
   const responses: kintoneAPI.rest.BulkResponse[] = [];
   const requestChunks = sliceIntoChunks(reshapedRequests, API_LIMIT_BULK_REQUEST);
+  let done = 0;
   for (const requests of requestChunks) {
     const response = await api<kintoneAPI.rest.BulkResponse>({
       endpointName: API_ENDPOINT_BULK,
@@ -593,7 +624,11 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
       guestSpaceId,
     });
     if (debug) {
-      console.log(`bulk request ${requests.length}/${reshapedRequests.length}`);
+      done += requests.length;
+      console.log(
+        `📦 %cbulk request in progress... ${done}/${reshapedRequests.length}`,
+        'color: #999'
+      );
     }
     responses.push(response);
     if (params.onProgress) {
@@ -602,6 +637,9 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
         done: responses.reduce((acc, response) => acc + response.results.length, 0),
       });
     }
+  }
+  if (debug) {
+    console.groupEnd();
   }
   return responses.reduce<kintoneAPI.rest.BulkResponse>(
     (acc, response) => {

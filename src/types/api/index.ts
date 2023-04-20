@@ -366,12 +366,6 @@ export declare namespace kintoneAPI {
       revision: string;
     };
 
-    type RecordsGetRequest = WithCommonRequestParams<{
-      app: AppIDToRequest;
-      query?: string;
-      fields?: string[];
-      totalCount?: boolean | 'true' | 'false';
-    }>;
     type RecordsGetResponse<T extends Frame = kintoneAPI.RecordData> = {
       records: T[];
       totalCount?: string | null;
