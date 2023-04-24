@@ -109,6 +109,6 @@ export const withMobileEvents = (events: string[]): string[] => {
  * @returns ゲストスペースID
  */
 export const detectGuestSpaceId = (): string | null => {
-  const match = location.pathname.match(/^\/k\/(\d+)\//);
+  const match = location.pathname.match(/^\/k\/guest\/(\d+)\//);
   return match ? match[1] : null;
 };
