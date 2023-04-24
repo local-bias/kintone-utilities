@@ -100,3 +100,15 @@ export const withMobileEvents = (events: string[]): string[] => {
   const mobileEvents = events.filter((e) => !/^mobile/.test(e)).map((type) => 'mobile.' + type);
   return [...new Set([...events, ...mobileEvents])];
 };
+
+/**
+ * 現在実行されている環境がゲストスペースかどうかを判定します
+ *
+ * ゲストスペースである場合は、ゲストスペースIDを返却します
+ *
+ * @returns ゲストスペースID
+ */
+export const detectGuestSpaceId = (): string | null => {
+  const match = location.pathname.match(/^\/k\/(\d+)\//);
+  return match ? match[1] : null;
+};

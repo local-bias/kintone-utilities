@@ -1,5 +1,5 @@
 import type { kintoneAPI } from './types/api';
-import { withMobileEvents } from './utilities';
+import { detectGuestSpaceId, withMobileEvents } from './utilities';
 
 type ErrorHandler = (error: any, props: { event: kintoneAPI.Event }) => void;
 
@@ -9,10 +9,13 @@ type ConstructorProps = Partial<{
   logDisabled: boolean;
 }>;
 
+type CallbackOption = { pluginId?: string; guestSpaceId: string | null };
+
 export class KintoneEventListener {
   readonly #uid: string = Math.random().toString(36).slice(2);
   readonly #pluginId?: string;
   readonly #commonErrorHandler: ErrorHandler;
+  readonly #guestSpaceId: string | null;
   #logDisabled: boolean;
 
   /**
@@ -21,8 +24,11 @@ export class KintoneEventListener {
   public constructor(props?: ConstructorProps) {
     const { errorHandler = () => null, pluginId, logDisabled = false } = props ?? {};
 
+    const guestSpaceId = detectGuestSpaceId();
+
     this.#commonErrorHandler = errorHandler;
     this.#pluginId = pluginId;
+    this.#guestSpaceId = guestSpaceId;
     this.#logDisabled = logDisabled;
   }
 
@@ -35,27 +41,24 @@ export class KintoneEventListener {
    * @param callback
    */
   public add = <T = kintoneAPI.RecordData>(
-    events: kintoneAPI.EventType[],
+    events: kintoneAPI.js.EventType[],
     callback: (
-      event: kintoneAPI.Event<T>,
-      options?: { pluginId?: string }
-    ) => kintoneAPI.Event<T> | Promise<kintoneAPI.Event<T>>
+      event: kintoneAPI.js.Event<T>,
+      options?: CallbackOption
+    ) => kintoneAPI.js.Event<T> | Promise<kintoneAPI.js.Event<T>>
   ) => {
     kintone.events.on(withMobileEvents(events), async (event) => {
       try {
-        window.addEventListener('beforeunload', this.beforeunload);
-        if (!this.#logDisabled) {
-          console.group(`%c${event.type} %c(${this.#uid})`, 'color: #1e40af;', 'color: #aaa');
-        }
-        return await callback(event, { pluginId: this.#pluginId });
+        this.initialize(event);
+        return await callback(event, {
+          pluginId: this.#pluginId,
+          guestSpaceId: this.#guestSpaceId,
+        });
       } catch (error) {
         await this.#commonErrorHandler(error, { event });
         throw error;
       } finally {
-        window.removeEventListener('beforeunload', this.beforeunload);
-        if (!this.#logDisabled) {
-          console.groupEnd();
-        }
+        this.tarminate();
       }
     });
   };
@@ -69,25 +72,36 @@ export class KintoneEventListener {
    */
   public addChangeEvents = <T = kintoneAPI.RecordData>(
     events: string[],
-    callback: (event: kintoneAPI.Event<T>, options?: { pluginId?: string }) => kintoneAPI.Event<T>
+    callback: (event: kintoneAPI.js.Event<T>, options?: CallbackOption) => kintoneAPI.js.Event<T>
   ) => {
     kintone.events.on(withMobileEvents(events), (event) => {
       try {
-        window.addEventListener('beforeunload', this.beforeunload);
-        if (!this.#logDisabled) {
-          console.group(`%c${event.type} %c(${this.#uid})`, 'color: #1e40af;', 'color: #aaa');
-        }
-        return callback(event, { pluginId: this.#pluginId });
+        this.initialize(event);
+        return callback(event, {
+          pluginId: this.#pluginId,
+          guestSpaceId: this.#guestSpaceId,
+        });
       } catch (error) {
         this.#commonErrorHandler(error, { event });
         throw error;
       } finally {
-        window.removeEventListener('beforeunload', this.beforeunload);
-        if (!this.#logDisabled) {
-          console.groupEnd();
-        }
+        this.tarminate();
       }
     });
+  };
+
+  private initialize = (event: kintoneAPI.js.Event) => {
+    window.addEventListener('beforeunload', this.beforeunload);
+    if (!this.#logDisabled) {
+      console.group(`%c${event.type} %c(${this.#uid})`, 'color: #1e40af;', 'color: #aaa');
+    }
+  };
+
+  private tarminate = () => {
+    window.removeEventListener('beforeunload', this.beforeunload);
+    if (!this.#logDisabled) {
+      console.groupEnd();
+    }
   };
 
   public set logDisabled(value: boolean) {
