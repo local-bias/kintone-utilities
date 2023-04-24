@@ -45,7 +45,7 @@ export const getAllApps = async (
   }>
 ): Promise<kintoneAPI.App[]> => {
   const { offset = 0, _apps = [], debug, guestSpaceId } = params;
-  const { apps } = await getApps({ limit: API_LIMIT_APP, offset });
+  const { apps } = await getApps({ limit: API_LIMIT_APP, offset, debug, guestSpaceId });
 
   const allApps = [..._apps, ...apps];
 
