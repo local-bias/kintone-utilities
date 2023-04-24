@@ -44,7 +44,7 @@ export class KintoneEventListener {
     events: kintoneAPI.js.EventType[],
     callback: (
       event: kintoneAPI.js.Event<T>,
-      options?: CallbackOption
+      options: CallbackOption
     ) => kintoneAPI.js.Event<T> | Promise<kintoneAPI.js.Event<T>>
   ) => {
     kintone.events.on(withMobileEvents(events), async (event) => {
@@ -72,7 +72,7 @@ export class KintoneEventListener {
    */
   public addChangeEvents = <T = kintoneAPI.RecordData>(
     events: string[],
-    callback: (event: kintoneAPI.js.Event<T>, options?: CallbackOption) => kintoneAPI.js.Event<T>
+    callback: (event: kintoneAPI.js.Event<T>, options: CallbackOption) => kintoneAPI.js.Event<T>
   ) => {
     kintone.events.on(withMobileEvents(events), (event) => {
       try {
