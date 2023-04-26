@@ -161,7 +161,7 @@ export const updateAllRecords = async <T extends kintoneAPI.rest.Frame = kintone
 ): Promise<kintoneAPI.rest.RecordsPutResponse> => {
   const { onProgress, debug, guestSpaceId, ...requestParams } = params;
   const response: { results: kintoneAPI.rest.RecordsPutResponse[] } = (await bulkRequest<T>({
-    requests: [{ type: 'updateRecords', params: requestParams }],
+    requests: [{ type: 'updateAllRecords', params: requestParams }],
     onProgress,
     debug,
     guestSpaceId,
@@ -187,7 +187,7 @@ export const addAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI
 ): Promise<kintoneAPI.rest.RecordsPostResponse> => {
   const { onProgress, debug, guestSpaceId, ...requestParams } = params;
   const responses: { results: kintoneAPI.rest.RecordsPostResponse[] } = (await bulkRequest<T>({
-    requests: [{ type: 'addRecords', params: requestParams }],
+    requests: [{ type: 'addAllRecords', params: requestParams }],
     onProgress,
     debug,
     guestSpaceId,
@@ -533,11 +533,11 @@ export type BulkRequestParams<T extends kintoneAPI.rest.Frame = kintoneAPI.Recor
           params: RecordPostRequest<T>;
         }
       | {
-          type: 'updateRecords';
+          type: 'updateAllRecords';
           params: RecordsPutRequest<T>;
         }
       | {
-          type: 'addRecords';
+          type: 'addAllRecords';
           params: RecordsPostRequest<T>;
         }
       | {
@@ -574,8 +574,8 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
   > = {
     updateRecord: { endpointName: API_ENDPOINT_RECORD, method: 'PUT' },
     addRecord: { endpointName: API_ENDPOINT_RECORD, method: 'POST' },
-    updateRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'PUT' },
-    addRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'POST' },
+    updateAllRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'PUT' },
+    addAllRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'POST' },
     deleteRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'DELETE' },
     updateRecordAssignees: { endpointName: API_ENDPOINT_ASSIGNEES, method: 'PUT' },
     updateRecordStatus: { endpointName: API_ENDPOINT_RECORD_STATUS, method: 'PUT' },
@@ -594,7 +594,7 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
       request.type === 'updateRecordStatus'
     ) {
       reshapedRequests.push({ method, api, payload: request.params });
-    } else if (request.type === 'updateRecords') {
+    } else if (request.type === 'updateAllRecords') {
       const { records: allRecords, ...commonRequestParams } = request.params;
       const recordChunks = sliceIntoChunks(allRecords, API_LIMIT_PUT);
       for (const records of recordChunks) {
@@ -604,7 +604,7 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
           payload: { ...commonRequestParams, records },
         });
       }
-    } else if (request.type === 'addRecords') {
+    } else if (request.type === 'addAllRecords') {
       const recordChunks = sliceIntoChunks(request.params.records, API_LIMIT_POST);
       for (const records of recordChunks) {
         reshapedRequests.push({ method, api, payload: { ...request.params, records } });
