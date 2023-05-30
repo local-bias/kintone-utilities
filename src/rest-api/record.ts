@@ -322,7 +322,7 @@ const getRecursive = async <T extends Record<string, unknown>>(
 ): Promise<WithId<T>[]> => {
   const { app, fields, condition, id, debug, guestSpaceId } = params;
 
-  const newCondition = id ? `${condition ? `${condition} and ` : ''} $id < ${id}` : condition;
+  const newCondition = id ? `${condition ? `(${condition}) and ` : ''} $id < ${id}` : condition;
 
   const query = `${newCondition} order by $id desc limit ${API_LIMIT_GET}`;
 
