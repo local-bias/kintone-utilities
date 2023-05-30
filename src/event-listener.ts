@@ -7,6 +7,7 @@ type ConstructorProps = Partial<{
   errorHandler: ErrorHandler;
   pluginId: string;
   logDisabled: boolean;
+  logPrefix: string;
 }>;
 
 type CallbackOption = { pluginId?: string; guestSpaceId: string | null };
@@ -17,12 +18,18 @@ export class KintoneEventListener {
   readonly #commonErrorHandler: ErrorHandler;
   readonly #guestSpaceId: string | null;
   #logDisabled: boolean;
+  #logPrefix: string;
 
   /**
    * 複数の処理を、各イベントに登録することができます
    */
   public constructor(props?: ConstructorProps) {
-    const { errorHandler = () => null, pluginId, logDisabled = false } = props ?? {};
+    const {
+      errorHandler = () => null,
+      pluginId,
+      logDisabled = false,
+      logPrefix = '',
+    } = props ?? {};
 
     const guestSpaceId = detectGuestSpaceId();
 
@@ -30,6 +37,7 @@ export class KintoneEventListener {
     this.#pluginId = pluginId;
     this.#guestSpaceId = guestSpaceId;
     this.#logDisabled = logDisabled;
+    this.#logPrefix = logPrefix;
   }
 
   /**
@@ -93,7 +101,11 @@ export class KintoneEventListener {
   private initialize = (event: kintoneAPI.js.Event) => {
     window.addEventListener('beforeunload', this.beforeunload);
     if (!this.#logDisabled) {
-      console.group(`%c${event.type} %c(${this.#uid})`, 'color: #1e40af;', 'color: #aaa');
+      console.group(
+        `${this.#logPrefix}%c${event.type} %c(${this.#uid})`,
+        'color: #1e40af;',
+        'color: #aaa'
+      );
     }
   };
 
@@ -106,6 +118,10 @@ export class KintoneEventListener {
 
   public set logDisabled(value: boolean) {
     this.#logDisabled = value;
+  }
+
+  public set logPrefix(value: string) {
+    this.#logPrefix = value;
   }
 
   /** JavaScript中にページを離れようとした場合にアラートを表示します */
