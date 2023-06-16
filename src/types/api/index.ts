@@ -4,7 +4,7 @@ import type {
   Record as DefaultRecord,
   ViewForParameter,
   ViewForResponse,
-} from '@kintone/rest-api-client/lib/client/types';
+} from '@kintone/rest-api-client/lib/src/client/types';
 import type {
   Calc as CalcField,
   Category as CategoryField,
@@ -36,7 +36,7 @@ import type {
   Time as TimeField,
   UpdatedTime as UpdatedTimeField,
   UserSelect as UserSelectField,
-} from '@kintone/rest-api-client/lib/KintoneFields/types/field';
+} from '@kintone/rest-api-client/lib/src/KintoneFields/types/field';
 import type {
   CheckBox as DefaultLayoutCheckBox,
   CreatedTime as DefaultLayoutCreatedTime,
@@ -65,11 +65,11 @@ import type {
   Time as DefaultLayoutTime,
   UpdatedTime as DefaultLayoutUpdatedTime,
   UserSelect as DefaultLayoutUserSelect,
-} from '@kintone/rest-api-client/lib/KintoneFields/types/fieldLayout';
+} from '@kintone/rest-api-client/lib/src/KintoneFields/types/fieldLayout';
 import type {
   Group as DefaultGroup,
   Row as DefaultRow,
-} from '@kintone/rest-api-client/lib/KintoneFields/types/layout';
+} from '@kintone/rest-api-client/lib/src/KintoneFields/types/layout';
 import type {
   Calc as CalcProperty,
   Category as CategoryProperty,
@@ -99,7 +99,7 @@ import type {
   Time as TimeProperty,
   UpdatedTime as UpdatedTimeProperty,
   UserSelect as UserSelectProperty,
-} from '@kintone/rest-api-client/lib/KintoneFields/types/property';
+} from '@kintone/rest-api-client/lib/src/KintoneFields/types/property';
 
 import { Event as JsEvent } from './js';
 
