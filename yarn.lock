@@ -94,10 +94,10 @@
     "@emotion/weak-memoize" "^0.3.1"
     stylis "4.2.0"
 
-"@emotion/css@^11.11.0":
-  version "11.11.0"
-  resolved "https://registry.yarnpkg.com/@emotion/css/-/css-11.11.0.tgz#dad6a27a77d5e5cbb0287674c3ace76d762563ca"
-  integrity sha512-m4g6nKzZyiKyJ3WOfdwrBdcujVcpaScIWHAnyNKPm/A/xJKwfXPfQAbEVi1kgexWTDakmg+r2aDj0KvnMTo4oQ==
+"@emotion/css@^11.11.2":
+  version "11.11.2"
+  resolved "https://registry.yarnpkg.com/@emotion/css/-/css-11.11.2.tgz#e5fa081d0c6e335352e1bc2b05953b61832dca5a"
+  integrity sha512-VJxe1ucoMYMS7DkiMdC2T7PWNbrEI0a39YRiyDvK2qq4lXwjRbVP/z4lpG+odCsRzadlR+1ywwrTzhdm5HNdew==
   dependencies:
     "@emotion/babel-plugin" "^11.11.0"
     "@emotion/cache" "^11.11.0"
@@ -197,10 +197,10 @@
   resolved "https://registry.yarnpkg.com/@humanwhocodes/object-schema/-/object-schema-1.2.1.tgz#b520529ec21d8e5945a1851dfd1c32e94e39ff45"
   integrity sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==
 
-"@kintone/dts-gen@^7.0.1":
-  version "7.0.1"
-  resolved "https://registry.yarnpkg.com/@kintone/dts-gen/-/dts-gen-7.0.1.tgz#81428e3c4fd59e570ca6776d5e248e7d827f4e48"
-  integrity sha512-aDJU0XZgb1M8TX2Qft/CrLdpA6lubmdJQAPZP2X1rVst4ObSeS/5pliGR250Pu8K9Up+l2Ry9ne/t2YDUVqzGQ==
+"@kintone/dts-gen@^7.0.2":
+  version "7.0.2"
+  resolved "https://registry.yarnpkg.com/@kintone/dts-gen/-/dts-gen-7.0.2.tgz#1739653dd70320d76ac72bc172aca369f956b8ee"
+  integrity sha512-C9WZlNYepjWd2JFUQd0+EKmMCXghZvJ+cEavaP/FUOCFu8nC/+vXXnlIjCkrtjVxdUTqQft8knIW7iknw1KxDg==
   dependencies:
     "@cybozu/eslint-config" "^18.0.3"
     axios "^0.27.2"
