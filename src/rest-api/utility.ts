@@ -20,3 +20,26 @@ export const filterFieldProperties = (
 
   return reduced;
 };
+
+/**
+ * REST APIでアクセスする先のアプリがゲストスペースに存在するものかどうかのつかない時、
+ *
+ * 一度スペースIDを未指定でアクセスし、エラーが返ってきたらスペースIDを指定して再度アクセスする関数です。
+ */
+export const withSpaceIdFallback = async <T extends (...args: any) => any>(params: {
+  spaceId?: string;
+  func: T;
+  funcParams: Parameters<T>[0];
+}): Promise<ReturnType<T>> => {
+  const { spaceId, func, funcParams } = params;
+  try {
+    const response = await func(funcParams);
+    return response;
+  } catch (error: any) {
+    if (error.code === 'GAIA_IL23') {
+      const response = await func({ ...funcParams, guestSpaceId: spaceId });
+      return response;
+    }
+    throw error;
+  }
+};
