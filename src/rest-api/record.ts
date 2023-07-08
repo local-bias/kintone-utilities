@@ -105,7 +105,7 @@ export type RecordPutRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Record
   record: kintoneAPI.rest.RecordToRequest<T>;
   revision?: kintoneAPI.rest.Revision;
 } & PrimaryKeyToUpdate<T>;
-type UpdateRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
+export type UpdateRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   WithCommonRequestParams<RecordPutRequest<T>>;
 
 export const updateRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
@@ -125,14 +125,19 @@ export type RecordPostRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Recor
   app: kintoneAPI.IDToRequest;
   record: kintoneAPI.rest.RecordToRequest<T>;
 };
+export type AddRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
+  WithCommonRequestParams<RecordPutRequest<T>>;
 
 export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
-  params: RecordPostRequest<T>
+  params: AddRecordParams<T>
 ): Promise<kintoneAPI.rest.RecordPostResponse> => {
+  const { debug, guestSpaceId, ...requestParams } = params;
   return api({
     endpointName: API_ENDPOINT_RECORD,
     method: 'POST',
-    body: params,
+    body: requestParams,
+    debug,
+    guestSpaceId,
   });
 };
 
