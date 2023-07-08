@@ -126,7 +126,7 @@ export type RecordPostRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Recor
   record: kintoneAPI.rest.RecordToRequest<T>;
 };
 export type AddRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
-  WithCommonRequestParams<RecordPutRequest<T>>;
+  WithCommonRequestParams<RecordPostRequest<T>>;
 
 export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: AddRecordParams<T>
