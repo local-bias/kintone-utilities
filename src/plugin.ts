@@ -18,10 +18,9 @@ export const restoreStorage = <T = any>(id: string): T | null => {
  * @param callback 保存成功後に実行する処理. 省略すると、アプリ設定のプラグインの一覧画面に遷移し、設定完了メッセージを表示します。指定すると、アプリ設定のプラグインの一覧画面には遷移しません。
  */
 export const storeStorage = (target: Record<string, any>, callback?: () => void): void => {
-  const converted = Object.entries(target).reduce(
-    (acc, [key, value]) => ({ ...acc, [key]: JSON.stringify(value) }),
-    {}
-  );
+  const converted = Object.entries(target)
+    .filter(([_, v]) => v !== undefined)
+    .reduce((acc, [key, value]) => ({ ...acc, [key]: JSON.stringify(value) }), {});
 
   kintone.plugin.app.setConfig(converted, callback);
 };
