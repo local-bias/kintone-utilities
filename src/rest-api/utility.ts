@@ -1,4 +1,5 @@
 import { kintoneAPI } from '../types/api';
+import { getRecords } from './record';
 
 /**
  * APIから取得したフィールド情報から、指定した関数の条件に当てはまるフィールドのみを返却します
@@ -42,4 +43,13 @@ export const withSpaceIdFallback = async <T extends (...args: any) => any>(param
     }
     throw error;
   }
+};
+
+export const isGuestSpace = async (appId: string): Promise<boolean> => {
+  try {
+    await getRecords({ app: appId });
+  } catch (error: any) {
+    return error.code === 'GAIA_IL23';
+  }
+  return false;
 };
