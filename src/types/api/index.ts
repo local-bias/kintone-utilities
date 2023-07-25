@@ -443,6 +443,26 @@ export declare namespace kintoneAPI {
       revision: string;
     };
 
+    type ACLRight = {
+      id: string;
+      record: {
+        viewable: boolean;
+        editable: boolean;
+        deletable: boolean;
+      };
+      fields: Record<
+        string,
+        {
+          viewable: boolean;
+          editable: boolean;
+        }
+      >;
+    };
+
+    type RecordACLEvaluateGetResponse = {
+      rights: ACLRight[];
+    };
+
     type RecordStatusPutResponse = {
       revision: string;
     };

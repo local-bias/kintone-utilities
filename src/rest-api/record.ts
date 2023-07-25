@@ -7,6 +7,7 @@ const API_ENDPOINT_CURSOR = `records/cursor`;
 const API_ENDPOINT_ASSIGNEES = `record/assignees`;
 const API_ENDPOINT_RECORD_STATUS = `record/status`;
 const API_ENDPOINT_RECORD_STATUSES = `records/status`;
+const API_ENDPOINT_ACL_EVALUATE = `records/acl/evaluate`;
 const API_ENDPOINT_BULK = `bulkRequest`;
 const API_LIMIT_GET = 500;
 const API_LIMIT_PUT = 100;
@@ -510,6 +511,25 @@ export const updateAllRecordStatuses = async (
     },
     { records: [] }
   );
+};
+
+export type RecordACLEvaluateGetRequest = {
+  app: kintoneAPI.IDToRequest;
+  ids: kintoneAPI.IDToRequest[];
+};
+export type GetRecordACLEvaluateParams = WithCommonRequestParams<RecordACLEvaluateGetRequest>;
+
+export const getRecordACLEvaluate = async (
+  params: GetRecordACLEvaluateParams
+): Promise<kintoneAPI.rest.RecordACLEvaluateGetResponse> => {
+  const { debug, guestSpaceId, ...requestParams } = params;
+  return api<kintoneAPI.rest.RecordACLEvaluateGetResponse>({
+    endpointName: API_ENDPOINT_ACL_EVALUATE,
+    method: 'GET',
+    body: requestParams,
+    debug,
+    guestSpaceId,
+  });
 };
 
 export type OneOfBulkRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
