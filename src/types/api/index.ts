@@ -1,11 +1,4 @@
 import type {
-  App as DefaultApp,
-  Layout as DefaultLayout,
-  Record as DefaultRecord,
-  ViewForParameter,
-  ViewForResponse,
-} from '@kintone/rest-api-client/lib/src/client/types';
-import type {
   Calc as CalcField,
   Category as CategoryField,
   CheckBox as CheckBoxField,
@@ -30,13 +23,13 @@ import type {
   Revision as RevisionField,
   RichText as RichTextField,
   SingleLineText as SingleLineTextField,
-  Status as StatusField,
   StatusAssignee as StatusAssigneeField,
+  Status as StatusField,
   Subtable as SubtableField,
   Time as TimeField,
   UpdatedTime as UpdatedTimeField,
   UserSelect as UserSelectField,
-} from '@kintone/rest-api-client/lib/src/KintoneFields/types/field';
+} from './field';
 import type {
   CheckBox as DefaultLayoutCheckBox,
   CreatedTime as DefaultLayoutCreatedTime,
@@ -44,6 +37,7 @@ import type {
   Date as DefaultLayoutDate,
   DateTime as DefaultLayoutDateTime,
   Dropdown as DefaultLayoutDropdown,
+  OneOf as DefaultLayoutField,
   File as DefaultLayoutFile,
   GroupSelect as DefaultLayoutGroupSelect,
   HR as DefaultLayoutHR,
@@ -54,7 +48,6 @@ import type {
   MultiLineText as DefaultLayoutMultiLineText,
   MultiSelect as DefaultLayoutMultiSelect,
   Number as DefaultLayoutNumber,
-  OneOf as DefaultLayoutField,
   OrganizationSelect as DefaultLayoutOrganizationSelect,
   RadioButton as DefaultLayoutRadioButton,
   RecordNumber as DefaultLayoutRecordNumber,
@@ -65,11 +58,9 @@ import type {
   Time as DefaultLayoutTime,
   UpdatedTime as DefaultLayoutUpdatedTime,
   UserSelect as DefaultLayoutUserSelect,
-} from '@kintone/rest-api-client/lib/src/KintoneFields/types/fieldLayout';
-import type {
-  Group as DefaultGroup,
-  Row as DefaultRow,
-} from '@kintone/rest-api-client/lib/src/KintoneFields/types/layout';
+} from './fieldLayout';
+import type { Layout as DefaultLayout } from './form';
+import type { Group as DefaultGroup, Row as DefaultRow } from './layout';
 import type {
   Calc as CalcProperty,
   Category as CategoryProperty,
@@ -88,23 +79,41 @@ import type {
   MultiSelect as MultiSelectProperty,
   Number as NumberProperty,
   OneOf as OneOfProperty,
+  Lookup as LookupProperty,
   OrganizationSelect as OrganizationSelectProperty,
   RadioButton as RadioButtonProperty,
   RecordNumber as RecordNumberProperty,
   RichText as RichTextProperty,
   SingleLineText as SingleLineTextProperty,
-  Status as StatusProperty,
   StatusAssignee as StatusAssigneeProperty,
+  Status as StatusProperty,
   Subtable as SubtableProperty,
   Time as TimeProperty,
   UpdatedTime as UpdatedTimeProperty,
   UserSelect as UserSelectProperty,
-} from '@kintone/rest-api-client/lib/src/KintoneFields/types/property';
-
-import { Event as JsEvent } from './js';
+} from './property';
+import type { Record as DefaultRecord } from './record';
+import type { ViewForParameter, ViewForResponse } from './view';
 
 export declare namespace kintoneAPI {
-  type App = DefaultApp;
+  /**
+   * @see {@link https://github.com/kintone/js-sdk/blob/master/packages/rest-api-client/src/client/types/app/index.ts}
+   */
+  type App = {
+    appId: string;
+    code: string;
+    name: string;
+    description: string;
+    spaceId: string | null;
+    threadId: string | null;
+    createdAt: string;
+    creator: { code: string; name: string };
+    modifiedAt: string;
+    modifier: {
+      code: string;
+      name: string;
+    };
+  };
 
   type RecordData = DefaultRecord;
 
@@ -173,6 +182,7 @@ export declare namespace kintoneAPI {
     type GroupSelect = GroupSelectProperty;
     type InSubtable = InSubtableProperty;
     type Link = LinkProperty;
+    type Lookup = LookupProperty;
     type Modifier = ModifierProperty;
     type MultiLineText = MultiLineTextProperty;
     type MultiSelect = MultiSelectProperty;
@@ -226,7 +236,7 @@ export declare namespace kintoneAPI {
   }
 
   namespace response {
-    type App = { readonly app?: DefaultApp; readonly fields?: FieldProperties };
+    type App = { readonly app?: kintoneAPI.App; readonly fields?: FieldProperties };
   }
 
   /**
