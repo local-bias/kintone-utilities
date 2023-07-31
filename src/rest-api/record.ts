@@ -435,7 +435,7 @@ const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(
     onStep({ records: newRecords });
   }
 
-  return response.next ? getRecordsByCursorId({ id, onStep, loadedData: newRecords }) : newRecords;
+  return response.next ? getRecordsByCursorId({ ...params, loadedData: newRecords }) : newRecords;
 };
 
 export type RecordAssigneesPutRequest = {
