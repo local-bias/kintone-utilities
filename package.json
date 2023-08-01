@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities",
-  "version": "2.11.1",
+  "version": "2.12.4",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "repository": "https://github.com/local-bias/kintone-utilities.git",
@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@emotion/css": "^11.11.2",
-    "@kintone/rest-api-client": "^4.0.3"
+    "@kintone/rest-api-client": "^4.1.0"
   },
   "devDependencies": {
     "@kintone/dts-gen": "^7.0.4",
