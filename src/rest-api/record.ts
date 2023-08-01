@@ -275,6 +275,10 @@ export type GetAllRecordsParams = WithCommonRequestParams<RecordsGetRequest>;
 export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.RecordData>(
   params: GetAllRecordsParams & { onStep?: OnStep<T> }
 ) => {
+  if (params.query && /limit \d+/.test(params.query)) {
+    const { records } = await getRecords<T>(params);
+    return records;
+  }
   if (params.query && params.query.includes('order by')) {
     return getAllRecordsWithCursor<T>(params);
   }
