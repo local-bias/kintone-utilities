@@ -112,3 +112,24 @@ export const detectGuestSpaceId = (): string | null => {
   const match = location.pathname.match(/^\/k\/guest\/(\d+)\//);
   return match ? match[1] : null;
 };
+
+export type OnFileLoadOptions = {
+  encoding?: string;
+};
+
+export const onFileLoad = (file: File | Blob, options?: OnFileLoadOptions) => {
+  const { encoding = 'utf-8' } = options ?? {};
+
+  return new Promise<ProgressEvent<FileReader>>((resolve, reject) => {
+    try {
+      const reader = new FileReader();
+
+      reader.readAsText(file, encoding);
+
+      reader.onload = (event) => resolve(event);
+      reader.onerror = (event) => reject(event);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
