@@ -74,6 +74,37 @@ export const getFieldValueAsString = (
   return '';
 };
 
+/**
+ * 計算フィールドの値と設定情報を基に、画面表示用の値を返却します
+ */
+export const getCalcFieldValueAsString = (params: {
+  field: kintoneAPI.field.Calc;
+  property: kintoneAPI.property.Calc;
+}) => {
+  const { field, property } = params;
+  switch (property.format) {
+    case 'NUMBER_DIGIT':
+      return Number(field.value).toLocaleString();
+    case 'DATE':
+      return new Date(field.value).toLocaleDateString();
+    case 'TIME':
+      return new Date(field.value).toLocaleTimeString();
+    case 'DATETIME':
+      return new Date(field.value).toLocaleString();
+    case 'HOUR_MINUTE':
+      const [h, m] = field.value.split(':');
+      return `${h}時間${m}分`;
+    case 'DAY_HOUR_MINUTE':
+      const [hourString, minute] = field.value.split(':');
+      const hour = Number(hourString);
+      const day = Math.floor(hour / 24);
+      const hourInDay = hour % 24;
+      return `${day}日${hourInDay}時間${minute}分`;
+    default:
+      return field.value;
+  }
+};
+
 export const compareField = (
   field1: kintoneAPI.Field,
   field2: kintoneAPI.Field,
