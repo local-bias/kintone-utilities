@@ -9,3 +9,4 @@ export * from './types/kintone-config';
 export * from './utilities';
 export * from './utility-types';
 export * from './date';
+export * from './cybozu';
