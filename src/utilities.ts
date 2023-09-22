@@ -75,6 +75,119 @@ export const getFieldValueAsString = (
 };
 
 /**
+ * 各フィールドのタイプに応じて、ソートを行います
+ *
+ * @param aField ソート対象のフィールド
+ * @param bField ソート対象のフィールド
+ * @returns aFieldがbFieldより小さい場合は負の整数、aFieldがbFieldより大きい場合は正の整数、等しい場合は0
+ */
+export const sortField = <T extends kintoneAPI.Field>(aField: T, bField: T): number => {
+  const aFieldType = aField.type;
+  const bFieldType = bField.type;
+
+  if (aField.value === null && bField.value === null) {
+    return 0;
+  }
+  if (aField.value === null) {
+    return 1;
+  }
+  if (bField.value === null) {
+    return -1;
+  }
+
+  if (
+    (aFieldType === 'SINGLE_LINE_TEXT' ||
+      aFieldType === 'MULTI_LINE_TEXT' ||
+      aFieldType === 'RICH_TEXT' ||
+      aFieldType === 'DROP_DOWN' ||
+      aFieldType === 'LINK' ||
+      aFieldType === 'RECORD_NUMBER' ||
+      aFieldType === 'STATUS' ||
+      aFieldType === 'RADIO_BUTTON' ||
+      aFieldType === '__ID__' ||
+      aFieldType === '__REVISION__') &&
+    (bFieldType === 'SINGLE_LINE_TEXT' ||
+      bFieldType === 'MULTI_LINE_TEXT' ||
+      bFieldType === 'RICH_TEXT' ||
+      bFieldType === 'DROP_DOWN' ||
+      bFieldType === 'LINK' ||
+      bFieldType === 'RECORD_NUMBER' ||
+      bFieldType === 'STATUS' ||
+      bFieldType === 'RADIO_BUTTON' ||
+      bFieldType === '__ID__' ||
+      bFieldType === '__REVISION__')
+  ) {
+    return aField.value?.localeCompare(bField.value ?? '') ?? 0;
+  } else if (
+    (aFieldType === 'NUMBER' || aFieldType === 'CALC') &&
+    (bFieldType === 'NUMBER' || bFieldType === 'CALC')
+  ) {
+    const aNum = Number(aField.value);
+    const bNum = Number(bField.value);
+    if (isNaN(aNum) && isNaN(bNum)) {
+      return 0;
+    }
+    if (isNaN(aNum)) {
+      return 1;
+    }
+    if (isNaN(bNum)) {
+      return -1;
+    }
+    return aNum - bNum;
+  } else if (
+    (aFieldType === 'CREATED_TIME' ||
+      aFieldType === 'UPDATED_TIME' ||
+      aFieldType === 'DATE' ||
+      aFieldType === 'DATETIME' ||
+      aFieldType === 'TIME') &&
+    (bFieldType === 'CREATED_TIME' ||
+      bFieldType === 'UPDATED_TIME' ||
+      bFieldType === 'DATE' ||
+      bFieldType === 'DATETIME' ||
+      bFieldType === 'TIME')
+  ) {
+    const aDate = new Date(aField.value);
+    const bDate = new Date(bField.value);
+    if (isNaN(aDate.getTime()) && isNaN(bDate.getTime())) {
+      return 0;
+    }
+    if (isNaN(aDate.getTime())) {
+      return 1;
+    }
+    if (isNaN(bDate.getTime())) {
+      return -1;
+    }
+    return aDate.getTime() - bDate.getTime();
+  } else if (
+    (aFieldType === 'CATEGORY' || aFieldType === 'CHECK_BOX' || aFieldType === 'MULTI_SELECT') &&
+    (bFieldType === 'CATEGORY' || bFieldType === 'CHECK_BOX' || bFieldType === 'MULTI_SELECT')
+  ) {
+    return getFieldValueAsString(aField).localeCompare(getFieldValueAsString(bField));
+  } else if (
+    (aFieldType === 'CREATOR' || aFieldType === 'MODIFIER') &&
+    (bFieldType === 'CREATOR' || bFieldType === 'MODIFIER')
+  ) {
+    return aField.value.name.localeCompare(bField.value.name);
+  } else if (
+    (aFieldType === 'GROUP_SELECT' ||
+      aFieldType === 'ORGANIZATION_SELECT' ||
+      aFieldType === 'USER_SELECT' ||
+      aFieldType === 'STATUS_ASSIGNEE') &&
+    (bFieldType === 'GROUP_SELECT' ||
+      bFieldType === 'ORGANIZATION_SELECT' ||
+      bFieldType === 'USER_SELECT' ||
+      bFieldType === 'STATUS_ASSIGNEE')
+  ) {
+    return getFieldValueAsString(aField).localeCompare(getFieldValueAsString(bField));
+  } else if (aFieldType === 'FILE' && bFieldType === 'FILE') {
+    return getFieldValueAsString(aField).localeCompare(getFieldValueAsString(bField));
+  } else if (aFieldType === 'SUBTABLE' && bFieldType === 'SUBTABLE') {
+    return getFieldValueAsString(aField).localeCompare(getFieldValueAsString(bField));
+  }
+  return 0;
+};
+
+/**
  * 計算フィールドの値と設定情報を基に、画面表示用の値を返却します
  */
 export const getCalcFieldValueAsString = (params: {
@@ -82,27 +195,45 @@ export const getCalcFieldValueAsString = (params: {
   property: kintoneAPI.property.Calc;
 }) => {
   const { field, property } = params;
-  switch (property.format) {
+  const { unit, unitPosition, format } = property;
+  let fieldValue: string = '';
+
+  switch (format) {
     case 'NUMBER_DIGIT':
-      return Number(field.value).toLocaleString();
+      fieldValue = Number(field.value).toLocaleString();
+      break;
     case 'DATE':
-      return new Date(field.value).toLocaleDateString();
+      fieldValue = new Date(field.value).toLocaleDateString();
+      break;
     case 'TIME':
-      return new Date(field.value).toLocaleTimeString();
+      fieldValue = new Date(field.value).toLocaleTimeString();
+      break;
     case 'DATETIME':
-      return new Date(field.value).toLocaleString();
+      fieldValue = new Date(field.value).toLocaleString();
+      break;
     case 'HOUR_MINUTE':
       const [h, m] = field.value.split(':');
-      return `${h}時間${m}分`;
+      fieldValue = `${h}時間${m}分`;
+      break;
     case 'DAY_HOUR_MINUTE':
       const [hourString, minute] = field.value.split(':');
       const hour = Number(hourString);
       const day = Math.floor(hour / 24);
       const hourInDay = hour % 24;
-      return `${day}日${hourInDay}時間${minute}分`;
+      fieldValue = `${day}日${hourInDay}時間${minute}分`;
+      break;
     default:
-      return field.value;
+      fieldValue = field.value;
   }
+
+  if (unit) {
+    if (unitPosition === 'BEFORE') {
+      fieldValue = unit + fieldValue;
+    } else {
+      fieldValue += unit;
+    }
+  }
+  return fieldValue;
 };
 
 export const compareField = (
