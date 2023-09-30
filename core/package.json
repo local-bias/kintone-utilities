@@ -1,0 +1,31 @@
+{
+  "name": "@konomi-app/kintone-utilities",
+  "version": "3.3.1",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "repository": "https://github.com/local-bias/kintone-utilities.git",
+  "author": "Ribbit",
+  "license": "MIT",
+  "scripts": {
+    "build": "rmdir dist /s /q && tsc",
+    "prepare": "npm run build",
+    "play": "cd playground && npm run dev"
+  },
+  "dependencies": {
+    "@emotion/css": "^11.11.2",
+    "@kintone/rest-api-client": "^4.1.0"
+  },
+  "devDependencies": {
+    "@kintone/dts-gen": "^7.0.4",
+    "typescript": "^5.2.2"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "arrowParens": "always",
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "endOfLine": "lf"
+  }
+}

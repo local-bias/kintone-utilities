@@ -1,0 +1,33 @@
+{
+  "name": "@konomi-app/kintone-utilities-react",
+  "version": "1.4.0",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "repository": "https://github.com/local-bias/kintone-utility-component.git",
+  "author": "Ribbit",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.9",
+    "@mui/material": "^5.14.10",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.22",
+    "typescript": "^5.2.2"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "arrowParens": "always",
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "endOfLine": "lf"
+  }
+}

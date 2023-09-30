@@ -1,0 +1,2 @@
+# kpc
+kintone plugin component
