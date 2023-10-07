@@ -1,5 +1,9 @@
 /**
  * プラグインがアプリ単位で保存している設定情報を返却します
+ *
+ * 設定情報の取得に失敗した場合は、nullを返却します
+ * @param id プラグインID
+ * @returns プラグインの設定情報
  */
 export const restoreStorage = <T = any>(id: string): T | null => {
   const config: Record<string, string> = kintone.plugin.app.getConfig(id);
