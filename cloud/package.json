@@ -1,0 +1,31 @@
+{
+  "name": "@konomi-app/kintone-utilities-cloud",
+  "version": "1.0.0",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "repository": "https://github.com/local-bias/kintone-cloud-connector.git",
+  "author": "adachi",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "prepare": "yarn run build"
+  },
+  "dependencies": {
+    "qs": "^6.11.2"
+  },
+  "devDependencies": {
+    "@kintone/dts-gen": "^7.0.5",
+    "@types/node": "^20.7.2",
+    "@types/qs": "^6.9.8",
+    "typescript": "^5.2.2"
+  },
+  "prettier": {
+    "printWidth": 100,
+    "arrowParens": "always",
+    "singleQuote": true,
+    "jsxSingleQuote": true,
+    "tabWidth": 2,
+    "trailingComma": "es5",
+    "endOfLine": "lf"
+  }
+}
