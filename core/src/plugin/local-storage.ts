@@ -1,34 +1,32 @@
 export class PluginLocalStorage {
   readonly #key: string;
+  #storage: Record<string, any>;
 
   public constructor(key: string) {
     this.#key = key;
+    const stored = localStorage.getItem(this.#key) ?? '{}';
+    this.#storage = JSON.parse(stored);
+  }
+
+  private save() {
+    localStorage.setItem(this.#key, JSON.stringify(this.#storage));
   }
 
   public updateVersion = (currentVersion: string) => {
-    const stored = localStorage.getItem(this.#key) ?? '{}';
-    const parsed = JSON.parse(stored);
+    const latestVersion: string = this.#storage.latestVersion ?? currentVersion;
 
-    const latestVersion: string = parsed.latestVersion ?? currentVersion;
-
-    const newStorage = {
-      ...parsed,
-      version: currentVersion,
-    };
+    this.#storage.version = currentVersion;
 
     const [latestMajor, latestMinor] = latestVersion.split('.').map((v) => parseInt(v, 10));
     const [currentMajor, currentMinor] = currentVersion.split('.').map((v) => parseInt(v, 10));
 
-    newStorage.hasNewVersion =
+    this.#storage.hasNewVersion =
       latestMajor > currentMajor || (latestMajor === currentMajor && latestMinor > currentMinor);
 
-    localStorage.setItem(this.#key, JSON.stringify(newStorage));
+    this.save();
   };
 
-  get hasNewVersion(): boolean {
-    const stored = localStorage.getItem(this.#key) ?? '{}';
-    const parsed = JSON.parse(stored);
-
-    return parsed.hasNewVersion ?? false;
+  public get hasNewVersion(): boolean {
+    return this.#storage.hasNewVersion ?? false;
   }
 }
