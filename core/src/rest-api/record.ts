@@ -90,16 +90,14 @@ export const getRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.Re
   });
 };
 
-export type PrimaryKeyToUpdate<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
-  | {
-      id: kintoneAPI.IDToRequest;
-    }
-  | {
-      updateKey: {
-        field: keyof T;
-        value: string | number;
-      };
-    };
+export type UpdateKey<T extends kintoneAPI.rest.Frame> = {
+  field: keyof T;
+  value: string | number;
+};
+
+export type PrimaryKeyToUpdate<T extends kintoneAPI.rest.Frame> =
+  | { id: kintoneAPI.IDToRequest }
+  | { updateKey: UpdateKey<T> };
 
 export type RecordPutRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
   app: kintoneAPI.IDToRequest;
@@ -140,6 +138,35 @@ export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.Rec
     debug,
     guestSpaceId,
   });
+};
+
+export type RecordUpsertRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
+  app: kintoneAPI.IDToRequest;
+  record: kintoneAPI.rest.RecordToRequest<T>;
+  updateKey: UpdateKey<T>;
+};
+export type UpsertRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
+  WithCommonRequestParams<RecordUpsertRequest<T>>;
+export const upsertRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  params: UpsertRecordParams<T>
+): Promise<kintoneAPI.rest.RecordPostResponse> => {
+  const { record, updateKey, app, ...rest } = params;
+  const { records } = await getRecords<T>({
+    app,
+    query: `${updateKey.field as string} = "${updateKey.value}"`,
+    fields: ['$id'],
+  });
+
+  if (records.length) {
+    const res = await updateRecord<T>({
+      app,
+      record,
+      id: records[0].$id.value,
+      ...rest,
+    });
+    return { id: records[0].$id.value, revision: res.revision };
+  }
+  return addRecord<T>({ app, record, ...rest });
 };
 
 export type RecordsPutRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
