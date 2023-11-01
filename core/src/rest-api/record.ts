@@ -339,12 +339,15 @@ export const getAllRecordsWithId = async <T extends Record<string, any>>(
   if (debug) {
     console.groupCollapsed('📦 %cgetAllRecordsWithId', 'color: #1e40af');
   }
-  const records = await getRecursive<T>({ ...params, fields, condition });
-  if (debug) {
-    console.groupEnd();
-  }
+  try {
+    const records = await getRecursive<T>({ ...params, fields, condition });
 
-  return records;
+    return records;
+  } finally {
+    if (debug) {
+      console.groupEnd();
+    }
+  }
 };
 
 const getRecursive = async <T extends Record<string, unknown>>(
@@ -419,29 +422,31 @@ export const getAllRecordsWithCursor = async <T extends kintoneAPI.rest.Frame>(
     console.groupCollapsed('📦 %cgetAllRecordsWithCursor', 'color: #1e40af');
   }
 
-  const param: kintoneAPI.rest.CursorCreateRequest = { app, fields, size: API_LIMIT_GET, query };
+  try {
+    const param: kintoneAPI.rest.CursorCreateRequest = { app, fields, size: API_LIMIT_GET, query };
 
-  const cursor = await api<kintoneAPI.rest.CursorCreateResponse>({
-    endpointName: API_ENDPOINT_CURSOR,
-    method: 'POST',
-    body: param,
-    debug,
-    guestSpaceId,
-  });
-
-  if (onTotalGet) {
-    onTotalGet({
-      total: Number(cursor.totalCount),
+    const cursor = await api<kintoneAPI.rest.CursorCreateResponse>({
+      endpointName: API_ENDPOINT_CURSOR,
+      method: 'POST',
+      body: param,
+      debug,
+      guestSpaceId,
     });
+
+    if (onTotalGet) {
+      onTotalGet({
+        total: Number(cursor.totalCount),
+      });
+    }
+
+    const records = await getRecordsByCursorId<T>({ id: cursor.id, onStep, debug, guestSpaceId });
+
+    return records;
+  } finally {
+    if (debug) {
+      console.groupEnd();
+    }
   }
-
-  const records = await getRecordsByCursorId<T>({ id: cursor.id, onStep, debug, guestSpaceId });
-
-  if (debug) {
-    console.groupEnd();
-  }
-
-  return records;
 };
 
 const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(
@@ -624,93 +629,97 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
     console.groupCollapsed('📦 %cbulkRequest', 'color: #1e40af');
   }
 
-  const apiTable: Record<
-    (typeof requests)[number]['type'],
-    { endpointName: string; method: kintoneAPI.rest.Method }
-  > = {
-    updateRecord: { endpointName: API_ENDPOINT_RECORD, method: 'PUT' },
-    addRecord: { endpointName: API_ENDPOINT_RECORD, method: 'POST' },
-    updateAllRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'PUT' },
-    addAllRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'POST' },
-    deleteRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'DELETE' },
-    updateRecordAssignees: { endpointName: API_ENDPOINT_ASSIGNEES, method: 'PUT' },
-    updateRecordStatus: { endpointName: API_ENDPOINT_RECORD_STATUS, method: 'PUT' },
-    updateRecordStatuses: { endpointName: API_ENDPOINT_RECORD_STATUSES, method: 'PUT' },
-  };
+  try {
+    const apiTable: Record<
+      (typeof requests)[number]['type'],
+      { endpointName: string; method: kintoneAPI.rest.Method }
+    > = {
+      updateRecord: { endpointName: API_ENDPOINT_RECORD, method: 'PUT' },
+      addRecord: { endpointName: API_ENDPOINT_RECORD, method: 'POST' },
+      updateAllRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'PUT' },
+      addAllRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'POST' },
+      deleteRecords: { endpointName: API_ENDPOINT_RECORDS, method: 'DELETE' },
+      updateRecordAssignees: { endpointName: API_ENDPOINT_ASSIGNEES, method: 'PUT' },
+      updateRecordStatus: { endpointName: API_ENDPOINT_RECORD_STATUS, method: 'PUT' },
+      updateRecordStatuses: { endpointName: API_ENDPOINT_RECORD_STATUSES, method: 'PUT' },
+    };
 
-  let reshapedRequests: OneOfBulkRequest<T>[] = [];
-  for (const request of requests) {
-    const { endpointName, method } = apiTable[request.type];
-    const api = buildPath({ endpointName, guestSpaceId });
+    let reshapedRequests: OneOfBulkRequest<T>[] = [];
+    for (const request of requests) {
+      const { endpointName, method } = apiTable[request.type];
+      const api = buildPath({ endpointName, guestSpaceId });
 
-    if (
-      request.type === 'updateRecord' ||
-      request.type === 'addRecord' ||
-      request.type === 'updateRecordAssignees' ||
-      request.type === 'updateRecordStatus'
-    ) {
-      reshapedRequests.push({ method, api, payload: request.params });
-    } else if (request.type === 'updateAllRecords') {
-      const { records: allRecords, ...commonRequestParams } = request.params;
-      const recordChunks = sliceIntoChunks(allRecords, API_LIMIT_PUT);
-      for (const records of recordChunks) {
-        reshapedRequests.push({
-          method,
-          api,
-          payload: { ...commonRequestParams, records },
+      if (
+        request.type === 'updateRecord' ||
+        request.type === 'addRecord' ||
+        request.type === 'updateRecordAssignees' ||
+        request.type === 'updateRecordStatus'
+      ) {
+        reshapedRequests.push({ method, api, payload: request.params });
+      } else if (request.type === 'updateAllRecords') {
+        const { records: allRecords, ...commonRequestParams } = request.params;
+        const recordChunks = sliceIntoChunks(allRecords, API_LIMIT_PUT);
+        for (const records of recordChunks) {
+          reshapedRequests.push({
+            method,
+            api,
+            payload: { ...commonRequestParams, records },
+          });
+        }
+      } else if (request.type === 'addAllRecords') {
+        const recordChunks = sliceIntoChunks(request.params.records, API_LIMIT_POST);
+        for (const records of recordChunks) {
+          reshapedRequests.push({ method, api, payload: { ...request.params, records } });
+        }
+      } else if (request.type === 'deleteRecords') {
+        const idChunks = sliceIntoChunks(request.params.ids, API_LIMIT_DELETE);
+        for (const ids of idChunks) {
+          reshapedRequests.push({ method, api, payload: { ...request.params, ids } });
+        }
+      } else if (request.type === 'updateRecordStatuses') {
+        const recordChunks = sliceIntoChunks(request.params.records, API_LIMIT_PUT);
+        for (const records of recordChunks) {
+          reshapedRequests.push({ method, api, payload: { ...request.params, records } });
+        }
+      }
+    }
+
+    const responses: kintoneAPI.rest.BulkResponse[] = [];
+    const requestChunks = sliceIntoChunks(reshapedRequests, API_LIMIT_BULK_REQUEST);
+    let done = 0;
+    for (const requests of requestChunks) {
+      const response = await api<kintoneAPI.rest.BulkResponse>({
+        endpointName: API_ENDPOINT_BULK,
+        method: 'POST',
+        body: { requests },
+        debug,
+        guestSpaceId,
+      });
+      if (debug) {
+        done += requests.length;
+        console.log(
+          `%cbulk request in progress... ${done}/${reshapedRequests.length}`,
+          'color: #999'
+        );
+      }
+      responses.push(response);
+      if (params.onProgress) {
+        params.onProgress({
+          total: reshapedRequests.length,
+          done: responses.reduce((acc, response) => acc + response.results.length, 0),
         });
       }
-    } else if (request.type === 'addAllRecords') {
-      const recordChunks = sliceIntoChunks(request.params.records, API_LIMIT_POST);
-      for (const records of recordChunks) {
-        reshapedRequests.push({ method, api, payload: { ...request.params, records } });
-      }
-    } else if (request.type === 'deleteRecords') {
-      const idChunks = sliceIntoChunks(request.params.ids, API_LIMIT_DELETE);
-      for (const ids of idChunks) {
-        reshapedRequests.push({ method, api, payload: { ...request.params, ids } });
-      }
-    } else if (request.type === 'updateRecordStatuses') {
-      const recordChunks = sliceIntoChunks(request.params.records, API_LIMIT_PUT);
-      for (const records of recordChunks) {
-        reshapedRequests.push({ method, api, payload: { ...request.params, records } });
-      }
     }
-  }
 
-  const responses: kintoneAPI.rest.BulkResponse[] = [];
-  const requestChunks = sliceIntoChunks(reshapedRequests, API_LIMIT_BULK_REQUEST);
-  let done = 0;
-  for (const requests of requestChunks) {
-    const response = await api<kintoneAPI.rest.BulkResponse>({
-      endpointName: API_ENDPOINT_BULK,
-      method: 'POST',
-      body: { requests },
-      debug,
-      guestSpaceId,
-    });
+    return responses.reduce<kintoneAPI.rest.BulkResponse>(
+      (acc, response) => {
+        return { results: [...acc.results, ...response.results] };
+      },
+      { results: [] }
+    );
+  } finally {
     if (debug) {
-      done += requests.length;
-      console.log(
-        `%cbulk request in progress... ${done}/${reshapedRequests.length}`,
-        'color: #999'
-      );
-    }
-    responses.push(response);
-    if (params.onProgress) {
-      params.onProgress({
-        total: reshapedRequests.length,
-        done: responses.reduce((acc, response) => acc + response.results.length, 0),
-      });
+      console.groupEnd();
     }
   }
-  if (debug) {
-    console.groupEnd();
-  }
-  return responses.reduce<kintoneAPI.rest.BulkResponse>(
-    (acc, response) => {
-      return { results: [...acc.results, ...response.results] };
-    },
-    { results: [] }
-  );
 };
