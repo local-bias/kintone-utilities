@@ -155,6 +155,7 @@ export const upsertRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.
     app,
     query: `${updateKey.field as string} = "${updateKey.value}"`,
     fields: ['$id'],
+    ...rest,
   });
 
   if (records.length) {
