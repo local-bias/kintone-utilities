@@ -11,7 +11,7 @@ const buildPath = (params: { endpointName: string }) => {
 
 const api = async <T = any>(params: {
   endpointName: string;
-  method: kintoneAPI.rest.Method;
+  method: kintoneRestAPI.Method;
   body: any;
   debug?: boolean;
 }): Promise<T> => {

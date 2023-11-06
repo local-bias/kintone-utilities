@@ -340,6 +340,9 @@ export declare namespace kintoneAPI {
       | 'mobile.app.record.edit.submit'
       | 'mobile.app.record.edit.submit.success';
   }
+  /**
+   * @deprecated Use global namespace `kintoneRestAPI` instead.
+   */
   namespace rest {
     type AppIDToRequest = string | number;
     type RecordID = string | number;
@@ -488,14 +491,14 @@ export declare namespace kintoneAPI {
 
     type BulkResponse = {
       results: (
-        | kintoneAPI.rest.RecordsPutResponse
-        | kintoneAPI.rest.RecordPostResponse
-        | kintoneAPI.rest.RecordsPostResponse
-        | kintoneAPI.rest.RecordsPutResponse
-        | kintoneAPI.rest.RecordsDeleteResponse
-        | kintoneAPI.rest.RecordAssigneesPutResponse
-        | kintoneAPI.rest.RecordStatusPutResponse
-        | kintoneAPI.rest.RecordStatusesPutResponse
+        | RecordsPutResponse
+        | RecordPostResponse
+        | RecordsPostResponse
+        | RecordsPutResponse
+        | RecordsDeleteResponse
+        | RecordAssigneesPutResponse
+        | RecordStatusPutResponse
+        | RecordStatusesPutResponse
       )[];
     };
 
