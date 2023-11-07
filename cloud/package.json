@@ -14,9 +14,9 @@
     "qs": "^6.11.2"
   },
   "devDependencies": {
-    "@kintone/dts-gen": "^7.0.5",
-    "@types/node": "^20.7.2",
-    "@types/qs": "^6.9.8",
+    "@kintone/dts-gen": "^8.0.2",
+    "@types/node": "^20.8.10",
+    "@types/qs": "^6.9.9",
     "typescript": "^5.2.2"
   },
   "prettier": {
