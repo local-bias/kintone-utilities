@@ -14,7 +14,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "files": ["./node_modules/@kintone/dts-gen/kintone.d.ts"],
+  "files": ["./node_modules/@kintone/dts-gen/kintone.d.ts", "cloud.d.ts"],
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]
 }
