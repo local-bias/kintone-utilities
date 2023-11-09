@@ -1,4 +1,4 @@
-declare namespace chatwork {
+declare namespace Chatwork {
   type GetMyTasksParam = {
     /** タスクの依頼者のアカウントID */
     assigned_by_account_id?: number;
