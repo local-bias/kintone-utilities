@@ -3,3 +3,5 @@
 /src
 tsconfig.json
 .prettierrc.yml
+jest.config.mjs
+/test-results
