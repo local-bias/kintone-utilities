@@ -138,9 +138,10 @@ export type GetYuruCharaOptions = {
  * getYuruChara('ｱｲｳｴｵ') // => 'あいうえお'
  * getYuruChara('ｱｲｳｴｵ', { isKatakanaSensitive: true }) // => 'アイウエオ'
  * getYuruChara('ｱｲｳｴｵ', { isHankakuKatakanaSensitive: true }) // => 'ｱｲｳｴｵ'
- * getYuruChara('ＡＢＣ') // => 'abc'
- * getYuruChara('ＡＢＣ', { isCaseSensitive: true }) // => 'ABC'
- * getYuruChara('ＡＢＣ', { isZenkakuEisujiSensitive: true }) // => 'ＡＢＣ'
+ * getYuruChara('ＡＢＣ１２３') // => 'abc123'
+ * getYuruChara('ＡＢＣ１２３', { isCaseSensitive: true }) // => 'ABC123'
+ * getYuruChara('ＡＢＣ１２３', { isZenkakuEisujiSensitive: true }) // => 'ａｂｃ１２３'
+ * getYuruChara('ＡＢＣ１２３', { isCaseSensitive: true, isZenkakuEisujiSensitive: true }) // => 'ＡＢＣ１２３'
  * ```
  */
 export const getYuruChara = (target: string, options?: Partial<GetYuruCharaOptions>) => {
