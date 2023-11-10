@@ -1,10 +1,10 @@
 import React, { FC, Suspense, useCallback } from 'react';
-import { RecoilState, useRecoilValue } from 'recoil';
+import { RecoilValueReadOnly, useRecoilValue } from 'recoil';
 import { TextField, Autocomplete } from '@mui/material';
 import { kintoneAPI } from '@konomi-app/kintone-utilities';
 
 type ContainerProps = {
-  state: RecoilState<kintoneAPI.FieldProperty[]>;
+  state: RecoilValueReadOnly<kintoneAPI.FieldProperty[]>;
   fieldCode: string;
   onChange: (code: string) => void;
   width?: number;
