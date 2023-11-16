@@ -200,7 +200,13 @@ export const getCalcFieldValueAsString = (params: {
 
   switch (format) {
     case 'NUMBER_DIGIT':
-      fieldValue = Number(field.value).toLocaleString();
+      if (property.displayScale) {
+        const displayScale = Number(property.displayScale || 0);
+        const scaled = Math.round(Number(field.value) * 10 ** displayScale) / 10 ** displayScale;
+        fieldValue = scaled.toLocaleString();
+      } else {
+        fieldValue = Number(field.value).toLocaleString();
+      }
       break;
     case 'DATE':
       fieldValue = new Date(field.value).toLocaleDateString();
