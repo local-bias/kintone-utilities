@@ -6,23 +6,23 @@ const API_ENDPOINT_COMMENT = `record/comment`;
 
 const API_LIMIT_COMMENT = 10;
 
-export const getRecordComments = (props: kintoneRestAPI.CommentsGetRequest) => {
+export const getRecordComments = (props: kintoneAPI.rest.CommentsGetRequest) => {
   return getRecursiveRecordComments(props);
 };
 
 const getRecursiveRecordComments = async (
-  requestParams: kintoneRestAPI.CommentsGetRequest,
-  stored: kintoneRestAPI.CommentsGetResponse['comments'] = []
-): Promise<kintoneRestAPI.CommentsGetResponse['comments']> => {
+  requestParams: kintoneAPI.rest.CommentsGetRequest,
+  stored: kintoneAPI.rest.CommentsGetResponse['comments'] = []
+): Promise<kintoneAPI.rest.CommentsGetResponse['comments']> => {
   const offset = stored.length;
 
-  const newRequest: kintoneRestAPI.CommentsGetRequest = {
+  const newRequest: kintoneAPI.rest.CommentsGetRequest = {
     ...requestParams,
     limit: API_LIMIT_COMMENT,
     offset,
   };
 
-  const response = await api<kintoneRestAPI.CommentsGetResponse>({
+  const response = await api<kintoneAPI.rest.CommentsGetResponse>({
     endpointName: API_ENDPOINT_COMMENTS,
     method: 'GET',
     body: newRequest,
@@ -36,8 +36,8 @@ const getRecursiveRecordComments = async (
     : comments;
 };
 
-export const addRecordComment = (params: kintoneRestAPI.CommentPostRequest) => {
-  return api<kintoneRestAPI.CommentPostResponse>({
+export const addRecordComment = (params: kintoneAPI.rest.CommentPostRequest) => {
+  return api<kintoneAPI.rest.CommentPostResponse>({
     endpointName: API_ENDPOINT_COMMENT,
     method: 'POST',
     body: params,
@@ -45,8 +45,8 @@ export const addRecordComment = (params: kintoneRestAPI.CommentPostRequest) => {
   });
 };
 
-export const deleteRecordComment = (params: kintoneRestAPI.CommentDeleteRequest) => {
-  return api<kintoneRestAPI.CommentDeleteResponse>({
+export const deleteRecordComment = (params: kintoneAPI.rest.CommentDeleteRequest) => {
+  return api<kintoneAPI.rest.CommentDeleteResponse>({
     endpointName: API_ENDPOINT_COMMENT,
     method: 'DELETE',
     body: params,

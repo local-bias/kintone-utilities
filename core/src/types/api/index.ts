@@ -340,9 +340,7 @@ export declare namespace kintoneAPI {
       | 'mobile.app.record.edit.submit'
       | 'mobile.app.record.edit.submit.success';
   }
-  /**
-   * @deprecated Use global namespace `kintoneRestAPI` instead.
-   */
+
   namespace rest {
     type AppIDToRequest = string | number;
     type RecordID = string | number;

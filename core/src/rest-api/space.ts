@@ -6,8 +6,8 @@ const API_ENDPOINT_THREAD = 'space/thread';
 const API_ENDPOINT_MEMBERS = 'space/members';
 const API_ENDPOINT_TEMPLATE = 'template/space';
 
-export const getSpace = (params: kintoneRestAPI.space.GetSpaceRequest) => {
-  return api<kintoneRestAPI.space.GetSpaceResponse>({
+export const getSpace = (params: kintoneAPI.rest.space.GetSpaceRequest) => {
+  return api<kintoneAPI.rest.space.GetSpaceResponse>({
     endpointName: API_ENDPOINT_SPACE,
     method: 'GET',
     body: params,
@@ -43,7 +43,7 @@ export const createSpace = (params: CreateSpaceParams): Promise<CreateSpaceRespo
 
 export type DeleteSpaceParams = WithCommonRequestParams<{
   /** 更新するスレッドのスレッドID */
-  id: kintoneRestAPI.space.SpaceIdToRequest;
+  id: kintoneAPI.rest.space.SpaceIdToRequest;
 }>;
 export type DeleteSpaceResponse = {};
 

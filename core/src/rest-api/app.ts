@@ -57,7 +57,7 @@ export const getAllApps = async (
 export const getViews = async (
   params: WithCommonRequestParams<{
     app: kintoneAPI.IDToRequest;
-    lang?: kintoneRestAPI.Lang;
+    lang?: kintoneAPI.rest.Lang;
     preview?: boolean;
   }>
 ): Promise<{ views: Record<string, kintoneAPI.view.Response>; revision: string }> => {
