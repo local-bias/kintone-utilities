@@ -310,8 +310,27 @@ export const onFileLoad = (file: File | Blob, options?: OnFileLoadOptions) => {
  * @param query クエリ文字列
  * @returns ソート条件の文字列
  * @see {@link https://cybozu.dev/ja/kintone/docs/js-api/app/get-record-list-query-with-order-by-limit-offset/ レコード一覧のクエリ文字列を取得する（オプション付き）}
+ * @example
+ * ```js
+ * const query = kintone.app.getQuery(); // "order by フィールド1 asc フィールド2 desc limit 100 offset 0"
+ * const sort = getSortFromQuery(query); // [{ field: 'フィールド1', order: 'asc' }, { field: 'フィールド2', order: 'desc' }]
+ * ```
  */
-export const getSortFromQuery = (query: string): string => {
+export const getSortFromQuery = (query: string): { field: string; order: 'asc' | 'desc' }[] => {
   const match = query.match(/order by.*?(?= limit| offset)/i);
-  return match ? match[0] : '';
+  if (!match) {
+    return [];
+  }
+
+  const sortString = match[0].replace(/^order by /i, '');
+
+  return sortString
+    .split(' ')
+    .map((s) => s.trim())
+    .reduce<{ field: string; order: 'asc' | 'desc' }[]>((acc, cur, index, array) => {
+      if (index % 2 === 0) {
+        acc.push({ field: cur, order: array[index + 1] as 'asc' | 'desc' });
+      }
+      return acc;
+    }, []);
 };
