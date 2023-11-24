@@ -301,3 +301,17 @@ export const onFileLoad = (file: File | Blob, options?: OnFileLoadOptions) => {
     }
   });
 };
+
+/**
+ * クエリからソート条件を取得します。
+ *
+ * kintone.app.getQuery()の結果を想定しています。
+ *
+ * @param query クエリ文字列
+ * @returns ソート条件の文字列
+ * @see {@link https://cybozu.dev/ja/kintone/docs/js-api/app/get-record-list-query-with-order-by-limit-offset/ レコード一覧のクエリ文字列を取得する（オプション付き）}
+ */
+export const getSortFromQuery = (query: string): string => {
+  const match = query.match(/order by.*?(?= limit| offset)/i);
+  return match ? match[0] : '';
+};
