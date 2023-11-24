@@ -25,7 +25,9 @@ export class KintoneEventListener {
    */
   public constructor(props?: ConstructorProps) {
     const {
-      errorHandler = () => null,
+      errorHandler = (error: any) => {
+        throw error;
+      },
       pluginId,
       logDisabled = false,
       logPrefix = '',
@@ -63,8 +65,7 @@ export class KintoneEventListener {
           guestSpaceId: this.#guestSpaceId,
         });
       } catch (error) {
-        await this.#commonErrorHandler(error, { event });
-        throw error;
+        return await this.#commonErrorHandler(error, { event });
       } finally {
         this.tarminate();
       }
@@ -85,13 +86,9 @@ export class KintoneEventListener {
     kintone.events.on(withMobileEvents(events), (event) => {
       try {
         this.initialize(event);
-        return callback(event, {
-          pluginId: this.#pluginId,
-          guestSpaceId: this.#guestSpaceId,
-        });
+        return callback(event, { pluginId: this.#pluginId, guestSpaceId: this.#guestSpaceId });
       } catch (error) {
-        this.#commonErrorHandler(error, { event });
-        throw error;
+        return this.#commonErrorHandler(error, { event });
       } finally {
         this.tarminate();
       }
