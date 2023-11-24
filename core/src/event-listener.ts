@@ -1,7 +1,7 @@
 import type { kintoneAPI } from './types/api';
 import { detectGuestSpaceId, withMobileEvents } from './utilities';
 
-type ErrorHandler = (error: any, props: { event: kintoneAPI.Event }) => void;
+type ErrorHandler = (error: any, props: { event: kintoneAPI.js.Event }) => kintoneAPI.js.Event;
 
 type ConstructorProps = Partial<{
   errorHandler: ErrorHandler;
