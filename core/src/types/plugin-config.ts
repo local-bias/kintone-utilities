@@ -54,7 +54,13 @@ export type PluginManifest = {
   };
 };
 
+/**
+ * 公開しているプラグインテンプレートで使用する設定ファイル
+ *
+ * @see {@link https://github.com/local-bias/kintone-plugin-template | kintone-plugin-template}
+ */
 export type PluginConfig = {
+  id: string;
   version?: 1;
   manifest: {
     base: PluginManifest;
@@ -62,5 +68,6 @@ export type PluginConfig = {
     prod?: Partial<PluginManifest>;
     standalone?: Partial<PluginManifest>;
   };
+  pluginReleasePageUrl?: string;
   config_params?: Record<string, any>;
 };
