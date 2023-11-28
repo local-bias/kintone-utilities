@@ -1,4 +1,4 @@
-import React, { FC, Suspense, useCallback } from 'react';
+import React, { ComponentProps, FC, Suspense, useCallback } from 'react';
 import { RecoilValueReadOnly, useRecoilValue } from 'recoil';
 import { TextField, Autocomplete } from '@mui/material';
 import { kintoneAPI } from '@konomi-app/kintone-utilities';
@@ -7,10 +7,9 @@ type ContainerProps = {
   state: RecoilValueReadOnly<kintoneAPI.FieldProperty[]>;
   fieldCode: string;
   onChange: (code: string) => void;
-  width?: number;
   label?: string;
   placeholder?: string;
-};
+} & Omit<ComponentProps<typeof Autocomplete>, 'onChange' | 'value'>;
 
 type Props = Omit<ContainerProps, 'state' | 'onChange' | 'fieldCode'> & {
   value: kintoneAPI.FieldProperty | null;
@@ -18,14 +17,22 @@ type Props = Omit<ContainerProps, 'state' | 'onChange' | 'fieldCode'> & {
   onFieldChange: (_: any, field: kintoneAPI.FieldProperty | null) => void;
 };
 
-const Select: FC<Props> = ({ fields, value, onFieldChange, width, label, placeholder }) => (
+const Select: FC<Props> = ({
+  fields,
+  value,
+  onFieldChange,
+  label,
+  placeholder,
+  ...autocompleteProps
+}) => (
   <Autocomplete
     value={value}
-    sx={{ width }}
     options={fields}
     isOptionEqualToValue={(option, v) => option.code === v.code}
     getOptionLabel={(option) => `${option.label}(${option.code})`}
     onChange={onFieldChange}
+    sx={autocompleteProps.sx}
+    fullWidth={autocompleteProps.fullWidth}
     renderInput={(params) => (
       <TextField
         {...params}
@@ -53,8 +60,8 @@ const Component: FC<ContainerProps> = ({ state, onChange, fieldCode, ...rest }) 
 };
 Component.displayName = 'RecoilFieldSelectComponent';
 
-const PlaceHolder: FC<ContainerProps> = ({ label, placeholder, width }) => (
-  <TextField label={label} placeholder={placeholder} value='' sx={{ width }} disabled />
+const PlaceHolder: FC<ContainerProps> = ({ label, placeholder, ...autocompleteProps }) => (
+  <TextField label={label} placeholder={placeholder} value='' sx={autocompleteProps.sx} disabled />
 );
 PlaceHolder.displayName = 'RecoilFieldSelectPlaceHolder';
 
@@ -66,7 +73,7 @@ const Container: FC<ContainerProps> = (props) => (
 
 Container.displayName = 'RecoilFieldSelectContainer';
 Container.defaultProps = {
-  width: 400,
+  sx: { width: 400 },
   label: '対象フィールド',
   placeholder: 'フィールドを選択してください',
 };
