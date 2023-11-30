@@ -140,49 +140,52 @@ export class KintoneEventManager {
     document.head.append(style);
     style.textContent = `
       .rkemb {
+        font-size: 15px;
+        font-family: Yu Gothic Meduim, "游ゴシック Medium", "游ゴシック体", YuGothic, "游ゴシック", "メイリオ", sans-serif;
         display: inline-flex;
         margin: 0 4px;
         padding: 0 16px;
         min-width: 160px;
         height: 48px;
+        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
         outline: none;
-        border: 1px solid;
         color: #3498db;
+        border-radius: 4px;
         text-align: center;
         line-height: 48px;
         transition: all 250ms ease;
+        border: 0;
+      }
+      .rkemb:hover {
+        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
       }
       .rkemb[data-color="default"] {
         background-color: #f9fafb;
-        color: #6b7280;
-        border-color: #e5e7eb;
+        color: #3b82f6;
       }
       .rkemb[data-color="default"]:hover {
         background-color: #f3f4f6;
       }
       .rkemb[data-color="blue"] {
-        background-color: #eff6ff;
-        color: #3b82f6;
-        border-color: #bfdbfe;
+        background-color: #3b82f6;
+        color: #fff;
       }
       .rkemb[data-color="blue"]:hover {
-        background-color: #dbeafe;
+        background-color: #2563eb;
       }
       .rkemb[data-color="red"] {
-        background-color: #fef2f2;
-        color: #ef4444;
-        border-color: #fecaca;
+        background-color: #ef4444;
+        color: #fff;
       }
       .rkemb[data-color="red"]:hover {
-        background-color: #fee2e2;
+        background-color: #dc2626;
       }
       .rkemb[data-color="yellow"] {
-        background-color: #fefce8;
-        color: #eab308;
-        border-color: #fef08a;
+        background-color: #eab308;
+        color: #fff;
       }
       .rkemb[data-color="yellow"]:hover {
-        background-color: #fef9c3;
+        background-color: #ca8a04;
       }
     `;
   };
