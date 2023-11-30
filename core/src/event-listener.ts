@@ -1,3 +1,4 @@
+import { getHeaderSpace } from '@lb-ribbit/kintone-xapp';
 import type { kintoneAPI } from './types/api';
 import { detectGuestSpaceId, withMobileEvents } from './utilities';
 
@@ -12,7 +13,7 @@ type ConstructorProps = Partial<{
 
 type CallbackOption = { pluginId?: string; guestSpaceId: string | null };
 
-export class KintoneEventListener {
+export class KintoneEventManager {
   readonly #uid: string = Math.random().toString(36).slice(2);
   readonly #pluginId?: string;
   readonly #commonErrorHandler: ErrorHandler;
@@ -93,6 +94,97 @@ export class KintoneEventListener {
         this.tarminate();
       }
     });
+  };
+
+  public addHeaderButton(params: {
+    id: string;
+    label: string;
+    color?: 'default' | 'blue' | 'red' | 'yellow';
+    onClick: () => void | Promise<void>;
+    events: kintoneAPI.js.EventType[];
+  }) {
+    const { id, label, color = 'default', onClick, events } = params;
+
+    this.addButtonStyle();
+
+    this.add(events, (event) => {
+      if (document.getElementById(id)) {
+        return event;
+      }
+      const headerSpace = getHeaderSpace(event.type);
+      if (!headerSpace) {
+        throw new Error(
+          'ヘッダーにボタンを追加することができませんでした。ヘッダーが見つかりませんでした。'
+        );
+      }
+
+      const root = document.createElement('button');
+      root.id = id;
+      root.textContent = label;
+      root.className = 'rkemb';
+      root.dataset.color = color;
+      root.addEventListener('click', onClick);
+      headerSpace.append(root);
+
+      return event;
+    });
+  }
+
+  private addButtonStyle = () => {
+    if (document.querySelector('style[data-rkem]')) {
+      return;
+    }
+
+    const style = document.createElement('style');
+    style.dataset.rkem = '';
+    document.head.append(style);
+    style.textContent = `
+      .rkemb {
+        display: inline-flex;
+        margin: 0 4px;
+        padding: 0 16px;
+        min-width: 160px;
+        height: 48px;
+        outline: none;
+        border: 1px solid;
+        color: #3498db;
+        text-align: center;
+        line-height: 48px;
+        transition: all 250ms ease;
+      }
+      .rkemb[data-color="default"] {
+        background-color: #f9fafb;
+        color: #6b7280;
+        border-color: #e5e7eb;
+      }
+      .rkemb[data-color="default"]:hover {
+        background-color: #f3f4f6;
+      }
+      .rkemb[data-color="blue"] {
+        background-color: #eff6ff;
+        color: #3b82f6;
+        border-color: #bfdbfe;
+      }
+      .rkemb[data-color="blue"]:hover {
+        background-color: #dbeafe;
+      }
+      .rkemb[data-color="red"] {
+        background-color: #fef2f2;
+        color: #ef4444;
+        border-color: #fecaca;
+      }
+      .rkemb[data-color="red"]:hover {
+        background-color: #fee2e2;
+      }
+      .rkemb[data-color="yellow"] {
+        background-color: #fefce8;
+        color: #eab308;
+        border-color: #fef08a;
+      }
+      .rkemb[data-color="yellow"]:hover {
+        background-color: #fef9c3;
+      }
+    `;
   };
 
   private initialize = (event: kintoneAPI.js.Event) => {
