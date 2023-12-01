@@ -100,14 +100,19 @@ export class KintoneEventManager {
     id: string;
     label: string;
     color?: 'default' | 'blue' | 'red' | 'yellow';
+    isButtonHidden?: (event: kintoneAPI.js.Event) => boolean | Promise<boolean>;
     onClick: () => void | Promise<void>;
     events: kintoneAPI.js.EventType[];
   }) {
-    const { id, label, color = 'default', onClick, events } = params;
+    const { id, label, color = 'default', onClick, isButtonHidden, events } = params;
 
     this.addButtonStyle();
 
-    this.add(events, (event) => {
+    this.add(events, async (event) => {
+      if (isButtonHidden && (await isButtonHidden(event))) {
+        return event;
+      }
+
       if (document.getElementById(id)) {
         return event;
       }
@@ -139,54 +144,54 @@ export class KintoneEventManager {
     style.dataset.rkem = '';
     document.head.append(style);
     style.textContent = `
-      .rkemb {
-        font-size: 15px;
-        font-family: Yu Gothic Meduim, "游ゴシック Medium", "游ゴシック体", YuGothic, "游ゴシック", "メイリオ", sans-serif;
-        display: inline-flex;
-        margin: 0 4px;
-        padding: 0 16px;
-        min-width: 160px;
-        height: 48px;
-        box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-        outline: none;
-        color: #3498db;
-        border-radius: 4px;
-        text-align: center;
-        line-height: 48px;
-        transition: all 250ms ease;
-        border: 0;
-      }
-      .rkemb:hover {
-        box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      }
-      .rkemb[data-color="default"] {
-        background-color: #f9fafb;
-        color: #3b82f6;
-      }
-      .rkemb[data-color="default"]:hover {
-        background-color: #f3f4f6;
-      }
-      .rkemb[data-color="blue"] {
-        background-color: #3b82f6;
-        color: #fff;
-      }
-      .rkemb[data-color="blue"]:hover {
-        background-color: #2563eb;
-      }
-      .rkemb[data-color="red"] {
-        background-color: #ef4444;
-        color: #fff;
-      }
-      .rkemb[data-color="red"]:hover {
-        background-color: #dc2626;
-      }
-      .rkemb[data-color="yellow"] {
-        background-color: #eab308;
-        color: #fff;
-      }
-      .rkemb[data-color="yellow"]:hover {
-        background-color: #ca8a04;
-      }
+.rkemb {
+  font-size: 15px;
+  font-family: Yu Gothic Meduim, "游ゴシック Medium", "游ゴシック体", YuGothic, "游ゴシック", "メイリオ", sans-serif;
+  display: inline-flex;
+  margin: 0 4px;
+  padding: 0 16px;
+  min-width: 160px;
+  height: 48px;
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+  outline: none;
+  color: #3498db;
+  border-radius: 4px;
+  text-align: center;
+  line-height: 48px;
+  transition: all 250ms ease;
+  border: 0;
+}
+.rkemb:hover {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+.rkemb[data-color="default"] {
+  background-color: #f9fafb;
+  color: #3b82f6;
+}
+.rkemb[data-color="default"]:hover {
+  background-color: #f3f4f6;
+}
+.rkemb[data-color="blue"] {
+  background-color: #3b82f6;
+  color: #fff;
+}
+.rkemb[data-color="blue"]:hover {
+  background-color: #2563eb;
+}
+.rkemb[data-color="red"] {
+  background-color: #ef4444;
+  color: #fff;
+}
+.rkemb[data-color="red"]:hover {
+  background-color: #dc2626;
+}
+.rkemb[data-color="yellow"] {
+  background-color: #eab308;
+  color: #fff;
+}
+.rkemb[data-color="yellow"]:hover {
+  background-color: #ca8a04;
+}
     `;
   };
 
@@ -222,3 +227,8 @@ export class KintoneEventManager {
     event.returnValue = '';
   }
 }
+
+/**
+ * @deprecated 代わりに`KintoneEventListener`を使用してください
+ */
+export const KintoneEventListener = KintoneEventManager;
