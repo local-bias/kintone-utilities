@@ -145,9 +145,10 @@ export class KintoneEventManager {
     document.head.append(style);
     style.textContent = `
 .rkemb {
-  font-size: 15px;
+  font-size: 16px;
   font-family: Yu Gothic Meduim, "游ゴシック Medium", "游ゴシック体", YuGothic, "游ゴシック", "メイリオ", sans-serif;
   display: inline-flex;
+  justify-content: center;
   margin: 0 4px;
   padding: 0 16px;
   min-width: 160px;
@@ -172,18 +173,18 @@ export class KintoneEventManager {
   background-color: #f3f4f6;
 }
 .rkemb[data-color="blue"] {
-  background-color: #3b82f6;
+  background-color: #2563eb;
   color: #fff;
 }
 .rkemb[data-color="blue"]:hover {
-  background-color: #2563eb;
+  background-color: #1d4ed8;
 }
 .rkemb[data-color="red"] {
-  background-color: #ef4444;
+  background-color: #dc2626;
   color: #fff;
 }
 .rkemb[data-color="red"]:hover {
-  background-color: #dc2626;
+  background-color: #b91c1c;
 }
 .rkemb[data-color="yellow"] {
   background-color: #eab308;
