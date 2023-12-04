@@ -153,7 +153,6 @@ export class KintoneEventManager {
   padding: 0 16px;
   min-width: 160px;
   height: 48px;
-  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
   outline: none;
   color: #3498db;
   border-radius: 4px;
@@ -161,37 +160,58 @@ export class KintoneEventManager {
   line-height: 48px;
   transition: all 250ms ease;
   border: 0;
-}
-.rkemb:hover {
-  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  border: 1px solid;
 }
 .rkemb[data-color="default"] {
   background-color: #f9fafb;
   color: #3b82f6;
+  border-color: #e5e7eb;
 }
 .rkemb[data-color="default"]:hover {
   background-color: #f3f4f6;
 }
+.rkemb[data-color="default"]:active,
+.rkemb[data-color="default"]:focus {
+  background-color: #e5e7eb;
+}
 .rkemb[data-color="blue"] {
-  background-color: #2563eb;
-  color: #fff;
+  background-color: #eff6ff;
+  color: #3b82f6;
+  border-color: #bfdbfe;
 }
 .rkemb[data-color="blue"]:hover {
-  background-color: #1d4ed8;
+  background-color: #dbeafe;
+}
+.rkemb[data-color="blue"]:active,
+.rkemb[data-color="blue"]:focus {
+  background-color: #bfdbfe;
+  color: #2563eb;
 }
 .rkemb[data-color="red"] {
-  background-color: #dc2626;
-  color: #fff;
+  background-color: #fef2f2;
+  color: #ef4444;
+  border-color: #fecaca;
 }
 .rkemb[data-color="red"]:hover {
-  background-color: #b91c1c;
+  background-color: #fee2e2;
+}
+.rkemb[data-color="red"]:active,
+.rkemb[data-color="red"]:focus {
+  background-color: #fecaca;
+  color: #dc2626;
 }
 .rkemb[data-color="yellow"] {
-  background-color: #eab308;
-  color: #fff;
+  background-color: #fffbeb;
+  color: #f59e0b;
+  border-color: #fde68a;
 }
 .rkemb[data-color="yellow"]:hover {
-  background-color: #ca8a04;
+  background-color: #fef3c7;
+}
+.rkemb[data-color="yellow"]:active,
+.rkemb[data-color="yellow"]:focus {
+  background-color: #fde68a;
+  color: #d97706;
 }
     `;
   };
