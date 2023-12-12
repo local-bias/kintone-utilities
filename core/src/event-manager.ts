@@ -170,9 +170,11 @@ export class KintoneEventManager {
 .rkemb[data-color="default"]:hover {
   background-color: #f3f4f6;
 }
-.rkemb[data-color="default"]:active,
-.rkemb[data-color="default"]:focus {
+.rkemb[data-color="default"]:active {
   background-color: #e5e7eb;
+}
+.rkemb[data-color="default"]:focus {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #d1d5db;
 }
 .rkemb[data-color="blue"] {
   background-color: #eff6ff;
@@ -182,10 +184,12 @@ export class KintoneEventManager {
 .rkemb[data-color="blue"]:hover {
   background-color: #dbeafe;
 }
-.rkemb[data-color="blue"]:active,
-.rkemb[data-color="blue"]:focus {
+.rkemb[data-color="blue"]:active {
   background-color: #bfdbfe;
   color: #2563eb;
+}
+.rkemb[data-color="blue"]:focus {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #93c5fd;
 }
 .rkemb[data-color="red"] {
   background-color: #fef2f2;
@@ -195,10 +199,12 @@ export class KintoneEventManager {
 .rkemb[data-color="red"]:hover {
   background-color: #fee2e2;
 }
-.rkemb[data-color="red"]:active,
-.rkemb[data-color="red"]:focus {
+.rkemb[data-color="red"]:active {
   background-color: #fecaca;
   color: #dc2626;
+}
+.rkemb[data-color="red"]:focus {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #fca5a5;
 }
 .rkemb[data-color="yellow"] {
   background-color: #fffbeb;
@@ -208,10 +214,12 @@ export class KintoneEventManager {
 .rkemb[data-color="yellow"]:hover {
   background-color: #fef3c7;
 }
-.rkemb[data-color="yellow"]:active,
-.rkemb[data-color="yellow"]:focus {
+.rkemb[data-color="yellow"]:active {
   background-color: #fde68a;
   color: #d97706;
+}
+.rkemb[data-color="yellow"]:focus {
+  box-shadow: 0 0 0 2px #fff, 0 0 0 3px #fcd34d;
 }
     `;
   };
