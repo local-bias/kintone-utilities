@@ -11,13 +11,14 @@
     "prepare": "yarn run build"
   },
   "dependencies": {
+    "openai": "^4.23.0",
     "qs": "^6.11.2"
   },
   "devDependencies": {
     "@kintone/dts-gen": "^8.0.2",
-    "@types/node": "^20.9.0",
+    "@types/node": "^20.10.5",
     "@types/qs": "^6.9.10",
-    "typescript": "^5.2.2"
+    "typescript": "^5.3.3"
   },
   "prettier": {
     "printWidth": 100,
