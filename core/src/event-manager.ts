@@ -144,6 +144,15 @@ export class KintoneEventManager {
     style.dataset.rkem = '';
     document.head.append(style);
     style.textContent = `
+
+:root {
+  --rkemb-color-blue-lighter: #57aae1;
+  --rkemb-color-blue-light: #4ba4df;
+  --rkemb-color-blue: #3498db;
+  --rkemb-color-blue-dark: #258bcf;
+  --rkemb-color-blue-darker: #2383c4;
+}
+
 .rkemb {
   font-size: 16px;
   font-family: Yu Gothic Meduim, "游ゴシック Medium", "游ゴシック体", YuGothic, "游ゴシック", "メイリオ", sans-serif;
@@ -164,7 +173,7 @@ export class KintoneEventManager {
 }
 .rkemb[data-color="default"] {
   background-color: #f9fafb;
-  color: #3b82f6;
+  color: var(--rkemb-color-blue);
   border-color: #e5e7eb;
 }
 .rkemb[data-color="default"]:hover {
@@ -172,13 +181,14 @@ export class KintoneEventManager {
 }
 .rkemb[data-color="default"]:active {
   background-color: #e5e7eb;
+  color: var(--rkemb-color-blue-darker);
 }
 .rkemb[data-color="default"]:focus {
   box-shadow: 0 0 0 2px #fff, 0 0 0 3px #d1d5db;
 }
 .rkemb[data-color="blue"] {
   background-color: #eff6ff;
-  color: #3b82f6;
+  color: var(--rkemb-color-blue);
   border-color: #bfdbfe;
 }
 .rkemb[data-color="blue"]:hover {
@@ -186,7 +196,7 @@ export class KintoneEventManager {
 }
 .rkemb[data-color="blue"]:active {
   background-color: #bfdbfe;
-  color: #2563eb;
+  color: var(--rkemb-color-blue-darker);
 }
 .rkemb[data-color="blue"]:focus {
   box-shadow: 0 0 0 2px #fff, 0 0 0 3px #93c5fd;
