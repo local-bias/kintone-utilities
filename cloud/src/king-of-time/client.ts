@@ -80,12 +80,14 @@ export class KingOfTimeClient {
     });
   }
 
-  public async getCompany(): Promise<any> {
+  public async getCompany(): Promise<KingOfTime.GetCompanyResponse> {
     return this.get({ url: 'company' });
   }
 
-  public async getAdministrators(): Promise<any> {
-    return this.get({ url: 'administrators' });
+  public async getAdministrators(
+    params: KingOfTime.GetAdministratorsReqeust
+  ): Promise<KingOfTime.GetAdministratorsResponse> {
+    return this.get({ url: 'administrators', requestParams: params });
   }
 
   public async getEmployees(): Promise<KingOfTime.GetEmployeesResponse> {

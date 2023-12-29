@@ -231,4 +231,124 @@ declare namespace KingOfTime {
     firstName: string;
     employeeGroups: { code: string; name: string }[];
   }[];
+
+  /**
+   * 企業情報を取得する。
+   */
+  type GetCompanyResponse = {
+    /**
+     * 企業識別キー
+     *
+     * @example "1qazxsw23edc...."
+     */
+    key: string;
+    /**
+     * 企業コード
+     *
+     * @example "cmp"
+     */
+    code: string;
+    /**
+     * 企業名
+     *
+     * @example "株式会社サンプル"
+     */
+    name: string;
+    /**
+     * ホスト名
+     *
+     * @example "s2.kingtime.jp"
+     */
+    host: string;
+    /**
+     * 事業年度開始日
+     *
+     * @example "04/01"
+     */
+    businessYearStartDate: string;
+    /**
+     * 企業設定情報
+     */
+    settings: {
+      /**
+       * 表示形式
+       *
+       * - `decimal`: 10進数
+       * - `sexagesimal`: 60進数
+       */
+      timeDisplayFormat: 'decimal' | 'sexagesimal';
+      /**
+       * 10進表示の小数第3位の扱い
+       *
+       * - `roundDown`: 切り捨て
+       * - `roundUp`: 切り上げ
+       * - `round`: 四捨五入
+       */
+      decimalTreatType: 'roundDown' | 'roundUp' | 'round';
+      /**
+       * 半休取得時の出勤日数の計上方法
+       *
+       * - `oneDay`: 1日として計上
+       * - `halfDay`: 0.5日として計上
+       */
+      halfDayWorkingCount: 'oneDay' | 'halfDay';
+    };
+  };
+
+  type GetAdministratorsReqeust = {
+    /**
+     * 指定されたプロパティをレスポンスに追加
+     *
+     * @example "emailAddresses"
+     */
+    additionalFields?: string;
+  };
+
+  type GetAdministratorsResponse = {
+    /**
+     * 管理者コード
+     *
+     * @example "admin"
+     */
+    code: string;
+    /**
+     * 管理者識別キー
+     *
+     * 管理者コードが変更されても不変
+     *
+     * @example "1qazxsw23edc...."
+     */
+    key: string;
+    /**
+     * 管理者名
+     */
+    name: string;
+    /**
+     * メールアドレス
+     */
+    emailAddresses?: any;
+    /**
+     * 割当従業員
+     */
+    associatedEmployees?: {
+      /**
+       * 従業員コード
+       */
+      code: string;
+      /**
+       * 従業員識別キー
+       *
+       * 従業員コードが変更されても不変
+       */
+      key: string;
+      /**
+       * 姓
+       */
+      lastName: string;
+      /**
+       * 名
+       */
+      firstName: string;
+    }[];
+  };
 }
