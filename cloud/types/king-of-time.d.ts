@@ -3,51 +3,240 @@ declare namespace KingOfTime {
   type Gender = 'no_selected' | 'male' | 'female';
 
   type DailyWorking = {
-    /** 日付 */
+    /**
+     * 日付
+     *
+     * @example "2024-01-01"
+     **/
     date: string;
+    /**
+     * 従業員識別キー
+     *
+     * 従業員コードが変更されても不変
+     *
+     * @example "1qazxsw23edc...."
+     */
     employeeKey: string;
-    currentDateEmployee: {
-      divisionCode: string;
-      divisionName: string;
-      gender: Gender;
-      typeCode: string;
-      typeName: string;
-      code: string;
-      lastName: string;
-      firstName: string;
-      lastNamePhonetics: string;
-      firstNamePhonetics: string;
-      employeeGroups: { code: string; name: string }[];
-    };
+    /**
+     * 出勤先所属コード
+     *
+     * @example "1000"
+     */
     workPlaceDivisionCode: string;
+    /**
+     * 出勤先所属名
+     *
+     * @example "本社"
+     */
     workPlaceDivisionName: string;
+    /**
+     * 締め状況
+     */
     isClosing: boolean;
+    /**
+     * ヘルプ勤務状況
+     */
     isHelp: boolean;
+    /**
+     * エラー勤務状況
+     */
     isError: boolean;
+    /**
+     * 勤務日種別名
+     *
+     * @example "平日"
+     */
     workdayTypeName: string;
+    /**
+     * 所定時間（分）
+     */
     assigned: number;
+    /**
+     * 所定外時間（分）
+     */
     unassigned: number;
+    /**
+     * 残業時間（分）
+     */
     overtime: number;
+    /**
+     * 深夜時間（分）
+     */
     lateNight: number;
+    /**
+     * 深夜所定外時間（分）
+     */
     lateNightUnassigned: number;
+    /**
+     * 深夜残業時間（分）
+     */
     lateNightOvertime: number;
+    /**
+     * 休憩時間（分）
+     */
     breakTime: number;
+    /**
+     * 遅刻時間（分）
+     */
     late: number;
+    /**
+     * 早退時間（分）
+     */
     earlyLeave: number;
+    /**
+     * 労働合計時間（分）
+     */
     totalWork: number;
+    /**
+     * 休暇取得
+     */
     holidaysObtained: {
-      fulltimeHoliday: { code: number; name: string };
-      halfdayHolidays: { typeName: string; code: number; name: string }[];
-      hourHolidays: { start: string; end: string; minutes: number; code: number; name: string }[];
+      fulltimeHoliday: {
+        /**
+         * 休暇区分コード
+         */
+        code: number;
+        /**
+         * 休暇区分名
+         */
+        name: string;
+      };
+      halfdayHolidays: {
+        /**
+         * 半休種別名
+         *
+         * @example "PM休"
+         */
+        typeName: string;
+        /**
+         * 休暇区分コード
+         */
+        code: number;
+        /**
+         * 休暇区分名
+         *
+         * @example "有休"
+         */
+        name: string;
+      }[];
+      hourHolidays: {
+        /**
+         * 休暇開始時間
+         */
+        start: string;
+        /**
+         * 休暇終了時間
+         */
+        end: string;
+        /**
+         * 休暇取得時間
+         */
+        minutes: number;
+        /**
+         * 休暇区分コード
+         */
+        code: number;
+        /**
+         * 休暇区分名
+         */
+        name: string;
+      }[];
     };
-    autoBreakOff: number;
+    /**
+     * 自動休憩無効
+     *
+     * - `null`： 休憩を無効化しない
+     * - `1`：雇用区分休憩無効
+     * - `2`：スケジュール休憩無効
+     * - `3`：全ての自動休憩無効
+     */
+    autoBreakOff: number | null;
+    /**
+     * 休暇みなし時間（分）
+     */
     discretionaryVacation: number;
+    /**
+     * 日別カスタム勤怠項目
+     */
     customDailyWorkings: {
+      /**
+       * 日別カスタム表示コード
+       */
       code: string;
+      /**
+       * 日別カスタム表示名
+       */
       name: string;
+      /**
+       * 計算単位コード
+       *
+       * - `1`：日数
+       * - `2`：時間
+       * - `4`：数値
+       */
       calculationUnitCode: number;
+      /**
+       * 計算結果
+       *
+       * ※レスポンス例は整数表記ですが、実際のレスポンスは小数第一位まで表示されます。
+       */
       calculationResult: number;
     }[];
+    /**
+     * 今日時点の従業員データ
+     */
+    currentDateEmployee: {
+      /**
+       * 所属コード
+       */
+      divisionCode: string;
+      /**
+       * 所属名
+       */
+      divisionName: string;
+      gender: Gender;
+      /**
+       * 雇用区分コード
+       */
+      typeCode: string;
+      /**
+       * 雇用区分名
+       */
+      typeName: string;
+      /**
+       * 従業員コード
+       */
+      code: string;
+      /**
+       * 姓
+       */
+      lastName: string;
+      /**
+       * 名
+       */
+      firstName: string;
+      /**
+       * 姓（カナ）
+       */
+      lastNamePhonetics: string;
+      /**
+       * 名（カナ）
+       */
+      firstNamePhonetics: string;
+      /**
+       * 従業員グループ情報
+       */
+      employeeGroups: {
+        /**
+         * 従業員グループコード
+         */
+        code: string;
+        /**
+         * 従業員グループ名
+         */
+        name: string;
+      }[];
+    };
   };
 
   /**
