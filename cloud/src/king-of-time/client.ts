@@ -47,7 +47,7 @@ export class KingOfTimeClient {
     if (statusCode !== 200) {
       if (this.#debug) {
         console.log(
-          `Chatworkへリクエストを送信しましたが、データを正常に受信できませんでした。`,
+          `KING OF TIMEへリクエストを送信しましたが、データを正常に受信できませんでした。`,
           `エラー番号:`,
           statusCode,
           `エラー内容:`,
