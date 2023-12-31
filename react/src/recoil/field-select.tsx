@@ -9,7 +9,7 @@ type ContainerProps = {
   onChange: (code: string) => void;
   label?: string;
   placeholder?: string;
-} & Omit<ComponentProps<typeof Autocomplete>, 'onChange' | 'value'>;
+} & Omit<ComponentProps<typeof Autocomplete>, 'onChange' | 'value' | 'renderInput' | 'options'>;
 
 type Props = Omit<ContainerProps, 'state' | 'onChange' | 'fieldCode'> & {
   value: kintoneAPI.FieldProperty | null;
