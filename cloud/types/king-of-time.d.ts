@@ -408,6 +408,218 @@ declare namespace KingOfTime {
     intervalShortageCount: number;
   }[];
 
+  type DailySchedule = {
+    /**
+     * 年月日
+     *
+     * @example "2024-01-01"
+     */
+    date: string;
+    /**
+     * 従業員識別キー
+     *
+     * 従業員コードが変更されても不変
+     *
+     * @example "1qazxsw23edc...."
+     */
+    employeeKey: string;
+    /**
+     * 出勤予定時間
+     *
+     * @example "2016-05-01T09:00+09:00"
+     */
+    clockInSchedule: string;
+    /**
+     * 退勤予定時間
+     *
+     * @example "2016-05-01T18:00+09:00"
+     */
+    clockOutSchedule: string;
+    /**
+     * 休憩予定時間(分)
+     *
+     * @example 60
+     */
+    breakSchedule: number;
+    /**
+     * 休憩開始終了予定
+     */
+    startEndBreakSchedule: {
+      /**
+       * 休憩開始予定
+       *
+       * @example "2016-05-01T12:00+09:00"
+       */
+      start: string;
+      /**
+       * 休憩終了予定
+       *
+       * @example "2016-05-01T13:00+09:00"
+       */
+      end: string;
+    }[];
+    /**
+     * 休暇取得
+     */
+    holidaysObtained: {
+      fulltimeHoliday: {
+        /**
+         * 休暇区分コード
+         *
+         * @example 1
+         */
+        code: number;
+        /**
+         * 休暇区分名
+         *
+         * @example "有休"
+         */
+        name: string;
+      };
+      halfdayHolidays: [
+        {
+          typeName: 'PM休';
+          code: 1;
+          name: '有休';
+        }
+      ];
+      hourHolidays: [
+        {
+          start: '2016-05-01T10:00+09:00';
+          end: '2016-05-01T11:00+09:00';
+          minutes: 60;
+          code: 1;
+          name: '有休';
+        }
+      ];
+    };
+    /**
+     * 勤務日種別名
+     *
+     * @example "平日"
+     */
+    workDayTypeName: string;
+    /**
+     * 半休種別コード
+     */
+    halfDayVacationTypeCode: unknown;
+    /**
+     * 半休種別名
+     */
+    halfDayVacationTypeName: unknown;
+    /**
+     * 残業上限時間（分）
+     *
+     * @example 120
+     */
+    overtimeUpperLimit: number;
+    /**
+     * 出勤先所属コード
+     *
+     * @example "1000"
+     */
+    workPlaceDivisionCode: string;
+    /**
+     * 出勤先所属名
+     *
+     * @example "本社"
+     */
+    workPlaceDivisionName: string;
+    /**
+     * 振替出勤
+     *
+     * @example "振休"
+     */
+    substitutionClockInName: string;
+    /**
+     * スケジュール種別
+     *
+     * @example "通常勤務"
+     */
+    scheduleTypeName: string;
+    /**
+     * 今日時点の従業員データ
+     */
+    currentDateEmployee: {
+      /**
+       * 所属コード
+       *
+       * @example "1000"
+       */
+      divisionCode: string;
+      /**
+       * 所属名
+       *
+       * @example "本社"
+       */
+      divisionName: string;
+      /**
+       * 性別
+       */
+      gender: Gender;
+      /**
+       *  雇用区分コード
+       *
+       * @example "1"
+       */
+      typeCode: string;
+      /**
+       * 雇用区分名
+       *
+       * @example "正社員"
+       */
+      typeName: string;
+      /**
+       * 従業員コード
+       */
+      code: string;
+      /**
+       * 姓
+       */
+      lastName: string;
+      /**
+       * 名
+       */
+      firstName: string;
+      /**
+       * 姓（カナ）
+       */
+      lastNamePhonetics: string;
+      /**
+       * 名（カナ）
+       */
+      firstNamePhonetics: string;
+      /**
+       * 従業員グループ情報
+       */
+      employeeGroups: {
+        /**
+         * 従業員グループコード
+         *
+         * @example "0001"
+         */
+        code: string;
+        /**
+         * 従業員グループ名
+         *
+         * @example "人事部"
+         */
+        name: string;
+      }[];
+    };
+  };
+
+  type GetDailySchedulesRequest = {
+    division?: string;
+    ondivision?: boolean;
+    additionalFields?: string;
+  } & ({ date?: string } | { start?: string; end?: string });
+
+  type GetDailySchedulesResponse = {
+    date: string;
+    dailySchedules: DailySchedule[];
+  }[];
+
   type GetEmployeesResponse = {
     divisionCode: string;
     divisionName: string;

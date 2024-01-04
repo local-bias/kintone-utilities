@@ -100,6 +100,12 @@ export class KingOfTimeClient {
     return this.get({ url: 'daily-workings', requestParams: params });
   }
 
+  public async getDailySchedules(
+    params: KingOfTime.GetDailySchedulesRequest = {}
+  ): Promise<KingOfTime.GetDailySchedulesResponse> {
+    return this.get({ url: 'daily-schedules', requestParams: params });
+  }
+
   public getMonthlyWorkings(
     params: KingOfTime.GetMonthlyWorkingsRequest
   ): Promise<KingOfTime.GetMonthlyWorkingsResponse> {
