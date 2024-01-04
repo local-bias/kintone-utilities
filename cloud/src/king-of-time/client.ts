@@ -1,5 +1,7 @@
 import { stringify } from 'qs';
 
+type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
+
 export class KingOfTimeClient {
   readonly #apiToken: string;
   #debug: boolean;
@@ -18,57 +20,69 @@ export class KingOfTimeClient {
    *
    * @return 取得レコードの配列
    */
-  private async api<T = any>(
-    obj: Partial<{ url: string; method: string; requestParams: any }>
-  ): Promise<T> {
-    const { url = '', method = '', requestParams = {} } = obj;
+  private async api<T = any>(params: {
+    url: string;
+    method: Method;
+    requestParams?: any;
+  }): Promise<T> {
+    try {
+      const { url = '', method = '', requestParams = {} } = params;
 
-    const uri = KingOfTimeClient.ENDPOINT_ROOT + url;
-
-    const header: { [key: string]: any } = {};
-    header['Authorization'] = `Bearer ${this.#apiToken}`;
-    if (['POST', 'PUT', 'DELETE'].includes(method)) {
-      header['Content-Type'] = 'application/json; charset=utf-8';
-    }
-
-    const [responseData, statusCode, headers] = await kintone.proxy(
-      uri,
-      method,
-      header,
-      requestParams
-    );
-
-    const body: any = JSON.parse(responseData);
-    if (this.#debug) {
-      console.log('🕒 KING OF TIME WebAPI', { uri, method, header, requestParams, body });
-    }
-
-    // データを正常に受信できなかった場合、ログを出力しエラーを返します
-    if (statusCode !== 200) {
       if (this.#debug) {
-        console.log(
-          `KING OF TIMEへリクエストを送信しましたが、データを正常に受信できませんでした。`,
-          `エラー番号:`,
-          statusCode,
-          `エラー内容:`,
-          body,
-          `エラー詳細:`,
-          headers
-        );
+        console.groupCollapsed(`🕒 KING OF TIME WebAPI (${url})`);
       }
 
-      switch (statusCode) {
-        case 403:
-          switch (body?.errors[0]?.code) {
-            case 104:
-              throw new Error('利用可能時間外です。');
-          }
-          break;
-        default:
-          throw new Error(statusCode, body?.errors[0]);
+      const uri = KingOfTimeClient.ENDPOINT_ROOT + url;
+
+      const header: { [key: string]: any } = {};
+      header['Authorization'] = `Bearer ${this.#apiToken}`;
+      if (['POST', 'PUT', 'DELETE'].includes(method)) {
+        header['Content-Type'] = 'application/json; charset=utf-8';
+      }
+
+      const [responseData, statusCode, headers] = await kintone.proxy(
+        uri,
+        method,
+        header,
+        requestParams
+      );
+
+      const body: any = JSON.parse(responseData);
+      if (this.#debug) {
+        console.log('🕒 KING OF TIME WebAPI', { uri, method, header, requestParams, body });
+      }
+
+      // データを正常に受信できなかった場合、ログを出力しエラーを返します
+      if (statusCode !== 200) {
+        if (this.#debug) {
+          console.log(
+            `KING OF TIMEへリクエストを送信しましたが、データを正常に受信できませんでした。`,
+            `エラー番号:`,
+            statusCode,
+            `エラー内容:`,
+            body,
+            `エラー詳細:`,
+            headers
+          );
+        }
+
+        switch (statusCode) {
+          case 403:
+            switch (body?.errors[0]?.code) {
+              case 104:
+                throw new Error('利用可能時間外です。');
+            }
+            break;
+          default:
+            throw new Error(statusCode, body?.errors[0]);
+        }
+      }
+      return body;
+    } finally {
+      if (this.#debug) {
+        console.groupEnd();
       }
     }
-    return body;
   }
 
   private async get(params: { url: string; requestParams?: any }) {
