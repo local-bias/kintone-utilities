@@ -613,12 +613,17 @@ declare namespace KingOfTime {
     division?: string;
     ondivision?: boolean;
     additionalFields?: string;
-  } & ({ date?: string } | { start?: string; end?: string });
+  } & ({ date: string } | { start: string; end: string });
 
-  type GetDailySchedulesResponse = {
-    date: string;
-    dailySchedules: DailySchedule[];
-  }[];
+  type GetDailySchedulesResponse<T extends GetDailySchedulesRequest> = T extends { date: string }
+    ? {
+        date: string;
+        dailySchedules: DailySchedule[];
+      }
+    : {
+        date: string;
+        dailySchedules: DailySchedule[];
+      }[];
 
   type GetEmployeesResponse = {
     divisionCode: string;

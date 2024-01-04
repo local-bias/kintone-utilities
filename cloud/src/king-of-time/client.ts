@@ -100,9 +100,13 @@ export class KingOfTimeClient {
     return this.get({ url: 'daily-workings', requestParams: params });
   }
 
-  public async getDailySchedules(
-    params: KingOfTime.GetDailySchedulesRequest = {}
-  ): Promise<KingOfTime.GetDailySchedulesResponse> {
+  public async getDailySchedules<T extends KingOfTime.GetDailySchedulesRequest>(
+    params: T
+  ): Promise<KingOfTime.GetDailySchedulesResponse<T>> {
+    if ('date' in params) {
+      const { date, ...requestParams } = params;
+      return this.get({ url: `daily-schedules/${date}`, requestParams });
+    }
     return this.get({ url: 'daily-schedules', requestParams: params });
   }
 
