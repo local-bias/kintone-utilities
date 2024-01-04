@@ -613,7 +613,31 @@ declare namespace KingOfTime {
     division?: string;
     ondivision?: boolean;
     additionalFields?: string;
-  } & ({ date: string } | { start: string; end: string });
+  } & (
+    | { date: string }
+    | {
+        /**
+         * 取得したい期間の開始年月日
+         *
+         * - 過去日は最大3年前まで
+         *
+         * @default 当日
+         * @example "2024-01-01"
+         */
+        start?: string;
+        /**
+         * 取得したい期間の終了年月日
+         *
+         * - `start` が指定されている場合は必須
+         * - 期間は最大62日
+         * - 未来日は最大1年後まで
+         *
+         * @default 当日
+         * @example "2024-01-31"
+         */
+        end?: string;
+      }
+  );
 
   type GetDailySchedulesResponse<T extends GetDailySchedulesRequest> = T extends { date: string }
     ? {
