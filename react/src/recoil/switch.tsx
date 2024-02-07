@@ -1,13 +1,13 @@
-import { FormControlLabel, Switch } from '@mui/material';
+import { FormControlLabel, Switch, SwitchProps } from '@mui/material';
 import React, { FC, Suspense, memo } from 'react';
 import { RecoilState, useRecoilCallback, useRecoilValue } from 'recoil';
 
 type Props = {
   state: RecoilState<boolean>;
   label?: string;
-};
+} & Omit<SwitchProps, 'checked'>;
 
-const Component: FC<Props> = ({ state, label }) => {
+const Component: FC<Props> = ({ state, label, ...switchProps }) => {
   const enables = useRecoilValue(state);
 
   const onChange = useRecoilCallback(
@@ -20,15 +20,15 @@ const Component: FC<Props> = ({ state, label }) => {
 
   return (
     <FormControlLabel
-      control={<Switch color='primary' checked={enables} />}
+      control={<Switch checked={enables} {...switchProps} />}
       onChange={(_, checked) => onChange(checked)}
       label={label}
     />
   );
 };
 
-const PlaceHolder: FC<Props> = ({ label }) => (
-  <FormControlLabel control={<Switch color='primary' disabled defaultChecked />} label={label} />
+const PlaceHolder: FC<Props> = ({ label, state, ...switchProps }) => (
+  <FormControlLabel control={<Switch {...switchProps} disabled defaultChecked />} label={label} />
 );
 
 const Container: FC<Props> = (props) => (
