@@ -8,6 +8,7 @@ const API_ENDPOINT_APPS = `apps`;
 const API_ENDPOINT_VIEWS = 'app/views';
 const API_ENDPOINT_FORM_FIELDS = 'app/form/fields';
 const API_ENDPOINT_FORM_LAYOUT = 'app/form/layout';
+const API_ENDPOINT_APP_SETTINGS = 'app/settings';
 
 export const getApp = async (
   params: WithCommonRequestParams<{ id: kintoneAPI.IDToRequest }>
@@ -115,6 +116,23 @@ export const getFormLayout = async (
   const { app, preview = false, debug, guestSpaceId } = params;
   return api({
     endpointName: API_ENDPOINT_FORM_LAYOUT,
+    method: 'GET',
+    body: { app },
+    preview,
+    debug,
+    guestSpaceId,
+  });
+};
+
+export const getAppSettings = async (
+  params: WithCommonRequestParams<{
+    app: kintoneAPI.IDToRequest;
+    preview?: boolean;
+  }>
+): Promise<kintoneAPI.AppSettings> => {
+  const { app, preview = false, debug, guestSpaceId } = params;
+  return api({
+    endpointName: API_ENDPOINT_APP_SETTINGS,
     method: 'GET',
     body: { app },
     preview,

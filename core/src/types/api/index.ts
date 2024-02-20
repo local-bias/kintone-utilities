@@ -235,6 +235,37 @@ export declare namespace kintoneAPI {
     type UserSelect = DefaultLayoutUserSelect;
   }
 
+  type AppSettings = {
+    name: string;
+    description: string;
+    icon:
+      | {
+          type: 'FILE';
+          file: {
+            contentType: string;
+            fileKey: string;
+            name: string;
+            size: string;
+          };
+        }
+      | {
+          type: 'PRESET';
+          key: string;
+        };
+    theme:
+      | 'WHITE'
+      | 'CLIPBOARD'
+      | 'BINDER'
+      | 'PENCIL'
+      | 'CLIPS'
+      | 'RED'
+      | 'BLUE'
+      | 'GREEN'
+      | 'YELLOW'
+      | 'BLACK';
+    revision: string;
+  };
+
   namespace response {
     type App = { readonly app?: kintoneAPI.App; readonly fields?: FieldProperties };
   }
