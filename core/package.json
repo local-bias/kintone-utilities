@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities",
-  "version": "4.1.6",
+  "version": "4.2.0",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "repository": "https://github.com/local-bias/kintone-utilities.git",
@@ -19,7 +19,7 @@
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@kintone/dts-gen": "^8.0.6",
+    "@kintone/dts-gen": "^8.0.7",
     "@types/jest": "^29.5.12",
     "jest": "^29.7.0",
     "jest-html-reporters": "^3.1.7",
