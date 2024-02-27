@@ -27,5 +27,17 @@ export const useRecoilRow = <T>(props: { state: RecoilState<T[]>; getNewRow: () 
     [state]
   );
 
-  return { addRow, deleteRow };
+  const changeRow = useRecoilCallback(
+    ({ set }) =>
+      (index: number, row: T) => {
+        set(state, (prev) => {
+          const next = [...prev];
+          next[index] = row;
+          return next;
+        });
+      },
+    [state]
+  );
+
+  return { addRow, deleteRow, changeRow };
 };
