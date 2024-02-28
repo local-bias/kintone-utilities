@@ -242,6 +242,60 @@ export const getCalcFieldValueAsString = (params: {
   return fieldValue;
 };
 
+/**
+ * フィールドのタイプに応じて、空の値を返却します
+ * @param field クリア対象のフィールド
+ * @returns クリア後のフィールドの値
+ */
+export const getEmptyValue = (field: kintoneAPI.Field): kintoneAPI.Field['value'] => {
+  switch (field.type) {
+    case '__ID__':
+    case '__REVISION__':
+    case 'CALC':
+    case 'CREATED_TIME':
+    case 'UPDATED_TIME':
+    case 'CREATOR':
+    case 'MODIFIER':
+      console.warn(
+        `[kintone-utilities]: ${field.type}はクリアできないため、処理をスキップしました`
+      );
+      return field.value;
+    case 'SINGLE_LINE_TEXT':
+    case 'NUMBER':
+    case 'MULTI_LINE_TEXT':
+    case 'RICH_TEXT':
+    case 'DATE':
+    case 'TIME':
+    case 'DATETIME':
+    case 'DROP_DOWN':
+    case 'LINK':
+    case 'RECORD_NUMBER':
+    case 'STATUS':
+    case 'RADIO_BUTTON':
+      return '';
+    case 'CATEGORY':
+    case 'CHECK_BOX':
+    case 'MULTI_SELECT':
+    case 'USER_SELECT':
+    case 'GROUP_SELECT':
+    case 'ORGANIZATION_SELECT':
+    case 'STATUS_ASSIGNEE':
+    case 'FILE':
+      return [];
+    case 'SUBTABLE':
+      return field.value.map((row) => ({
+        ...row,
+        value: Object.entries(row.value).reduce(
+          (acc, [key, cell]) => ({ ...acc, [key]: getEmptyValue(cell) }),
+          {}
+        ),
+      }));
+    default:
+      //@ts-expect-error
+      throw new Error(`未対応のフィールドタイプです: ${field.type}`);
+  }
+};
+
 export const compareField = (
   field1: kintoneAPI.Field,
   field2: kintoneAPI.Field,
