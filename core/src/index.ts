@@ -10,3 +10,4 @@ export * from './utilities';
 export * from './utility-types';
 export * from './date';
 export * from './cybozu';
+export * from './xapp';
