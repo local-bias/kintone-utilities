@@ -247,8 +247,16 @@ export const getCalcFieldValueAsString = (params: {
  * @param field クリア対象のフィールド
  * @returns クリア後のフィールドの値
  */
-export const getEmptyValue = (field: kintoneAPI.Field): kintoneAPI.Field['value'] => {
-  switch (field.type) {
+export const getEmptyValue = (
+  params: { type: kintoneAPI.Field['type'] } | { field: kintoneAPI.Field }
+): kintoneAPI.Field['value'] => {
+  let type;
+  if ('type' in params) {
+    type = params.type;
+  } else {
+    type = params.field.type;
+  }
+  switch (type) {
     case '__ID__':
     case '__REVISION__':
     case 'CALC':
@@ -256,10 +264,13 @@ export const getEmptyValue = (field: kintoneAPI.Field): kintoneAPI.Field['value'
     case 'UPDATED_TIME':
     case 'CREATOR':
     case 'MODIFIER':
-      console.warn(
-        `[kintone-utilities]: ${field.type}はクリアできないため、処理をスキップしました`
-      );
-      return field.value;
+      if ('field' in params) {
+        console.warn(
+          `[kintone-utilities]: ${params.field.type}はクリアできないため、処理をスキップしました`
+        );
+        return params.field.value;
+      }
+      return null;
     case 'SINGLE_LINE_TEXT':
     case 'NUMBER':
     case 'MULTI_LINE_TEXT':
@@ -283,13 +294,15 @@ export const getEmptyValue = (field: kintoneAPI.Field): kintoneAPI.Field['value'
     case 'FILE':
       return [];
     case 'SUBTABLE':
-      return field.value.map((row) => ({
-        ...row,
-        value: Object.entries(row.value).reduce(
-          (acc, [key, cell]) => ({ ...acc, [key]: getEmptyValue(cell) }),
-          {}
-        ),
-      }));
+      if ('field' in params) {
+        return (params.field as kintoneAPI.field.Subtable).value.map((row) => ({
+          ...row,
+          value: Object.entries(row.value).reduce(
+            (acc, [key, cell]) => ({ ...acc, [key]: getEmptyValue(cell) }),
+            {}
+          ),
+        }));
+      }
     default:
       //@ts-expect-error
       throw new Error(`未対応のフィールドタイプです: ${field.type}`);
