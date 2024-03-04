@@ -342,7 +342,29 @@ export const getDefaultValue = (property: kintoneAPI.FieldProperty) => {
     case 'USER_SELECT':
     case 'GROUP_SELECT':
     case 'ORGANIZATION_SELECT':
-      return 'defaultValue' in property ? property.defaultValue ?? [] : [];
+      if (!('defaultValue' in property)) {
+        return [];
+      }
+      const { defaultValue: d } = property;
+      return d.map((v) => {
+        if (typeof v === 'string') {
+          return { code: v, name: v };
+        }
+        switch (v.type) {
+          case 'USER':
+          case 'GROUP':
+          case 'ORGANIZATION':
+            return { code: v.code, name: v.code };
+          case 'FUNCTION':
+            if (v.code === 'LOGINUSER()') {
+              const loginUser = kintone.getLoginUser();
+              return { code: loginUser.code, name: loginUser.name };
+            }
+            return [];
+          default:
+            return [];
+        }
+      });
     case 'STATUS':
     case 'CATEGORY':
     case 'RECORD_NUMBER':
