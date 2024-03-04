@@ -6,3 +6,4 @@ export * from './record-comment';
 export * from './report';
 export * from './space';
 export * from './utility';
+export * from './cybozu-user';
