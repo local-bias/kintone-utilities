@@ -49,7 +49,7 @@ export const getCybozuUsers = (
   props: kintoneAPI.cybozu.GetUsersRequest & { debug?: boolean } = {}
 ) => {
   const { debug = false, ...body } = props;
-  return api<kintoneAPI.cybozu.GetUsersResponse>({
+  return api<cybozu.api.User[]>({
     endpointName: API_ENDPOINT_USERS,
     method: 'GET',
     body,

@@ -11,3 +11,4 @@ export * from './utility-types';
 export * from './date';
 export * from './cybozu';
 export * from './xapp';
+export * from './cybozu-api';
