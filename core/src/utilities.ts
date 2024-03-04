@@ -309,6 +309,47 @@ export const getEmptyValue = (
   }
 };
 
+export const getDefaultValue = (property: kintoneAPI.FieldProperty) => {
+  switch (property.type) {
+    case 'SINGLE_LINE_TEXT':
+    case 'NUMBER':
+    case 'MULTI_LINE_TEXT':
+    case 'RICH_TEXT':
+    case 'DROP_DOWN':
+    case 'RADIO_BUTTON':
+    case 'LINK':
+      return 'defaultValue' in property ? property.defaultValue ?? '' : '';
+    case 'DATE':
+      const { defaultValue, defaultNowValue } = property;
+      if (defaultValue) {
+        return defaultValue;
+      }
+      return defaultNowValue ? new Date().toISOString().split('T')[0] : '';
+    case 'TIME':
+      const { defaultNowValue: n, defaultValue: v } = property;
+      if (v) {
+        return v;
+      }
+      return n ? new Date().toISOString().split('T')[1].split('.')[0] : '';
+    case 'DATETIME':
+      const { defaultNowValue: now, defaultValue: value } = property;
+      if (value) {
+        return value;
+      }
+      return now ? new Date().toISOString() : '';
+    case 'CHECK_BOX':
+    case 'MULTI_SELECT':
+    case 'USER_SELECT':
+    case 'GROUP_SELECT':
+    case 'ORGANIZATION_SELECT':
+      return 'defaultValue' in property ? property.defaultValue ?? [] : [];
+    case 'STATUS':
+    case 'CATEGORY':
+    case 'RECORD_NUMBER':
+      return null;
+  }
+};
+
 export const compareField = (
   field1: kintoneAPI.Field,
   field2: kintoneAPI.Field,
