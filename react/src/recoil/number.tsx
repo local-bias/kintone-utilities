@@ -3,17 +3,17 @@ import React, { ChangeEventHandler, FC, Suspense, memo } from 'react';
 import { RecoilState, useRecoilCallback, useRecoilValue } from 'recoil';
 
 type Props = {
-  state: RecoilState<string>;
+  state: RecoilState<number>;
   width?: number;
-} & Omit<TextFieldProps, 'value' | 'onChange'>;
+} & Omit<TextFieldProps, 'type' | 'value' | 'onChange'>;
 
 const Component: FC<Props> = ({ state, width, ...textFieldProps }) => {
-  const query = useRecoilValue(state);
+  const value = useRecoilValue(state);
 
   const onChange: ChangeEventHandler<HTMLInputElement> = useRecoilCallback(
     ({ set }) =>
       (event) => {
-        set(state, event.target.value);
+        set(state, Number(event.target.value ?? 0));
       },
     []
   );
@@ -21,28 +21,29 @@ const Component: FC<Props> = ({ state, width, ...textFieldProps }) => {
   return (
     <TextField
       {...textFieldProps}
-      value={query}
+      type='number'
+      value={value ?? 0}
       onChange={onChange}
       sx={{ ...textFieldProps.sx, width }}
     />
   );
 };
-Component.displayName = 'RecoilTextComponent';
+Component.displayName = 'RecoilNumberComponent';
 
 const PlaceHolder: FC<Props> = ({ label, placeholder, width }) => (
   <TextField label={label} placeholder={placeholder} value='' sx={{ width }} disabled />
 );
-PlaceHolder.displayName = 'RecoilTextPlaceHolder';
+PlaceHolder.displayName = 'RecoilNumberPlaceHolder';
 
 const Container: FC<Props> = (props) => (
   <Suspense fallback={<PlaceHolder {...props} />}>
     <Component {...props} />
   </Suspense>
 );
-Container.displayName = 'RecoilTextContainer';
+Container.displayName = 'RecoilNumberContainer';
 
 Container.defaultProps = {
   width: 400,
 };
 
-export const RecoilText = memo(Container);
+export const RecoilNumber = memo(Container);
