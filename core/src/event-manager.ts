@@ -1,4 +1,4 @@
-import { getHeaderSpace } from '@lb-ribbit/kintone-xapp';
+import { getHeaderSpace } from './xapp';
 import type { kintoneAPI } from './types/api';
 import { detectGuestSpaceId, withMobileEvents } from './utilities';
 
