@@ -127,8 +127,7 @@ export class KintoneEventManager {
       }
       const headerSpace = getHeaderSpace(event.type);
       if (!headerSpace) {
-        const message =
-          'ヘッダーにボタンを追加することができませんでした。ヘッダーが見つかりませんでした。';
+        const message = `ヘッダーにボタンを追加することができませんでした。${event.type}イベントが発生したタイミングには、対象要素が存在しない可能性があります`;
         if (!isTolerantToFailure) {
           throw new Error(message);
         }
