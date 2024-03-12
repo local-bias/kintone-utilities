@@ -103,8 +103,17 @@ export class KintoneEventManager {
     isButtonHidden?: (event: kintoneAPI.js.Event) => boolean | Promise<boolean>;
     onClick: () => void | Promise<void>;
     events: kintoneAPI.js.EventType[];
+    isTolerantToFailure?: boolean;
   }) {
-    const { id, label, color = 'default', onClick, isButtonHidden, events } = params;
+    const {
+      id,
+      label,
+      color = 'default',
+      onClick,
+      isButtonHidden,
+      events,
+      isTolerantToFailure = false,
+    } = params;
 
     this.addButtonStyle();
 
@@ -118,9 +127,13 @@ export class KintoneEventManager {
       }
       const headerSpace = getHeaderSpace(event.type);
       if (!headerSpace) {
-        throw new Error(
-          'ヘッダーにボタンを追加することができませんでした。ヘッダーが見つかりませんでした。'
-        );
+        const message =
+          'ヘッダーにボタンを追加することができませんでした。ヘッダーが見つかりませんでした。';
+        if (!isTolerantToFailure) {
+          throw new Error(message);
+        }
+        console.error(message);
+        return event;
       }
 
       const root = document.createElement('button');
