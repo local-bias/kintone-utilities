@@ -37,7 +37,7 @@ export const withSpaceIdFallback = async <T extends (...args: any) => any>(param
     const response = await func(funcParams);
     return response;
   } catch (error: any) {
-    if (error.code === 'GAIA_IL23') {
+    if (['GAIA_IL23', 'GAIA_IL25'].includes(error.code)) {
       const response = await func({ ...funcParams, guestSpaceId: spaceId });
       return response;
     }
