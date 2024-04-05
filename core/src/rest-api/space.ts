@@ -6,11 +6,14 @@ const API_ENDPOINT_THREAD = 'space/thread';
 const API_ENDPOINT_MEMBERS = 'space/members';
 const API_ENDPOINT_TEMPLATE = 'template/space';
 
-export const getSpace = (params: kintoneAPI.rest.space.GetSpaceRequest) => {
+export const getSpace = (
+  params: WithCommonRequestParams<kintoneAPI.rest.space.GetSpaceRequest>
+) => {
   return api<kintoneAPI.rest.space.GetSpaceResponse>({
     endpointName: API_ENDPOINT_SPACE,
     method: 'GET',
     body: params,
+    ...params,
   });
 };
 
