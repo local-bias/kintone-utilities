@@ -69,5 +69,8 @@ export type PluginConfig = {
     standalone?: Partial<PluginManifest>;
   };
   pluginReleasePageUrl?: string;
+  inquiriesPageUrl?: string;
+  promotionPageUrl?: string;
+  bannerPageUrl?: string;
   config_params?: Record<string, any>;
 };
