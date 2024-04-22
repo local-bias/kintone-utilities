@@ -11,14 +11,14 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "openai": "^4.24.1",
-    "qs": "^6.11.2"
+    "openai": "^4",
+    "qs": "^6"
   },
   "devDependencies": {
-    "@kintone/dts-gen": "^8.0.3",
-    "@types/node": "^20.10.6",
-    "@types/qs": "^6.9.11",
-    "typescript": "^5.3.3"
+    "@kintone/dts-gen": "^8",
+    "@types/node": "^20",
+    "@types/qs": "^6",
+    "typescript": "^5"
   },
   "prettier": {
     "printWidth": 100,
