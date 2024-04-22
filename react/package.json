@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities-react",
-  "version": "1.13.1",
+  "version": "1.14.0",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "repository": "https://github.com/local-bias/kintone-utilities.git",
@@ -11,18 +11,18 @@
     "prepare": "npm run build"
   },
   "dependencies": {
-    "@emotion/styled": "^11.11.0",
-    "@konomi-app/kintone-utilities": "^5.4.1",
-    "@mui/icons-material": "^5.15.12",
-    "@mui/material": "^5.15.12",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "recoil": "^0.7.7"
+    "@emotion/styled": "^11",
+    "@konomi-app/kintone-utilities": "*",
+    "@mui/icons-material": "^5",
+    "@mui/material": "^5",
+    "react": "^18",
+    "react-dom": "^18",
+    "recoil": "^0.7"
   },
   "devDependencies": {
-    "@types/react": "^18.2.64",
-    "@types/react-dom": "^18.2.21",
-    "typescript": "^5.4.2"
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "typescript": "^5"
   },
   "prettier": {
     "printWidth": 100,
