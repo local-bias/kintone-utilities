@@ -2,11 +2,11 @@ import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mu
 import React, { FC, Suspense, memo } from 'react';
 import { RecoilState, useRecoilCallback, useRecoilValue } from 'recoil';
 
-type Props = {
-  state: RecoilState<string>;
+type Props<T extends string = string> = {
+  state: RecoilState<T>;
   label?: string;
   defaultValue?: string;
-  options: { label: string; value: string }[];
+  options: { label: string; value: T }[];
   width?: number;
 };
 
