@@ -5,7 +5,7 @@ import { RecoilState, useRecoilCallback, useRecoilValue } from 'recoil';
 type Props<T extends string = string> = {
   state: RecoilState<T>;
   label?: string;
-  defaultValue?: string;
+  defaultValue?: T;
   options: { label: string; value: T }[];
   width?: number;
 };
