@@ -74,8 +74,8 @@ const Container: FC<ContainerProps> = (props) => (
 Container.displayName = 'RecoilAppSelectContainer';
 Container.defaultProps = {
   sx: { width: 400 },
-  label: '対象フィールド',
-  placeholder: 'フィールドを選択してください',
+  label: '対象アプリ',
+  placeholder: 'アプリを選択してください',
 };
 
 export const RecoilAppSelect = Container;
