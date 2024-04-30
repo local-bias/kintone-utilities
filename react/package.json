@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities-react",
-  "version": "1.15.0",
+  "version": "1.15.2",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "repository": "https://github.com/local-bias/kintone-utilities.git",
