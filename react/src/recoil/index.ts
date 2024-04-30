@@ -3,5 +3,6 @@ export * from './field-select';
 export * from './hooks';
 export * from './number';
 export * from './radio';
+export * from './select';
 export * from './switch';
 export * from './text';
