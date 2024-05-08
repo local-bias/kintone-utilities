@@ -1,24 +1,18 @@
-export class RakutenAPIClient {
-  public static DOMAIN = 'https://app.rakuten.co.jp/';
+export class YahooAPIClient {
+  public static DOMAIN = 'https://shopping.yahooapis.jp/';
 
   readonly #debug: boolean;
-  readonly #applicationId: string;
-  readonly #applicationSecret: string;
-  readonly #affiliateId: string | undefined;
+  readonly #clientId: string;
 
   /** APIを最後に実行した時刻 */
   #lastRequested = 0;
 
-  constructor(params: {
-    applicationId: string;
-    applicationSecret: string;
-    affiliateId?: string;
-    debug?: boolean;
-  }) {
-    const { applicationId, applicationSecret, affiliateId, debug = false } = params;
-    this.#applicationId = applicationId;
-    this.#applicationSecret = applicationSecret;
-    this.#affiliateId = affiliateId;
+  /**
+   * @see {@link https://e.developer.yahoo.co.jp/dashboard Yahoo!デベロッパーネットワーク - アプリケーションの管理}
+   */
+  constructor(params: { clientId: string; debug?: boolean }) {
+    const { clientId, debug = false } = params;
+    this.#clientId = clientId;
     this.#debug = debug;
   }
 
@@ -48,7 +42,7 @@ export class RakutenAPIClient {
         }
       } catch (error) {
         this.#lastRequested = new Date().getTime();
-        console.error('⚠️楽天API実行時にエラーが発生しました', error);
+        console.error('⚠️Yahoo API実行時にエラーが発生しました', error);
         await new Promise((resolve) => setTimeout(resolve, 1000));
       }
     }
@@ -56,16 +50,8 @@ export class RakutenAPIClient {
     return response!;
   }
 
-  protected get applicationId() {
-    return this.#applicationId;
-  }
-
-  protected get applicationSecret() {
-    return this.#applicationSecret;
-  }
-
-  protected get affiliateId() {
-    return this.#affiliateId;
+  protected get clientId() {
+    return this.#clientId;
   }
 
   protected get debug() {

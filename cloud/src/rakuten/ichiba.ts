@@ -30,7 +30,7 @@ export class RakutenIchibaClient extends RakutenAPIClient {
     params: Omit<Rakuten.Ichiba.RequestParams, 'applicationId' | 'affiliateId'>
   ): Promise<Rakuten.Ichiba.SuccessResponse> {
     try {
-      if (this._debug) console.group('🛒 Rakuten API Call');
+      if (this.debug) console.group('🛒 Rakuten API Call');
       const url = this.createUrl(params);
       const response = await this.useAPI(() => fetch<Rakuten.Ichiba.Response>(url));
 
@@ -41,7 +41,7 @@ export class RakutenIchibaClient extends RakutenAPIClient {
       }
       return json;
     } finally {
-      if (this._debug) console.groupEnd();
+      if (this.debug) console.groupEnd();
     }
   }
 }
