@@ -26,20 +26,50 @@ export class RakutenIchibaClient extends RakutenAPIClient {
     return `${RakutenAPIClient.DOMAIN}${RakutenIchibaClient.END_POINT}?${stringify(urlOptions)}`;
   }
 
-  async search(
+  private async searchItems(
     params: Omit<Rakuten.Ichiba.RequestParams, 'applicationId' | 'affiliateId'>
+  ) {
+    const url = this.createUrl(params);
+    const response = await this.useAPI(() => fetch<Rakuten.Ichiba.Response>(url));
+
+    const json = await response.json();
+
+    if ('error' in json) {
+      throw new Error(json.error_description);
+    }
+    return json;
+  }
+
+  async search(
+    params: Omit<Rakuten.Ichiba.RequestParams, 'applicationId' | 'affiliateId'> & {
+      recursive?: boolean;
+      onStep?: (params: { items: Rakuten.Ichiba.Item[] }) => void;
+      items?: Rakuten.Ichiba.Item[];
+    }
   ): Promise<Rakuten.Ichiba.SuccessResponse> {
     try {
       if (this.debug) console.group('🛒 Rakuten API Call');
-      const url = this.createUrl(params);
-      const response = await this.useAPI(() => fetch<Rakuten.Ichiba.Response>(url));
 
-      const json = await response.json();
+      if (params.recursive) {
+        const response = await this.searchItems(params);
+        if (this.debug) console.log('📥 api response', response);
 
-      if ('error' in json) {
-        throw new Error(json.error_description);
+        const items = [...(params.items || []), ...response.Items];
+
+        if (params.onStep) {
+          params.onStep({ items });
+        }
+
+        if (
+          (params.hits && params.hits > response.hits) ||
+          response.hits === 0 ||
+          response.Items.length === 0
+        ) {
+          return { ...response, Items: items };
+        }
+        return this.search({ ...params, page: response.page + 1, items });
       }
-      return json;
+      return this.searchItems(params);
     } finally {
       if (this.debug) console.groupEnd();
     }
