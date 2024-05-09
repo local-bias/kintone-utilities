@@ -106,3 +106,27 @@ export const getMetaSubtableFields_UNSTABLE = (subtableCode: string): cx.Field[]
 
   return null;
 };
+
+/**
+ * **この関数は非公式のAPIを使用しています。kintoneのアップデートにより使用できなくなる可能性があります**
+ *
+ * URLのクエリパラメータに含まれる一覧の検索条件を取得します
+ * クエリパラメータでは、フィールドのキー情報としてフィールドコードの代わりにフィールドID(f + 数字)が使用されます
+ *
+ * 保険として、URLのクエリパラメータに含まれるqパラメータも取得します
+ *
+ * 取得する手順は以下の通りです
+ *
+ * 1. `cybozu.data.page.QUERY_STRING`
+ * 2. `new URLSearchParams(location.search).get('q')`
+ * 3. 空文字
+ *
+ * @example
+ * ```ts
+ * // URL: https://example.cybozu.com/k/1/?f100000=1&f200000=2
+ * getQueryString_UNSTABLE(); // => 'f100000=1&f200000=2'
+ * ```
+ */
+export const getQueryString_UNSTABLE = () => {
+  return cybozu?.data?.page?.QUERY_STRING ?? new URLSearchParams(location.search).get('q') ?? '';
+};
