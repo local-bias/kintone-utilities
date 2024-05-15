@@ -4,8 +4,8 @@ export const fetch = async <T = any>(
   url: string,
   options: CompatibleFetchRequestOptions
 ): Promise<CompatibleFetchResponse<T>> => {
-  const { method = 'GET', headers: reqHeaders = {}, body: reqBody = {} } = options || {};
-  const [resBody, status, resHeaders] = await kintone.proxy(url, method, reqHeaders, reqBody);
+  const { method = 'GET', body: reqBody = {} } = options || {};
+  const [resBody, status, resHeaders] = await kintone.api(url, method, reqBody);
 
   return {
     json: async () => JSON.parse(resBody),
