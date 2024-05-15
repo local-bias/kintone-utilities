@@ -1,0 +1,23 @@
+{
+  "name": "@ribbit/kintone",
+  "version": "0.1.0",
+  "description": "",
+  "types": "dist/index.d.ts",
+  "main": "dist/index.js",
+  "repository": "https://github.com/local-bias/kintone-cloud-connector.git",
+  "author": "adachi",
+  "license": "MIT",
+  "scripts": {
+    "build": "rmdir /s /q dist & tsc",
+    "prepare": "npm run build"
+  },
+  "dependencies": {
+    "qs": "^6"
+  },
+  "devDependencies": {
+    "@kintone/dts-gen": "^8",
+    "@types/node": "^20",
+    "@types/qs": "^6",
+    "typescript": "^5"
+  }
+}
