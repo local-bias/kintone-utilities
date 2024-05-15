@@ -19,5 +19,10 @@
     "@types/node": "^20",
     "@types/qs": "^6",
     "typescript": "^5"
-  }
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ]
 }

@@ -12,9 +12,12 @@
     "esModuleInterop": true,
     "declaration": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@base/*": ["./src/base/*"]
+    }
   },
-  "files": ["./node_modules/@kintone/dts-gen/kintone.d.ts", "cloud.d.ts"],
+  "files": ["./node_modules/@kintone/dts-gen/kintone.d.ts"],
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]
 }
