@@ -96,7 +96,9 @@ declare namespace Yahoo {
       sale_end_from?: number;
       sale_start_from?: number;
       sale_start_to?: number;
-      sort?: string;
+      price_from?: number;
+      price_to?: number;
+      sort?: '+price' | '-price' | '+score' | '-score';
       condition?: 'used' | 'new';
     };
 

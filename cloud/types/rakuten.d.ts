@@ -130,7 +130,7 @@ declare namespace Rakuten {
       /** 取得ページ - 1から100までの整数 */
       page?: number;
       /** ソート - 各ソートオプションに対応する文字列 */
-      sort?: string;
+      sort?: Sorting;
       /** 最小価格 - 1以上999,999,999以下の整数 */
       minPrice?: number;
       /** 最大価格 - 1以上999,999,999以下の整数 maxPriceはminPriceより大きい必要がある */
