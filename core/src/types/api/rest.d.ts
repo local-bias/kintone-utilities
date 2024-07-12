@@ -127,12 +127,14 @@ declare namespace kintoneRestAPI {
       editable: boolean;
       deletable: boolean;
     };
-    fields: Record<
-      string,
-      {
-        viewable: boolean;
-        editable: boolean;
-      }
+    fields: Partial<
+      Record<
+        string,
+        {
+          viewable: boolean;
+          editable: boolean;
+        }
+      >
     >;
   };
 

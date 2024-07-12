@@ -25,7 +25,7 @@ type Field = BaseFieldProperty & {
 };
 
 type Table = BaseFieldProperty & {
-  fieldList: Record<string, Field>;
+  fieldList: Partial<Record<string, Field>>;
   properties: { noLabel: BooleanAsString };
   type: 'TABLE';
 };
@@ -33,7 +33,7 @@ type Table = BaseFieldProperty & {
 type Schema = {
   groups: any[];
   revision: string;
-  subTable: Record<string, Table>;
+  subTable: Partial<Record<string, Table>>;
   table: Table;
 };
 
@@ -55,7 +55,7 @@ declare namespace cybozu {
           vtComponentLocalId: string;
         }[];
         export const revision: string;
-        export const subTable: Record<string, Table>;
+        export const subTable: Partial<Record<string, Table>>;
         export const table: Table;
       }
       namespace FORM_DATA {
@@ -65,7 +65,7 @@ declare namespace cybozu {
             vtComponentLocalId: string;
           }[];
           export const revision: string;
-          export const subTable: Record<string, Table>;
+          export const subTable: Partial<Record<string, Table>>;
           export const table: Table;
         }
       }

@@ -166,7 +166,7 @@ export declare namespace kintoneAPI {
 
   type FieldProperty = OneOfProperty;
   type FieldPropertyType = FieldProperty['type'];
-  type FieldProperties = Record<string, OneOfProperty>;
+  type FieldProperties = Partial<Record<string, OneOfProperty>>;
   type FieldEntry = [string, OneOfProperty];
   /** REST APIから取得できるアプリの各フィールド情報 */
   namespace property {
