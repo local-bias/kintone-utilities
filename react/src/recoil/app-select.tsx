@@ -65,17 +65,20 @@ const PlaceHolder: FC<ContainerProps> = ({ label, placeholder, ...autocompletePr
 );
 PlaceHolder.displayName = 'RecoilAppSelectPlaceHolder';
 
-const Container: FC<ContainerProps> = (props) => (
-  <Suspense fallback={<PlaceHolder {...props} />}>
-    <Component {...props} />
-  </Suspense>
-);
+const Container: FC<ContainerProps> = (props) => {
+  const completed: ContainerProps = {
+    sx: { width: 400 },
+    label: '対象アプリ',
+    placeholder: 'アプリを選択してください',
+    ...props,
+  };
 
-Container.displayName = 'RecoilAppSelectContainer';
-Container.defaultProps = {
-  sx: { width: 400 },
-  label: '対象アプリ',
-  placeholder: 'アプリを選択してください',
+  return (
+    <Suspense fallback={<PlaceHolder {...completed} />}>
+      <Component {...completed} />
+    </Suspense>
+  );
 };
+Container.displayName = 'RecoilAppSelectContainer';
 
 export const RecoilAppSelect = Container;

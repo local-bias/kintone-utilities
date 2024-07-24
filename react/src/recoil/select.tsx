@@ -1,5 +1,5 @@
 import { MenuItem, TextField, TextFieldProps } from '@mui/material';
-import React, { ChangeEventHandler, FC, Suspense, memo } from 'react';
+import React, { ChangeEventHandler, FC, Suspense } from 'react';
 import { RecoilState, useRecoilCallback, useRecoilValue } from 'recoil';
 
 type Props<T extends string = string> = {
@@ -42,15 +42,18 @@ const PlaceHolder: FC<Props> = ({ label, placeholder, width }) => (
 );
 PlaceHolder.displayName = 'RecoilSelectPlaceHolder';
 
-const Container: FC<Props> = (props) => (
-  <Suspense fallback={<PlaceHolder {...props} />}>
-    <Component {...props} />
-  </Suspense>
-);
+const Container: FC<Props> = (props) => {
+  const completed: Props = {
+    sx: { width: 400 },
+    ...props,
+  };
+
+  return (
+    <Suspense fallback={<PlaceHolder {...completed} />}>
+      <Component {...completed} />
+    </Suspense>
+  );
+};
 Container.displayName = 'RecoilSelectContainer';
 
-Container.defaultProps = {
-  width: 400,
-};
-
-export const RecoilSelect = memo(Container);
+export const RecoilSelect = Container;

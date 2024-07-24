@@ -65,17 +65,20 @@ const PlaceHolder: FC<ContainerProps> = ({ label, placeholder, ...autocompletePr
 );
 PlaceHolder.displayName = 'RecoilFieldSelectPlaceHolder';
 
-const Container: FC<ContainerProps> = (props) => (
-  <Suspense fallback={<PlaceHolder {...props} />}>
-    <Component {...props} />
-  </Suspense>
-);
+const Container: FC<ContainerProps> = (props) => {
+  const completed: ContainerProps = {
+    sx: { width: 400 },
+    label: '対象フィールド',
+    placeholder: 'フィールドを選択してください',
+    ...props,
+  };
 
-Container.displayName = 'RecoilFieldSelectContainer';
-Container.defaultProps = {
-  sx: { width: 400 },
-  label: '対象フィールド',
-  placeholder: 'フィールドを選択してください',
+  return (
+    <Suspense fallback={<PlaceHolder {...completed} />}>
+      <Component {...completed} />
+    </Suspense>
+  );
 };
+Container.displayName = 'RecoilFieldSelectContainer';
 
 export const RecoilFieldSelect = Container;

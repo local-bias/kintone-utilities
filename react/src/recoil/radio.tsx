@@ -1,5 +1,5 @@
 import { FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
-import React, { FC, Suspense, memo } from 'react';
+import React, { FC, Suspense } from 'react';
 import { RecoilState, useRecoilCallback, useRecoilValue } from 'recoil';
 
 type Props<T extends string = string> = {
@@ -50,18 +50,21 @@ const PlaceHolder: FC<Props> = ({ options, width }) => (
 );
 PlaceHolder.displayName = 'RecoilRadioPlaceHolder';
 
-const Container: FC<Props> = (props) => (
-  <FormControl>
-    {props.label && <FormLabel>{props.label}</FormLabel>}
-    <Suspense fallback={<PlaceHolder {...props} />}>
-      <Component {...props} />
-    </Suspense>
-  </FormControl>
-);
+const Container: FC<Props> = (props) => {
+  const completed: Props = {
+    width: 400,
+    ...props,
+  };
+
+  return (
+    <FormControl>
+      {props.label && <FormLabel>{props.label}</FormLabel>}
+      <Suspense fallback={<PlaceHolder {...completed} />}>
+        <Component {...completed} />
+      </Suspense>
+    </FormControl>
+  );
+};
 Container.displayName = 'RecoilRadioContainer';
 
-Container.defaultProps = {
-  width: 400,
-};
-
-export const RecoilRadio = memo(Container);
+export const RecoilRadio = Container;

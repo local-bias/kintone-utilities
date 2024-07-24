@@ -1,5 +1,5 @@
 import { FormControlLabel, Switch, SwitchProps } from '@mui/material';
-import React, { FC, Suspense, memo } from 'react';
+import React, { FC, Suspense } from 'react';
 import { RecoilState, useRecoilCallback, useRecoilValue } from 'recoil';
 
 type Props = {
@@ -37,4 +37,4 @@ const Container: FC<Props> = (props) => (
   </Suspense>
 );
 
-export const RecoilSwitch = memo(Container);
+export const RecoilSwitch = Container;
