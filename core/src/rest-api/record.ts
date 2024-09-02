@@ -212,6 +212,7 @@ export const updateAllRecords = async <T extends kintoneAPI.rest.Frame = kintone
 export type RecordsPostRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
   app: kintoneAPI.IDToRequest;
   records: kintoneAPI.rest.RecordToRequest<T>[];
+  limit?: number;
 };
 export type AddAllRecordsParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   WithBulkRequestCallback<WithCommonRequestParams<RecordsPostRequest<T>>>;
@@ -314,7 +315,16 @@ export const getAllRecords = async <T extends Record<string, any> = kintoneAPI.R
 };
 
 type WithId<T> = T & { $id: kintoneAPI.field.ID };
-type OnStep<T> = (params: { records: T[] }) => void;
+type OnStep<T> = (params: {
+  /**
+   * その時点で取得が完了した全てのレコード
+   */
+  records: T[];
+  /**
+   * その時点で取得が完了したレコードのうち、新たに取得されたレコード
+   */
+  incremental: T[];
+}) => void;
 
 /**
  * 対象アプリの指定されたクエリに一致するレコードを、レコードIDをもとに全件取得します
@@ -381,7 +391,7 @@ const getRecursive = async <T extends Record<string, unknown>>(
   const stored = [...(params.stored ?? []), ...records];
 
   if (params.onStep) {
-    params.onStep({ records: stored });
+    params.onStep({ records: stored, incremental: records });
   }
 
   const lastRecord = stored[stored.length - 1];
@@ -469,7 +479,7 @@ const getRecordsByCursorId = async <T extends kintoneAPI.rest.Frame>(
   const newRecords: T[] = [...loadedData, ...(response.records as T[])];
 
   if (onStep) {
-    onStep({ records: newRecords });
+    onStep({ records: newRecords, incremental: response.records as T[] });
   }
 
   return response.next ? getRecordsByCursorId({ ...params, loadedData: newRecords }) : newRecords;
@@ -620,12 +630,13 @@ export type BulkRequestParams<T extends kintoneAPI.rest.Frame = kintoneAPI.Recor
         }
     )[];
     onProgress?: (params: BulkRequestProgressParams) => void;
+    limit?: number;
   }>;
 
 export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: BulkRequestParams<T>
 ): Promise<kintoneAPI.rest.BulkResponse> => {
-  const { requests, debug, guestSpaceId } = params;
+  const { requests, debug, guestSpaceId, limit = API_LIMIT_BULK_REQUEST } = params;
   if (debug) {
     console.groupCollapsed('📦 %cbulkRequest', 'color: #1e40af');
   }
@@ -668,7 +679,10 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
           });
         }
       } else if (request.type === 'addAllRecords') {
-        const recordChunks = sliceIntoChunks(request.params.records, API_LIMIT_POST);
+        const recordChunks = sliceIntoChunks(
+          request.params.records,
+          Math.min(request.params.limit ?? API_LIMIT_POST, API_LIMIT_POST)
+        );
         for (const records of recordChunks) {
           reshapedRequests.push({ method, api, payload: { ...request.params, records } });
         }
@@ -686,7 +700,10 @@ export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.R
     }
 
     const responses: kintoneAPI.rest.BulkResponse[] = [];
-    const requestChunks = sliceIntoChunks(reshapedRequests, API_LIMIT_BULK_REQUEST);
+    const requestChunks = sliceIntoChunks(
+      reshapedRequests,
+      Math.min(limit, API_LIMIT_BULK_REQUEST)
+    );
     let done = 0;
     for (const requests of requestChunks) {
       const response = await api<kintoneAPI.rest.BulkResponse>({
