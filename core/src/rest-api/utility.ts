@@ -53,3 +53,54 @@ export const isGuestSpace = async (appId: string): Promise<boolean> => {
   }
   return false;
 };
+
+type Operator = '=' | '!=' | '>' | '<' | '>=' | '<=' | 'in' | 'not in' | 'like' | 'not like';
+
+type OrderBy = 'asc' | 'desc';
+
+/**
+ * ソート条件を組み立てます．
+ *
+ * ### なぜこの関数が必要？
+ *
+ * kintoneでフィールドコードが変更されることを想定してコードを記述する場合、フィールドコードのチェックと、ソート条件の組み立てを1つずつ定義する必要があります．
+ *
+ * この関数を使用することで、フィールドコードのチェックと、ソート条件の組み立てを同時に行うことができます．
+ */
+export const useSorting = <T>(field: keyof T, orderBy: OrderBy) => {
+  return ` order by ${String(field)} ${orderBy}`;
+};
+
+export type QueryCondition<T> = {
+  field: keyof T;
+  operator: Operator;
+  value: string;
+  truth?: 'and' | 'or';
+};
+
+/**
+ * APIを使用する際のクエリーを組み立てます．
+ *
+ * ### なぜこの関数が必要？
+ *
+ *  kintoneでフィールドコードが変更されることを想定してコードを記述する場合、クエリに使用するフィールドコードを1つずつ定義する必要があります。
+ *
+ *  この関数を使用することで、フィールドコードのチェックと、クエリの組み立てを同時に行うことができます。
+ */
+export const useQuery = <T>(
+  conditions: QueryCondition<T>[],
+  options?: { sort?: { field: keyof T; orderBy: OrderBy } }
+) => {
+  const { sort } = options || {};
+  const mergedCondition = conditions.reduce((acc, condition) => {
+    if (acc.length) {
+      acc += ` ${condition.truth || 'and'} `;
+    }
+    return acc + `${String(condition.field)} ${condition.operator} ${condition.value}`;
+  }, '');
+
+  if (sort) {
+    return `${mergedCondition}${useSorting(sort.field, sort.orderBy)}`;
+  }
+  return mergedCondition;
+};
