@@ -11,7 +11,7 @@ const API_ENDPOINT_ACL_EVALUATE = `records/acl/evaluate`;
 const API_ENDPOINT_BULK = `bulkRequest`;
 const API_LIMIT_GET = 500;
 const API_LIMIT_PUT = 100;
-const API_LIMIT_POST = 100;
+export const API_LIMIT_POST = 100;
 const API_LIMIT_DELETE = 100;
 const API_LIMIT_STATUS_PUT = 100;
 const API_LIMIT_BULK_REQUEST = 20;
@@ -140,6 +140,19 @@ export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.Rec
   });
 };
 
+export const addRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
+  params: WithCommonRequestParams<RecordsPostRequest<T>>
+): Promise<kintoneAPI.rest.RecordsPostResponse> => {
+  const { debug, guestSpaceId, ...requestParams } = params;
+  return api({
+    endpointName: API_ENDPOINT_RECORDS,
+    method: 'POST',
+    body: requestParams,
+    debug,
+    guestSpaceId,
+  });
+};
+
 export type RecordUpsertRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> = {
   app: kintoneAPI.IDToRequest;
   record: kintoneAPI.rest.RecordToRequest<T>;
@@ -221,6 +234,14 @@ export const addAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI
   params: AddAllRecordsParams<T>
 ): Promise<kintoneAPI.rest.RecordsPostResponse> => {
   const { onProgress, debug, guestSpaceId, ...requestParams } = params;
+
+  if (requestParams.records.length === 0) {
+    if (debug) {
+      console.log('😕 %caddAllRecords: No records to add', 'color: #fbbf24');
+    }
+    return { ids: [], revisions: [] };
+  }
+
   const responses: { results: kintoneAPI.rest.RecordsPostResponse[] } = (await bulkRequest<T>({
     requests: [{ type: 'addAllRecords', params: requestParams }],
     onProgress,

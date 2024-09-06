@@ -1,4 +1,5 @@
 export * from './app';
+export * from './client';
 export * from './file';
 export * from './record';
 export * from './record-comment';
