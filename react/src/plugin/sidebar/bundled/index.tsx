@@ -24,6 +24,10 @@ export type SidebarProps<T extends PluginConditionBase> = {
   commonTabLabel?: string;
   commonTab?: boolean;
   onConditionDelete?: (id: string) => void;
+  contextMenuItems?: {
+    component: JSX.Element | ((condition: T) => JSX.Element);
+    onClick: (condition: T) => void;
+  }[];
 };
 
 const Sidebar = <T extends PluginConditionBase = PluginConditionBase>(props: SidebarProps<T>) => {
@@ -52,6 +56,7 @@ const Sidebar = <T extends PluginConditionBase = PluginConditionBase>(props: Sid
                 onSelectedConditionChange={props.onSelectedConditionChange}
                 selectedConditionId={props.selectedConditionId}
                 onConditionDelete={props.onConditionDelete}
+                contextMenuItems={props.contextMenuItems}
               />
             </SidebarSortableContext>
           </SidebarTabsContainer>

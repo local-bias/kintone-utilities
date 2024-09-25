@@ -1,10 +1,10 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, Trash2 } from 'lucide-react';
-import React, { FC } from 'react';
-import { type PluginConditionBase, type SidebarProps } from '.';
-import clsx from 'clsx';
 import styled from '@emotion/styled';
+import clsx from 'clsx';
+import { GripVertical, Trash2 } from 'lucide-react';
+import React from 'react';
+import { type PluginConditionBase, type SidebarProps } from '.';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -20,6 +20,7 @@ type Props<T extends PluginConditionBase> = Pick<
   | 'onSelectedConditionChange'
   | 'selectedConditionId'
   | 'onConditionDelete'
+  | 'contextMenuItems'
 > & {};
 
 const SidebarTabContainer = styled.div`
@@ -95,6 +96,7 @@ const SidebarTab = <T extends PluginConditionBase>(
     selectedConditionId,
     setConditions,
     onConditionDelete,
+    contextMenuItems = [],
   } = props;
   const {
     isDragging,
@@ -141,14 +143,27 @@ const SidebarTab = <T extends PluginConditionBase>(
           </SidebarTabButton>
         </SidebarTabContainer>
       </ContextMenuTrigger>
-      <ContextMenuContent>
+      <ContextMenuContent style={{ minWidth: '240px' }}>
         <ContextMenuItem
           onClick={() => deleteCondition(condition.id)}
           disabled={conditions.length < 2}
         >
-          <Trash2 strokeWidth={1.5} className='mr-2 w-5 h-5 text-gray-600' />
+          <Trash2
+            strokeWidth={1.5}
+            style={{
+              marginRight: '8px',
+              width: '20px',
+              height: '20px',
+              color: '#475569',
+            }}
+          />
           この設定を削除
         </ContextMenuItem>
+        {contextMenuItems.map((item, index) => (
+          <ContextMenuItem key={index} onClick={() => item.onClick(condition)}>
+            {typeof item.component === 'function' ? item.component(condition) : item.component}
+          </ContextMenuItem>
+        ))}
       </ContextMenuContent>
     </ContextMenu>
   );
