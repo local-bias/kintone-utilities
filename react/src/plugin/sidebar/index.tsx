@@ -1,4 +1,4 @@
 export * from './root';
-export * from './ConditionAppendButton';
-export * from './ConditionTab';
-export * from './ConditionTabs';
+export * from './separated/ConditionAppendButton';
+export * from './separated/ConditionTab';
+export * from './separated/ConditionTabs';
