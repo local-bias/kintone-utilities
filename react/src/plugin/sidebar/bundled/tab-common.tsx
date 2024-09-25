@@ -1,10 +1,10 @@
-import React, { type FC } from 'react';
-import { SidebarProps } from '.';
 import styled from '@emotion/styled';
 import clsx from 'clsx';
+import React from 'react';
+import { PluginConditionBase, SidebarProps } from '.';
 
-type SidebarCommonTabProps = Pick<
-  SidebarProps,
+type SidebarCommonTabProps<T extends PluginConditionBase> = Pick<
+  SidebarProps<T>,
   'selectedConditionId' | 'onSelectedConditionChange' | 'commonTabLabel'
 >;
 
@@ -43,7 +43,7 @@ const SidebarCommonTabButton = styled.button`
   width: 100%;
 `;
 
-const SidebarCommonTab: FC<SidebarCommonTabProps> = (props) => {
+const SidebarCommonTab = <T extends PluginConditionBase>(props: SidebarCommonTabProps<T>) => {
   const { commonTabLabel = '共通設定', selectedConditionId, onSelectedConditionChange } = props;
 
   const onTabClick = () => {

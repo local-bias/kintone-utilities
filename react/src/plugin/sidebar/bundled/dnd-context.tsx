@@ -2,11 +2,11 @@ import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import React, { PropsWithChildren } from 'react';
-import { SidebarProps } from '.';
+import { PluginConditionBase, SidebarProps } from '.';
 
-type Props = Pick<SidebarProps, 'conditions' | 'setConditions'>;
-
-const SidebarDndContext = (props: PropsWithChildren<Props>) => {
+const SidebarDndContext = <T extends PluginConditionBase>(
+  props: PropsWithChildren<Pick<SidebarProps<T>, 'conditions' | 'setConditions'>>
+) => {
   const { conditions, setConditions, children } = props;
 
   const onDragEnd = async (event: DragEndEvent) => {

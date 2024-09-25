@@ -4,7 +4,7 @@ import React, { forwardRef } from 'react';
 import { SidebarProps } from '.';
 
 export type SidebarConditionAppendButtonProps = ButtonProps &
-  Pick<SidebarProps, 'setConditions' | 'getNewCondition' | 'appendButtonLabel'>;
+  Pick<SidebarProps<any>, 'setConditions' | 'getNewCondition' | 'appendButtonLabel'>;
 
 const SidebarConditionAppendButton = forwardRef<
   HTMLButtonElement,

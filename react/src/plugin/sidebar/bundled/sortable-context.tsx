@@ -1,10 +1,10 @@
 import { SortableContext } from '@dnd-kit/sortable';
 import React, { PropsWithChildren } from 'react';
-import { SidebarProps } from '.';
+import { PluginConditionBase, SidebarProps } from '.';
 
-type Props = Pick<SidebarProps, 'conditions'>;
-
-const SidebarSortableContext = (props: PropsWithChildren<Props>) => {
+const SidebarSortableContext = <T extends PluginConditionBase>(
+  props: PropsWithChildren<Pick<SidebarProps<T>, 'conditions'>>
+) => {
   const { conditions, children } = props;
   return <SortableContext items={conditions}>{children}</SortableContext>;
 };

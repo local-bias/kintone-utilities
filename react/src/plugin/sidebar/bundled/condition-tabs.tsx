@@ -12,8 +12,8 @@ import {
   ContextMenuTrigger,
 } from './context-menu';
 
-type Props = Pick<
-  SidebarProps,
+type Props<T extends PluginConditionBase> = Pick<
+  SidebarProps<T>,
   | 'conditions'
   | 'setConditions'
   | 'labelComponent'
@@ -83,7 +83,9 @@ const SidebarTabButton = styled.button`
   width: 100%;
 `;
 
-const SidebarTab: FC<{ condition: PluginConditionBase; index: number } & Props> = (props) => {
+const SidebarTab = <T extends PluginConditionBase>(
+  props: { condition: T; index: number } & Props<T>
+) => {
   const {
     condition,
     conditions,
@@ -152,7 +154,7 @@ const SidebarTab: FC<{ condition: PluginConditionBase; index: number } & Props> 
   );
 };
 
-const SidebarConditionTabs: FC<Props> = (props) => {
+const SidebarConditionTabs = <T extends PluginConditionBase>(props: Props<T>) => {
   return props.conditions.map((condition, index) => (
     <SidebarTab key={condition.id} index={index} condition={condition} {...props} />
   ));

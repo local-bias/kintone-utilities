@@ -1,32 +1,32 @@
-import React, { Dispatch, FC, SetStateAction } from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import SidebarConditionAppendButton from './condition-addition-button';
+import SidebarConditionTabs from './condition-tabs';
 import SidebarContainer from './container';
 import SidebarDndContext from './dnd-context';
 import SidebarSortableContext from './sortable-context';
 import SidebarCommonTab from './tab-common';
 import SidebarTabsContainer from './tabs-container';
 import SidebarWrapper from './wrapper';
-import SidebarConditionTabs from './condition-tabs';
 
 export type PluginConditionBase = {
   id: string;
   [key: string]: any;
 };
 
-export type SidebarProps = {
-  labelComponent: (params: { condition: PluginConditionBase; index: number }) => JSX.Element;
-  conditions: PluginConditionBase[];
-  setConditions: Dispatch<SetStateAction<PluginConditionBase[]>>;
-  getNewCondition: () => PluginConditionBase;
+export type SidebarProps<T extends PluginConditionBase> = {
+  labelComponent: (params: { condition: T; index: number }) => JSX.Element;
+  conditions: T[];
+  setConditions: Dispatch<SetStateAction<T[]>>;
+  getNewCondition: () => T;
   selectedConditionId: string | null;
-  onSelectedConditionChange: (condition: PluginConditionBase | null) => void;
+  onSelectedConditionChange: (condition: T | null) => void;
   appendButtonLabel?: string;
   commonTabLabel?: string;
   commonTab?: boolean;
   onConditionDelete?: (id: string) => void;
 };
 
-const Sidebar: FC<SidebarProps> = (props) => {
+const Sidebar = <T extends PluginConditionBase = PluginConditionBase>(props: SidebarProps<T>) => {
   return (
     <SidebarWrapper>
       <SidebarContainer>
