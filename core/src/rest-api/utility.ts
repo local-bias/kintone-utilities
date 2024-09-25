@@ -89,16 +89,24 @@ export type QueryCondition<T> = {
  */
 export const useQuery = <T>(
   conditions: QueryCondition<T>[],
-  options?: { sort?: { field: keyof T; orderBy: OrderBy } }
+  options?: { debug?: boolean; sort?: { field: keyof T; orderBy: OrderBy } }
 ) => {
-  const { sort } = options || {};
+  const { sort, debug = false } = options || {};
   const mergedCondition = conditions.reduce((acc, condition) => {
+    const { field, operator, value, truth } = condition;
+    const isNumber = !isNaN(Number(value));
+
+    const formattedValue = !isNumber && !/^("|')/.test(value) ? `"${value}"` : value;
+
     if (acc.length) {
-      acc += ` ${condition.truth || 'and'} `;
+      acc += ` ${truth || 'and'} `;
     }
-    return acc + `${String(condition.field)} ${condition.operator} ${condition.value}`;
+    return acc + `${String(field)} ${operator} ${formattedValue}`;
   }, '');
 
+  if (debug) {
+    console.log(`🔍 Query: ${mergedCondition}`);
+  }
   if (sort) {
     return `${mergedCondition}${useSorting(sort.field, sort.orderBy)}`;
   }
