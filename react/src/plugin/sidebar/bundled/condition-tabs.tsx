@@ -34,16 +34,23 @@ const SidebarTabContainer = styled.div`
     box-shadow;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
+
   &.active {
     border-color: rgb(37 99 235);
     color: rgb(37 99 235);
     background-color: rgb(219 234 254 / 0.3);
+    &:active {
+      background-color: rgb(219 234 254 / 0.7);
+    }
   }
   &.dragging {
     z-index: 50;
     box-shadow:
       0 4px 6px -1px rgb(0 0 0 / 0.1),
       0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+  &:active {
+    background-color: rgb(219 234 254 / 0.7);
   }
 `;
 

@@ -21,6 +21,12 @@ const SidebarCommonTabContainer = styled.div`
     border-color: rgb(37 99 235);
     color: rgb(37 99 235);
     background-color: rgb(219 234 254 / 0.3);
+    &:active {
+      background-color: rgb(219 234 254 / 0.7);
+    }
+  }
+  &:active {
+    background-color: rgb(219 234 254 / 0.7);
   }
 `;
 
