@@ -1,10 +1,16 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, Trash2 } from 'lucide-react';
 import React, { FC } from 'react';
 import { type PluginConditionBase, type SidebarProps } from '.';
 import clsx from 'clsx';
 import styled from '@emotion/styled';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from './context-menu';
 
 type Props = Pick<
   SidebarProps,
@@ -13,15 +19,19 @@ type Props = Pick<
   | 'labelComponent'
   | 'onSelectedConditionChange'
   | 'selectedConditionId'
+  | 'onConditionDelete'
 > & {};
 
 const SidebarTabContainer = styled.div`
   border: 0;
   border-right-width: 2px;
   border-style: solid;
+  display: grid;
+  grid-template-columns: auto 1fr;
   border-color: transparent;
   background-color: #fff;
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke,
+    box-shadow;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
   transition-duration: 150ms;
   &.active {
@@ -31,8 +41,9 @@ const SidebarTabContainer = styled.div`
   }
   &.dragging {
     z-index: 50;
-    box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px,
-      rgba(0, 0, 0, 0.12) 0px 3px 14px 2px;
+    box-shadow:
+      0 4px 6px -1px rgb(0 0 0 / 0.1),
+      0 2px 4px -2px rgb(0 0 0 / 0.1);
   }
 `;
 
@@ -53,7 +64,7 @@ const SidebarTabGrip = styled.div`
 `;
 
 const SidebarTabButton = styled.button`
-  padding: 16px 16px 16px 0;
+  padding: 8px 16px 8px 0;
   background-color: transparent;
   border: 0;
   cursor: pointer;
@@ -65,11 +76,17 @@ const SidebarTabButton = styled.button`
   width: 100%;
 `;
 
-const SidebarTab: FC<
-  { condition: PluginConditionBase; index: number } & Omit<Props, 'conditions'>
-> = (props) => {
-  const { condition, index, labelComponent, onSelectedConditionChange, selectedConditionId } =
-    props;
+const SidebarTab: FC<{ condition: PluginConditionBase; index: number } & Props> = (props) => {
+  const {
+    condition,
+    conditions,
+    index,
+    labelComponent,
+    onSelectedConditionChange,
+    selectedConditionId,
+    setConditions,
+    onConditionDelete,
+  } = props;
   const {
     isDragging,
     setActivatorNodeRef,
@@ -86,33 +103,51 @@ const SidebarTab: FC<
     }
   };
 
+  const deleteCondition = (id: string) => {
+    setConditions((conditions) => conditions.filter((condition) => condition.id !== id));
+    if (onConditionDelete) {
+      onConditionDelete(id);
+    }
+  };
+
   return (
-    <SidebarTabContainer
-      ref={setNodeRef}
-      className={clsx({ dragging: isDragging, active: selectedConditionId === condition.id })}
-      style={{ transform: CSS.Transform.toString(transform), transition }}
-    >
-      <SidebarTabGrip
-        className={clsx({ dragging: isDragging })}
-        ref={setActivatorNodeRef}
-        {...attributes}
-        {...listeners}
-        tabIndex={-1}
-      >
-        <GripVertical />
-      </SidebarTabGrip>
-      <SidebarTabButton role='button' tabIndex={0} onClick={onClick}>
-        {labelComponent({ condition, index })}
-      </SidebarTabButton>
-    </SidebarTabContainer>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <SidebarTabContainer
+          ref={setNodeRef}
+          className={clsx({ dragging: isDragging, active: selectedConditionId === condition.id })}
+          style={{ transform: CSS.Transform.toString(transform), transition }}
+        >
+          <SidebarTabGrip
+            className={clsx({ dragging: isDragging })}
+            ref={setActivatorNodeRef}
+            {...attributes}
+            {...listeners}
+            tabIndex={-1}
+          >
+            <GripVertical />
+          </SidebarTabGrip>
+          <SidebarTabButton role='button' tabIndex={0} onClick={onClick}>
+            {labelComponent({ condition, index })}
+          </SidebarTabButton>
+        </SidebarTabContainer>
+      </ContextMenuTrigger>
+      <ContextMenuContent>
+        <ContextMenuItem
+          onClick={() => deleteCondition(condition.id)}
+          disabled={conditions.length < 2}
+        >
+          <Trash2 strokeWidth={1.5} className='mr-2 w-5 h-5 text-gray-600' />
+          この設定を削除
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 };
 
 const SidebarConditionTabs: FC<Props> = (props) => {
-  const { conditions, ...rest } = props;
-
-  return conditions.map((condition, index) => (
-    <SidebarTab key={condition.id} index={index} condition={condition} {...rest} />
+  return props.conditions.map((condition, index) => (
+    <SidebarTab key={condition.id} index={index} condition={condition} {...props} />
   ));
 };
 

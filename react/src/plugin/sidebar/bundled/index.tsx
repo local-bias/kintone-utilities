@@ -23,7 +23,8 @@ export type SidebarProps = {
   onSelectedConditionChange: (condition: PluginConditionBase | null) => void;
   appendButtonLabel?: string;
   commonTabLabel?: string;
-  isCommonTabDisabled?: boolean;
+  commonTab?: boolean;
+  onConditionDelete?: (id: string) => void;
 };
 
 const Sidebar: FC<SidebarProps> = (props) => {
@@ -37,7 +38,7 @@ const Sidebar: FC<SidebarProps> = (props) => {
         />
         <SidebarDndContext conditions={props.conditions} setConditions={props.setConditions}>
           <SidebarTabsContainer>
-            {props.isCommonTabDisabled && (
+            {props.commonTab && (
               <SidebarCommonTab
                 onSelectedConditionChange={props.onSelectedConditionChange}
                 selectedConditionId={props.selectedConditionId}
@@ -51,6 +52,7 @@ const Sidebar: FC<SidebarProps> = (props) => {
                 labelComponent={props.labelComponent}
                 onSelectedConditionChange={props.onSelectedConditionChange}
                 selectedConditionId={props.selectedConditionId}
+                onConditionDelete={props.onConditionDelete}
               />
             </SidebarSortableContext>
           </SidebarTabsContainer>
