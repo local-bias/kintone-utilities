@@ -1,13 +1,10 @@
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import React, { Dispatch, PropsWithChildren, SetStateAction } from 'react';
-import { PluginConditionBase } from '.';
+import React, { PropsWithChildren } from 'react';
+import { SidebarProps } from '.';
 
-type Props = {
-  conditions: PluginConditionBase[];
-  setConditions: Dispatch<SetStateAction<PluginConditionBase[]>>;
-};
+type Props = Pick<SidebarProps, 'conditions' | 'setConditions'>;
 
 const SidebarDndContext = (props: PropsWithChildren<Props>) => {
   const { conditions, setConditions, children } = props;

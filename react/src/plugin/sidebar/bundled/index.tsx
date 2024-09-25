@@ -1,5 +1,4 @@
-import { SetStateAction } from 'jotai';
-import React, { Dispatch, FC } from 'react';
+import React, { Dispatch, FC, SetStateAction } from 'react';
 import SidebarConditionAppendButton from './condition-addition-button';
 import SidebarContainer from './container';
 import SidebarDndContext from './dnd-context';
