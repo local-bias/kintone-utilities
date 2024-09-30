@@ -98,11 +98,11 @@ export const restorePluginConfig = <T = any>(
  * @param target プラグインの設定情報
  * @param callback 保存成功後に実行する処理. 省略すると、アプリ設定のプラグインの一覧画面に遷移し、設定完了メッセージを表示します。指定すると、アプリ設定のプラグインの一覧画面には遷移しません。
  */
-export const storePluginConfig = (
-  target: Record<string, any>,
+export const storePluginConfig = <T extends Record<string, any> = Record<string, any>>(
+  target: T,
   options?: {
     callback?: () => void;
-    flatProperties?: string[];
+    flatProperties?: (keyof T)[];
     debug?: boolean;
   }
 ): void => {
@@ -115,6 +115,10 @@ export const storePluginConfig = (
   let decomposed: Record<string, string> = {};
   let appliedProperties: string[] = [];
   for (const property of flatProperties) {
+    if (typeof property !== 'string') {
+      debug && console.warn('[config] Property name should be a string.');
+      continue;
+    }
     if (!(property in target) || !Array.isArray(target[property])) {
       debug && console.warn(`[config] Property "${property}" is not found or not an array.`);
       continue;
