@@ -3,7 +3,7 @@ import { PluginConfigContext } from '../../context';
 import Alert from './alert';
 import { useNewVersion } from './hooks';
 
-const Component: FC = () => {
+const NotificationContent: FC = () => {
   const { hasNewVersion } = useNewVersion();
 
   if (!hasNewVersion) {
@@ -13,14 +13,12 @@ const Component: FC = () => {
   return <Alert />;
 };
 
-const Container: FC = () => {
+export const Notification: FC = () => {
   const { config } = useContext(PluginConfigContext);
 
   if (!config || !config.id || !config.pluginReleasePageUrl) {
     return null;
   }
 
-  return <Component />;
+  return <NotificationContent />;
 };
-
-export const Notification = Container;
