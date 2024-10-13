@@ -23,8 +23,8 @@ const NewVersionAlert: FC<{ className?: string }> = ({ className }) => {
 };
 
 const StyledNewVersionAlert = styled(NewVersionAlert)`
-  a {
-    margin-top: 8px;
+  button {
+    margin-top: 16px;
   }
 `;
 
