@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities",
-  "version": "5.10.1",
+  "version": "5.11.0",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "repository": "https://github.com/local-bias/kintone-utilities.git",
@@ -18,19 +18,12 @@
   },
   "devDependencies": {
     "@kintone/dts-gen": "^8",
+    "@konomi-app/prettier-config": "^1.1.2",
     "@types/jest": "^29",
     "jest": "^29",
     "jest-html-reporters": "^3",
     "ts-jest": "^29",
     "typescript": "^5"
   },
-  "prettier": {
-    "printWidth": 100,
-    "arrowParens": "always",
-    "singleQuote": true,
-    "jsxSingleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "es5",
-    "endOfLine": "lf"
-  }
+  "prettier": "@konomi-app/prettier-config"
 }
