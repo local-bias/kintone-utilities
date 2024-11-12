@@ -1,0 +1,14 @@
+{
+  "name": "kintone-utilities",
+  "version": "1.0.0",
+  "description": "https://ribbit.konomi.app",
+  "repository": {
+    "type": "git",
+    "url": "@local-bias/kintone-utilities"
+  },
+  "author": "Adachi Keiichiro",
+  "license": "ISC",
+  "workspaces": [
+    "packages/*"
+  ]
+}
