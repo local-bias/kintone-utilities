@@ -41,6 +41,8 @@ export const storeStorage = (target: Record<string, any>, callback?: () => void)
   kintone.plugin.app.setConfig(converted, callback);
 };
 
+const createFlatPropertyKey = (property: string, id: string) => `${property}$${id}`;
+
 /**
  * プラグインがアプリ単位で保存している設定情報を返却します
  *
@@ -75,14 +77,27 @@ export const restorePluginConfig = <T = any>(
   const meta: PluginConfigMetadata = JSON.parse(config[META_PROPERTY_KEY]);
 
   let composed: Record<string, any> = {};
-  const flatIds = meta.flat.flatMap(({ ids }) => ids);
+  const flatKeys = meta.flat.flatMap(({ ids, property }) =>
+    ids.map((id) => createFlatPropertyKey(property, id))
+  );
   for (const { property, ids } of meta.flat) {
-    const properties = ids.map((id) => ({ id, ...JSON.parse(config[id]) }));
+    const properties = ids
+      .map((id) => ({ id, key: createFlatPropertyKey(property, id) }))
+      .filter(({ key }) => {
+        if (!(key in config)) {
+          console.warn(`[config] Property "${key}" is not found.`);
+          return false;
+        }
+        return true;
+      })
+      .map(({ id, key }) => {
+        return { id, ...JSON.parse(config[key]) };
+      });
     composed = { ...composed, [property]: properties };
   }
 
   const rest = Object.entries(config).reduce<Record<string, string>>((acc, [key, value]) => {
-    if (![META_PROPERTY_KEY, ...flatIds].includes(key)) {
+    if (![META_PROPERTY_KEY, ...flatKeys].includes(key)) {
       return { ...acc, [key]: JSON.parse(value) };
     }
     return acc;
@@ -133,7 +148,8 @@ export const storePluginConfig = <T extends Record<string, any> = Record<string,
 
     const decomposedProperties = target[property].reduce<Record<string, string>>((acc, item) => {
       const { id, ...rest } = item;
-      return { ...acc, [id]: JSON.stringify(rest) };
+      const key = createFlatPropertyKey(property, id);
+      return { ...acc, [key]: JSON.stringify(rest) };
     }, {});
 
     meta.flat.push({ property, ids });
