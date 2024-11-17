@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "target": "ESNext",
     "module": "ESNext",
     "lib": ["ESNext", "dom"],
@@ -14,7 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "files": ["./node_modules/@kintone/dts-gen/kintone.d.ts"],
+  "files": ["../../node_modules/@kintone/dts-gen/kintone.d.ts"],
   "include": ["src/**/*.ts", "cybozu.d.ts"],
   "exclude": ["dist", "node_modules"]
 }
