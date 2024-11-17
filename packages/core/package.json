@@ -8,7 +8,6 @@
   "license": "MIT",
   "scripts": {
     "build": "rmdir dist /s /q & tsc",
-    "prepare": "npm run build",
     "play": "cd playground && npm run dev",
     "test": "jest"
   },

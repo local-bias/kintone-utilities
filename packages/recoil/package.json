@@ -5,8 +5,7 @@
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
   "scripts": {
-    "build": "rmdir /s /q dist & tsc",
-    "prepare": "npm run build"
+    "build": "rmdir /s /q dist & tsc"
   },
   "author": "Adachi Keiichiro",
   "license": "MIT",

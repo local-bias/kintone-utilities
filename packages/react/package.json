@@ -7,8 +7,7 @@
   "author": "Ribbit",
   "license": "MIT",
   "scripts": {
-    "build": "rmdir /s /q dist & tsc",
-    "prepare": "npm run build"
+    "build": "rmdir /s /q dist & tsc"
   },
   "dependencies": {
     "@dnd-kit/core": "^6",
