@@ -1,5 +1,5 @@
 {
-  "name": "@konomi-app/kintone-utilities-jotai",
+  "name": "@konomi-app/kintone-utilities-recoil",
   "version": "0.1.0",
   "description": "",
   "types": "dist/index.d.ts",
