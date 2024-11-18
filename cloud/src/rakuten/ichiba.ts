@@ -1,9 +1,9 @@
-import { fetch } from '../lib/fetch';
 import { RakutenAPIClient } from './common';
 import { stringify } from 'querystring';
 
 export class RakutenIchibaClient extends RakutenAPIClient {
   public static END_POINT = 'services/api/IchibaItem/Search/20220601';
+  public static PAGE_LIMIT = 100;
 
   public constructor(params: ConstructorParameters<typeof RakutenAPIClient>[0]) {
     super(params);
@@ -29,8 +29,10 @@ export class RakutenIchibaClient extends RakutenAPIClient {
   private async searchItems(
     params: Omit<Rakuten.Ichiba.RequestParams, 'applicationId' | 'affiliateId'>
   ) {
+    if (this.debug) console.group('API Request', params);
+
     const url = this.createUrl(params);
-    const response = await this.useAPI(() => fetch<Rakuten.Ichiba.Response>(url));
+    const response = await this.useAPI(() => this.fetch<Rakuten.Ichiba.Response>(url));
 
     const json = await response.json();
 
@@ -63,10 +65,12 @@ export class RakutenIchibaClient extends RakutenAPIClient {
         if (
           (params.hits && params.hits > response.hits) ||
           response.hits === 0 ||
-          response.Items.length === 0
+          response.Items.length === 0 ||
+          params.page === RakutenIchibaClient.PAGE_LIMIT
         ) {
           return { ...response, Items: items };
         }
+        await new Promise((resolve) => setTimeout(resolve, 100));
         return this.search({ ...params, page: response.page + 1, items });
       }
       return this.searchItems(params);

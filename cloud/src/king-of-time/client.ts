@@ -1,4 +1,5 @@
 import { stringify } from 'qs';
+import { kintoneFetch } from '../lib/fetch';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -40,41 +41,42 @@ export class KingOfTimeClient {
         header['Content-Type'] = 'application/json; charset=utf-8';
       }
 
-      const [responseData, statusCode, headers] = await kintone.proxy(
-        uri,
+      const response = await kintoneFetch<T>(uri, {
         method,
-        header,
-        requestParams
-      );
+        headers: header,
+        body: requestParams,
+      });
 
-      const body: any = JSON.parse(responseData);
+      const body = await response.json();
       if (this.#debug) {
         console.log('🕒 KING OF TIME WebAPI', { uri, method, header, requestParams, body });
       }
 
       // データを正常に受信できなかった場合、ログを出力しエラーを返します
-      if (statusCode !== 200) {
+      if (response.status !== 200) {
         if (this.#debug) {
           console.log(
             `KING OF TIMEへリクエストを送信しましたが、データを正常に受信できませんでした。`,
             `エラー番号:`,
-            statusCode,
+            response.status,
             `エラー内容:`,
             body,
             `エラー詳細:`,
-            headers
+            response.headers
           );
         }
 
-        switch (statusCode) {
+        switch (response.status) {
           case 403:
+            // @ts-expect-error
             switch (body?.errors[0]?.code) {
               case 104:
                 throw new Error('利用可能時間外です。');
             }
             break;
           default:
-            throw new Error(statusCode, body?.errors[0]);
+            // @ts-expect-error
+            throw new Error(response.status, body?.errors[0]);
         }
       }
       return body;

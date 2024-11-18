@@ -1,3 +1,5 @@
+import { MinimalFetch } from '../lib/fetch';
+
 export class RakutenAPIClient {
   public static DOMAIN = 'https://app.rakuten.co.jp/';
 
@@ -5,6 +7,7 @@ export class RakutenAPIClient {
   readonly #applicationId: string;
   readonly #applicationSecret: string;
   readonly #affiliateId: string | undefined;
+  readonly #fetch: MinimalFetch;
 
   /** APIを最後に実行した時刻 */
   #lastRequested = 0;
@@ -13,12 +16,14 @@ export class RakutenAPIClient {
     applicationId: string;
     applicationSecret: string;
     affiliateId?: string;
+    fetch: MinimalFetch;
     debug?: boolean;
   }) {
-    const { applicationId, applicationSecret, affiliateId, debug = false } = params;
+    const { applicationId, applicationSecret, affiliateId, fetch, debug = false } = params;
     this.#applicationId = applicationId;
     this.#applicationSecret = applicationSecret;
     this.#affiliateId = affiliateId;
+    this.#fetch = fetch;
     this.#debug = debug;
   }
 
@@ -66,6 +71,10 @@ export class RakutenAPIClient {
 
   protected get affiliateId() {
     return this.#affiliateId;
+  }
+
+  protected get fetch() {
+    return this.#fetch;
   }
 
   protected get debug() {

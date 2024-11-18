@@ -1,4 +1,4 @@
-import { fetch } from '../lib/fetch';
+import { kintoneFetch } from '../lib/fetch';
 import { YahooAPIClient } from './common';
 import { stringify } from 'querystring';
 
@@ -24,7 +24,7 @@ export class YahooShoppingClient extends YahooAPIClient {
     try {
       if (this.debug) console.group('🛒 Yahoo shopping API Call');
       const url = this.createUrl(params);
-      const response = await this.useAPI(() => fetch<Yahoo.Shopping.Response>(url));
+      const response = await this.useAPI(() => kintoneFetch<Yahoo.Shopping.Response>(url));
       const json = await response.json();
       return json;
     } finally {
