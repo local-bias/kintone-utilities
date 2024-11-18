@@ -1,19 +1,9 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "baseUrl": ".",
-    "target": "ESNext",
-    "module": "ESNext",
-    "lib": ["ESNext", "dom"],
-    "jsx": "react",
-    "sourceMap": true,
     "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "moduleResolution": "node",
-    "esModuleInterop": true,
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "rootDir": "./src"
   },
   "files": ["../../node_modules/@kintone/dts-gen/kintone.d.ts"],
   "include": ["src/**/*.ts", "cybozu.d.ts"],

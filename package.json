@@ -10,5 +10,9 @@
   "license": "ISC",
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "devDependencies": {
+    "@konomi-app/prettier-config": "^1.1.2"
+  },
+  "prettier": "@konomi-app/prettier-config"
 }
