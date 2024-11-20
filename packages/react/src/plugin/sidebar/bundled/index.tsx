@@ -26,7 +26,8 @@ export type SidebarProps<T extends PluginConditionBase> = {
   onConditionDelete?: (id: string) => void;
   context?: Partial<{
     onCopy: (condition: T) => void;
-    onPaste: (condition: T) => T | null;
+    onPaste: (condition: T) => void;
+    onPasteFailure: (condition: T) => void;
     onPasteValidation: (condition: T) => boolean;
     onPasteValidationError: (condition: T) => void;
   }>;
@@ -63,6 +64,7 @@ const Sidebar = <T extends PluginConditionBase = PluginConditionBase>(props: Sid
                 selectedConditionId={props.selectedConditionId}
                 onConditionDelete={props.onConditionDelete}
                 contextMenuItems={props.contextMenuItems}
+                context={props.context}
               />
             </SidebarSortableContext>
           </SidebarTabsContainer>

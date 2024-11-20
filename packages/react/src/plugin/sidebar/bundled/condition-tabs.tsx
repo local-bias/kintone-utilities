@@ -2,8 +2,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import styled from '@emotion/styled';
 import clsx from 'clsx';
-import { Clipboard, ClipboardPaste, GripVertical, Trash2 } from 'lucide-react';
-import { nanoid } from 'nanoid';
+import { ClipboardPaste, Copy, GripVertical, Trash2 } from 'lucide-react';
 import React from 'react';
 import { type PluginConditionBase, type SidebarProps } from '.';
 import {
@@ -119,35 +118,42 @@ const SidebarTab = <T extends PluginConditionBase>(
   };
 
   const onCopy = () => {
-    const newCondition = { ...condition, id: nanoid() };
-    sessionStorage.setItem('copiedCondition', JSON.stringify(newCondition));
+    navigator.clipboard.writeText(JSON.stringify(condition));
     if (context.onCopy) {
       context.onCopy(condition);
     }
   };
 
-  const onPaste = () => {
-    const copiedCondition = sessionStorage.getItem('copiedCondition');
-    if (!copiedCondition) {
-      return;
-    }
-    const newCondition = JSON.parse(copiedCondition);
-    const valid = context.onPasteValidation ? context.onPasteValidation(newCondition) : true;
-    if (!valid) {
-      if (context.onPasteValidationError) {
-        context.onPasteValidationError(newCondition);
+  const onPaste = async () => {
+    try {
+      const copiedCondition = await navigator.clipboard.readText();
+      if (!copiedCondition) {
+        return;
       }
-      return;
-    }
+      const newCondition = JSON.parse(copiedCondition);
+      const valid = context.onPasteValidation ? context.onPasteValidation(newCondition) : true;
+      if (!valid) {
+        if (context.onPasteValidationError) {
+          context.onPasteValidationError(newCondition);
+        }
+        return;
+      }
 
-    setConditions((conditions) => {
-      const conditionIndex = conditions.findIndex((c) => c.id === condition.id);
-      const newConditions = [...conditions];
-      newConditions.splice(conditionIndex + 1, 0, { ...newCondition, id: nanoid() });
-      return newConditions;
-    });
-    if (context.onPaste) {
-      context.onPaste(newCondition);
+      setConditions((conditions) => {
+        const conditionIndex = conditions.findIndex((c) => c.id === condition.id);
+        const newConditions = [...conditions];
+        newConditions[conditionIndex] = { ...newCondition, id: newConditions[conditionIndex].id };
+        return newConditions;
+      });
+      if (context.onPaste) {
+        context.onPaste(newCondition);
+      }
+    } catch (error) {
+      if (context.onPasteFailure) {
+        context.onPasteFailure(condition);
+      } else {
+        throw error;
+      }
     }
   };
 
@@ -191,8 +197,8 @@ const SidebarTab = <T extends PluginConditionBase>(
             <ContextMenuSeparator />
           </>
         )}
-        <ContextMenuItem onClick={() => onCopy()} disabled={conditions.length < 2}>
-          <Clipboard
+        <ContextMenuItem onClick={() => onCopy()}>
+          <Copy
             strokeWidth={1.5}
             style={{
               marginRight: '8px',
@@ -203,7 +209,7 @@ const SidebarTab = <T extends PluginConditionBase>(
           />
           この設定をコピー
         </ContextMenuItem>
-        <ContextMenuItem onClick={() => onPaste()} disabled={conditions.length < 2}>
+        <ContextMenuItem onClick={() => onPaste()}>
           <ClipboardPaste
             strokeWidth={1.5}
             style={{
