@@ -2,13 +2,15 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import styled from '@emotion/styled';
 import clsx from 'clsx';
-import { GripVertical, Trash2 } from 'lucide-react';
+import { Clipboard, ClipboardPaste, GripVertical, Trash2 } from 'lucide-react';
+import { nanoid } from 'nanoid';
 import React from 'react';
 import { type PluginConditionBase, type SidebarProps } from '.';
 import {
   ContextMenu,
   ContextMenuContent,
   ContextMenuItem,
+  ContextMenuSeparator,
   ContextMenuTrigger,
 } from './context-menu';
 
@@ -21,6 +23,7 @@ type Props<T extends PluginConditionBase> = Pick<
   | 'selectedConditionId'
   | 'onConditionDelete'
   | 'contextMenuItems'
+  | 'context'
 > & {};
 
 const SidebarTabContainer = styled.div`
@@ -97,6 +100,7 @@ const SidebarTab = <T extends PluginConditionBase>(
     setConditions,
     onConditionDelete,
     contextMenuItems = [],
+    context = {},
   } = props;
   const {
     isDragging,
@@ -111,6 +115,39 @@ const SidebarTab = <T extends PluginConditionBase>(
   const onClick = () => {
     if (onSelectedConditionChange) {
       onSelectedConditionChange(condition);
+    }
+  };
+
+  const onCopy = () => {
+    const newCondition = { ...condition, id: nanoid() };
+    sessionStorage.setItem('copiedCondition', JSON.stringify(newCondition));
+    if (context.onCopy) {
+      context.onCopy(condition);
+    }
+  };
+
+  const onPaste = () => {
+    const copiedCondition = sessionStorage.getItem('copiedCondition');
+    if (!copiedCondition) {
+      return;
+    }
+    const newCondition = JSON.parse(copiedCondition);
+    const valid = context.onPasteValidation ? context.onPasteValidation(newCondition) : true;
+    if (!valid) {
+      if (context.onPasteValidationError) {
+        context.onPasteValidationError(newCondition);
+      }
+      return;
+    }
+
+    setConditions((conditions) => {
+      const conditionIndex = conditions.findIndex((c) => c.id === condition.id);
+      const newConditions = [...conditions];
+      newConditions.splice(conditionIndex + 1, 0, { ...newCondition, id: nanoid() });
+      return newConditions;
+    });
+    if (context.onPaste) {
+      context.onPaste(newCondition);
     }
   };
 
@@ -144,6 +181,41 @@ const SidebarTab = <T extends PluginConditionBase>(
         </SidebarTabContainer>
       </ContextMenuTrigger>
       <ContextMenuContent style={{ minWidth: '240px' }}>
+        {contextMenuItems.length > 0 && (
+          <>
+            {contextMenuItems.map((item, index) => (
+              <ContextMenuItem key={index} onClick={() => item.onClick(condition)}>
+                {typeof item.component === 'function' ? item.component(condition) : item.component}
+              </ContextMenuItem>
+            ))}
+            <ContextMenuSeparator />
+          </>
+        )}
+        <ContextMenuItem onClick={() => onCopy()} disabled={conditions.length < 2}>
+          <Clipboard
+            strokeWidth={1.5}
+            style={{
+              marginRight: '8px',
+              width: '20px',
+              height: '20px',
+              color: '#475569',
+            }}
+          />
+          この設定をコピー
+        </ContextMenuItem>
+        <ContextMenuItem onClick={() => onPaste()} disabled={conditions.length < 2}>
+          <ClipboardPaste
+            strokeWidth={1.5}
+            style={{
+              marginRight: '8px',
+              width: '20px',
+              height: '20px',
+              color: '#475569',
+            }}
+          />
+          コピーした設定を貼り付け
+        </ContextMenuItem>
+        <ContextMenuSeparator />
         <ContextMenuItem
           onClick={() => deleteCondition(condition.id)}
           disabled={conditions.length < 2}
@@ -159,11 +231,6 @@ const SidebarTab = <T extends PluginConditionBase>(
           />
           この設定を削除
         </ContextMenuItem>
-        {contextMenuItems.map((item, index) => (
-          <ContextMenuItem key={index} onClick={() => item.onClick(condition)}>
-            {typeof item.component === 'function' ? item.component(condition) : item.component}
-          </ContextMenuItem>
-        ))}
       </ContextMenuContent>
     </ContextMenu>
   );
