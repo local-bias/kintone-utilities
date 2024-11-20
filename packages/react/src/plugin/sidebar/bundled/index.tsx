@@ -24,6 +24,12 @@ export type SidebarProps<T extends PluginConditionBase> = {
   commonTabLabel?: string;
   commonTab?: boolean;
   onConditionDelete?: (id: string) => void;
+  context?: Partial<{
+    onCopy: (condition: T) => void;
+    onPaste: (condition: T) => T | null;
+    onPasteValidation: (condition: T) => boolean;
+    onPasteValidationError: (condition: T) => void;
+  }>;
   contextMenuItems?: {
     component: JSX.Element | ((condition: T) => JSX.Element);
     onClick: (condition: T) => void;

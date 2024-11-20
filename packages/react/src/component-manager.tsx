@@ -4,7 +4,7 @@ import { createRoot, Root } from 'react-dom/client';
 type ComponentCache = {
   root: Root;
   rootElement: HTMLElement;
-  parentElement: HTMLElement;
+  parentElement: Element;
 };
 
 /**
@@ -62,9 +62,10 @@ export class ComponentManager {
      * @param element ルート要素
      */
     onRootElementReady?: (element: HTMLElement) => void;
+    prepend?: boolean;
   }): void {
     try {
-      const { id, component, parentElement = document.body } = params;
+      const { id, component, parentElement = document.body, prepend = false } = params;
       const existingComponent = this.#components.get(id);
 
       if (!existingComponent) {
@@ -78,7 +79,11 @@ export class ComponentManager {
         const rootElement = document.createElement('div');
         rootElement.dataset['cmId'] = id;
         params.onRootElementReady?.(rootElement);
-        parentElement.append(rootElement);
+        if (prepend) {
+          parentElement.prepend(rootElement);
+        } else {
+          parentElement.append(rootElement);
+        }
         const root = createRoot(rootElement);
         root.render(component);
         this.#components.set(id, { root, rootElement, parentElement });
@@ -99,7 +104,11 @@ export class ComponentManager {
           existingComponent.parentElement.removeChild(existingComponent.rootElement);
         }
         if (!existingComponent.rootElement.isConnected) {
-          parentElement.append(existingComponent.rootElement);
+          if (prepend) {
+            parentElement.prepend(existingComponent.rootElement);
+          } else {
+            parentElement.append(existingComponent.rootElement);
+          }
         }
         params.onRootElementReady?.(existingComponent.rootElement);
         existingComponent.root.render(component);
