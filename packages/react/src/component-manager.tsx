@@ -35,42 +35,57 @@ export class ComponentManager {
 
   /**
    * 指定したパラメータを使用してコンポーネントをレンダリングします。
-   * @param params レンダリングに必要なパラメータのオブジェクト
-   * @param params.elementId コンポーネントを一意に識別するためのID
-   * @param params.component レンダリングするReact要素
-   * @param params.parentElement コンポーネントを追加する親のHTMLElement（省略可能、デフォルトはdocument.body）
-   * @param params.onRootElementReady ルート要素が準備できたときに呼び出されるコールバック（省略可能）
-   * @throws コンポーネントのレンダリングに失敗した場合にエラーを投げます
+   * @throws コンポーネントのレンダリングに失敗した場合にエラーがスローされます。
    */
   public renderComponent(params: {
-    elementId: string;
+    /**
+     * コンポーネントを一意に識別するためのID
+     *
+     * **このIDは、コンポーネントを識別するために使用されます。DOMの要素IDとは異なります。**
+     */
+    id: string;
+    /**
+     * レンダリングするReact要素
+     *
+     * この要素は、Reactの`ReactDOM.render`メソッドに渡すことができるものと同じです。
+     */
     component: ReactElement;
+    /**
+     * コンポーネントを追加する親のHTMLElement
+     *
+     * この要素は、コンポーネントが追加される親要素です。省略した場合は`document.body`が使用されます。
+     */
     parentElement?: HTMLElement;
+    /**
+     * ルート要素が準備できたときに呼び出されるコールバック
+     *
+     * @param element ルート要素
+     */
     onRootElementReady?: (element: HTMLElement) => void;
   }): void {
     try {
-      const { elementId, component, parentElement = document.body } = params;
-      const existingComponent = this.#components.get(elementId);
+      const { id, component, parentElement = document.body } = params;
+      const existingComponent = this.#components.get(id);
 
       if (!existingComponent) {
         if (this.#debug) {
           console.log(
-            `%c[ComponentManager] %c✨ コンポーネントを初期化しました id:${elementId}.`,
+            `%c[ComponentManager] %c✨ コンポーネントを初期化しました id:${id}.`,
             'color: #0d9488;',
             'color: #6b7280;'
           );
         }
         const rootElement = document.createElement('div');
-        rootElement.dataset['cmId'] = elementId;
+        rootElement.dataset['cmId'] = id;
         params.onRootElementReady?.(rootElement);
         parentElement.append(rootElement);
         const root = createRoot(rootElement);
         root.render(component);
-        this.#components.set(elementId, { root, rootElement, parentElement });
+        this.#components.set(id, { root, rootElement, parentElement });
       } else {
         if (this.#debug) {
           console.log(
-            `%c[ComponentManager] %c♻ コンポーネントを更新しました id:${elementId}.`,
+            `%c[ComponentManager] %c♻ コンポーネントを更新しました id:${id}.`,
             'color: #0d9488;',
             'color: #6b7280;',
             'マウント先の親要素',
@@ -88,7 +103,7 @@ export class ComponentManager {
         }
         params.onRootElementReady?.(existingComponent.rootElement);
         existingComponent.root.render(component);
-        this.#components.set(elementId, { ...existingComponent, parentElement });
+        this.#components.set(id, { ...existingComponent, parentElement });
       }
     } catch (error) {
       console.error(error);
