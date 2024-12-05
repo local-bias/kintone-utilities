@@ -1,5 +1,5 @@
 import { Slot } from '@radix-ui/react-slot';
-import { ForwardedRef, HTMLAttributes, forwardRef } from 'react';
+import React, { ForwardedRef, HTMLAttributes, forwardRef } from 'react';
 import { RecoilState, useRecoilValue } from 'recoil';
 
 export interface RecoilTogglePanelProps<T> extends HTMLAttributes<HTMLDivElement> {
