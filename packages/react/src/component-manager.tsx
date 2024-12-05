@@ -3,7 +3,7 @@ import { createRoot, Root } from 'react-dom/client';
 
 type ComponentCache = {
   root: Root;
-  rootElement: HTMLElement;
+  rootElement: Element;
   parentElement: Element;
 };
 
@@ -55,13 +55,13 @@ export class ComponentManager {
      *
      * この要素は、コンポーネントが追加される親要素です。省略した場合は`document.body`が使用されます。
      */
-    parentElement?: HTMLElement;
+    parentElement?: Element;
     /**
      * ルート要素が準備できたときに呼び出されるコールバック
      *
      * @param element ルート要素
      */
-    onRootElementReady?: (element: HTMLElement) => void;
+    onRootElementReady?: (element: Element) => void;
     prepend?: boolean;
   }): void {
     try {
@@ -100,7 +100,10 @@ export class ComponentManager {
           );
         }
 
-        if (existingComponent.parentElement !== parentElement) {
+        if (
+          existingComponent.parentElement !== parentElement &&
+          existingComponent.rootElement.isConnected
+        ) {
           existingComponent.parentElement.removeChild(existingComponent.rootElement);
         }
         if (!existingComponent.rootElement.isConnected) {
