@@ -1,20 +1,30 @@
 import { Slot } from '@radix-ui/react-slot';
-import { PrimitiveAtom, useAtomValue } from 'jotai';
-import React, { HTMLAttributes, forwardRef } from 'react';
+import React, { ForwardedRef, HTMLAttributes, forwardRef } from 'react';
+import { Atom, useAtomValue } from 'jotai';
 
-export interface JotaiTogglePanelProps extends HTMLAttributes<HTMLDivElement> {
-  atom: PrimitiveAtom<boolean>;
+export interface JotaiTogglePanelProps<T> extends HTMLAttributes<HTMLDivElement> {
+  atom: Atom<T>;
   asChild?: boolean;
+  shouldShow?: (value: T) => boolean;
 }
 
-export const JotaiTogglePanel = forwardRef<HTMLDivElement, JotaiTogglePanelProps>(
-  ({ atom, asChild, ...divProps }, ref) => {
-    const isOpen = useAtomValue(atom);
-    if (!isOpen) {
-      return null;
-    }
-    const Component = asChild ? Slot : 'div';
-    return <Component ref={ref} {...divProps} />;
+function JotaiTogglePanelInner<T>(
+  {
+    atom,
+    asChild,
+    shouldShow = (value: T) => Boolean(value),
+    ...divProps
+  }: JotaiTogglePanelProps<T>,
+  ref: ForwardedRef<HTMLDivElement>
+) {
+  const value = useAtomValue(atom);
+  if (!shouldShow(value)) {
+    return null;
   }
-);
-JotaiTogglePanel.displayName = 'JotaiTogglePanelComponent';
+  const Component = asChild ? Slot : 'div';
+  return <Component ref={ref} {...divProps} />;
+}
+
+export const JotaiTogglePanel = forwardRef(JotaiTogglePanelInner) as <T>(
+  props: JotaiTogglePanelProps<T> & { ref?: ForwardedRef<HTMLDivElement> }
+) => ReturnType<typeof JotaiTogglePanelInner>;
