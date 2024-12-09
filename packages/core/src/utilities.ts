@@ -2,6 +2,69 @@ import type { kintoneAPI } from './types/api';
 import type { SavedFields } from './utility-types';
 
 /**
+ * kintone の数値フィールドの値を指定された形式の文字列として取得します。
+ *
+ * @param params - 関数のパラメータオブジェクト
+ * @param params.field - 数値フィールドの値を含むオブジェクト
+ * @param params.property - フィールドのプロパティ設定（表示スケール、桁区切り、単位など）
+ * @param params.locales - ロケール情報（オプション、デフォルトは 'ja'）
+ * @returns フォーマットされた数値の文字列
+ *
+ * @example
+ * ```typescript
+ * const params = {
+ *   field: { value: "1234.56" },
+ *   property: {
+ *     displayScale: "2",
+ *     digit: true,
+ *     unit: "$",
+ *     unitPosition: "BEFORE"
+ *   },
+ *   locales: 'en-US',
+ * };
+ * const result = getNumberFieldValueAsString(params);
+ * // result: "$1,234.56"
+ * ```
+ */
+export const getNumberFieldValueAsString = (params: {
+  field: kintoneAPI.field.Number;
+  property: kintoneAPI.property.Number;
+  locales?: Intl.LocalesArgument;
+}): string => {
+  const { field, property, locales = 'ja' } = params;
+
+  const casted = Number(field.value);
+  if (isNaN(casted)) {
+    return field.value;
+  }
+
+  const displayScale = property?.displayScale ? Number(property.displayScale) : null;
+
+  const scaled = displayScale
+    ? Math.round(casted * Math.pow(10, Number(displayScale))) / Math.pow(10, Number(displayScale))
+    : casted;
+
+  const separated = property?.digit
+    ? Number(scaled).toLocaleString(locales, {
+        maximumFractionDigits: displayScale ?? undefined,
+        minimumFractionDigits: displayScale ?? undefined,
+      })
+    : displayScale
+      ? Number(scaled).toFixed(displayScale)
+      : scaled;
+
+  if (property?.unit) {
+    if (property.unitPosition === 'BEFORE') {
+      return `${property.unit}${separated}`;
+    } else {
+      return `${separated}${property.unit}`;
+    }
+  }
+
+  return String(separated);
+};
+
+/**
  * 各フィールドタイプの値を文字列として返却します
  *
  * 配列で取得されるような値は区切り文字で連結されます
@@ -318,7 +381,7 @@ export const getDefaultValue = (property: kintoneAPI.FieldProperty) => {
     case 'DROP_DOWN':
     case 'RADIO_BUTTON':
     case 'LINK':
-      return 'defaultValue' in property ? property.defaultValue ?? '' : '';
+      return 'defaultValue' in property ? (property.defaultValue ?? '') : '';
     case 'DATE':
       const { defaultValue, defaultNowValue } = property;
       if (defaultValue) {
