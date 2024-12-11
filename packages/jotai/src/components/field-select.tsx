@@ -1,5 +1,5 @@
 import { kintoneAPI } from '@konomi-app/kintone-utilities';
-import { Autocomplete, TextField } from '@mui/material';
+import { Autocomplete, Box, TextField } from '@mui/material';
 import { Atom, useAtomValue } from 'jotai';
 import React, { ComponentProps, FC, Suspense, useCallback } from 'react';
 
@@ -33,6 +33,19 @@ const JotaiFieldAutocomplete: FC<Props> = ({
     onChange={onFieldChange}
     sx={autocompleteProps.sx}
     fullWidth={autocompleteProps.fullWidth}
+    renderOption={(props, option) => {
+      const { key, ...optionProps } = props;
+      return (
+        <Box
+          key={key}
+          component='li'
+          sx={{ '& > span': { fontSize: '12px', color: '#6b7280', ml: '12px' } }}
+          {...optionProps}
+        >
+          {option.label} <span>{option.code}</span>
+        </Box>
+      );
+    }}
     renderInput={(params) => (
       <TextField
         {...params}
