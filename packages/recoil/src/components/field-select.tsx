@@ -1,6 +1,6 @@
 import React, { ComponentProps, FC, Suspense, useCallback } from 'react';
 import { RecoilValueReadOnly, useRecoilValue } from 'recoil';
-import { TextField, Autocomplete } from '@mui/material';
+import { TextField, Autocomplete, Box } from '@mui/material';
 import { kintoneAPI } from '@konomi-app/kintone-utilities';
 
 type ContainerProps = {
@@ -33,6 +33,19 @@ const Select: FC<Props> = ({
     onChange={onFieldChange}
     sx={autocompleteProps.sx}
     fullWidth={autocompleteProps.fullWidth}
+    renderOption={(props, option) => {
+      const { key, ...optionProps } = props;
+      return (
+        <Box
+          key={key}
+          component='li'
+          sx={{ '& > span': { fontSize: '12px', color: '#6b7280', ml: '12px' } }}
+          {...optionProps}
+        >
+          {option.label} <span>{option.code}</span>
+        </Box>
+      );
+    }}
     renderInput={(params) => (
       <TextField
         {...params}
