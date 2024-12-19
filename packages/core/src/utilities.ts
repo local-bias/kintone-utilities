@@ -137,6 +137,59 @@ export const getFieldValueAsString = (
   return '';
 };
 
+/** 受け取ったフィールドが文字列として管理されるフィールドであれば`true`を返します */
+const isStringField = (
+  field: kintoneAPI.Field
+): field is
+  | kintoneAPI.field.SingleLineText
+  | kintoneAPI.field.MultiLineText
+  | kintoneAPI.field.RichText
+  | kintoneAPI.field.Dropdown
+  | kintoneAPI.field.Link
+  | kintoneAPI.field.RecordNumber
+  | kintoneAPI.field.Status
+  | kintoneAPI.field.RadioButton
+  | kintoneAPI.field.ID
+  | kintoneAPI.field.Revision => {
+  return (
+    field.type === 'SINGLE_LINE_TEXT' ||
+    field.type === 'MULTI_LINE_TEXT' ||
+    field.type === 'RICH_TEXT' ||
+    field.type === 'DROP_DOWN' ||
+    field.type === 'LINK' ||
+    field.type === 'RECORD_NUMBER' ||
+    field.type === 'STATUS' ||
+    field.type === 'RADIO_BUTTON' ||
+    field.type === '__ID__' ||
+    field.type === '__REVISION__'
+  );
+};
+
+/** 受け取ったフィールドが数値として管理されるフィールドであれば`true`を返します */
+const isNumberField = (
+  field: kintoneAPI.Field
+): field is kintoneAPI.field.Number | kintoneAPI.field.Calc => {
+  return field.type === 'NUMBER' || field.type === 'CALC';
+};
+
+/** 受け取ったフィールドが日付として管理されるフィールドであれば`true`を返します */
+const isDateField = (
+  field: kintoneAPI.Field
+): field is
+  | kintoneAPI.field.CreatedTime
+  | kintoneAPI.field.UpdatedTime
+  | kintoneAPI.field.Date
+  | kintoneAPI.field.DateTime
+  | kintoneAPI.field.Time => {
+  return (
+    field.type === 'CREATED_TIME' ||
+    field.type === 'UPDATED_TIME' ||
+    field.type === 'DATE' ||
+    field.type === 'DATETIME' ||
+    field.type === 'TIME'
+  );
+};
+
 /**
  * 各フィールドのタイプに応じて、ソートを行います
  *
@@ -158,33 +211,23 @@ export const sortField = <T extends kintoneAPI.Field>(aField: T, bField: T): num
     return -1;
   }
 
-  if (
-    (aFieldType === 'SINGLE_LINE_TEXT' ||
-      aFieldType === 'MULTI_LINE_TEXT' ||
-      aFieldType === 'RICH_TEXT' ||
-      aFieldType === 'DROP_DOWN' ||
-      aFieldType === 'LINK' ||
-      aFieldType === 'RECORD_NUMBER' ||
-      aFieldType === 'STATUS' ||
-      aFieldType === 'RADIO_BUTTON' ||
-      aFieldType === '__ID__' ||
-      aFieldType === '__REVISION__') &&
-    (bFieldType === 'SINGLE_LINE_TEXT' ||
-      bFieldType === 'MULTI_LINE_TEXT' ||
-      bFieldType === 'RICH_TEXT' ||
-      bFieldType === 'DROP_DOWN' ||
-      bFieldType === 'LINK' ||
-      bFieldType === 'RECORD_NUMBER' ||
-      bFieldType === 'STATUS' ||
-      bFieldType === 'RADIO_BUTTON' ||
-      bFieldType === '__ID__' ||
-      bFieldType === '__REVISION__')
-  ) {
+  if (aFieldType === 'RECORD_NUMBER' && bFieldType === 'RECORD_NUMBER') {
+    // レコード番号は文字列だが、`アプリコード-連番`の形式で保存されているため、連番の部分を数値として比較する
+    const regex = /.*?(\d+)$/;
+    const aMatch = aField.value.match(regex);
+    const bMatch = bField.value.match(regex);
+    if (aMatch && bMatch) {
+      const aNumber = Number(aMatch[1]);
+      const bNumber = Number(bMatch[1]);
+      if (isNaN(aNumber) && isNaN(bNumber)) {
+        return 0;
+      }
+      return Number(aMatch[1]) - Number(bMatch[1]);
+    }
+    return aField.value.localeCompare(bField.value);
+  } else if (isStringField(aField) && isStringField(bField)) {
     return aField.value?.localeCompare(bField.value ?? '') ?? 0;
-  } else if (
-    (aFieldType === 'NUMBER' || aFieldType === 'CALC') &&
-    (bFieldType === 'NUMBER' || bFieldType === 'CALC')
-  ) {
+  } else if (isNumberField(aField) && isNumberField(bField)) {
     const aNum = Number(aField.value);
     const bNum = Number(bField.value);
     if (isNaN(aNum) && isNaN(bNum)) {
@@ -197,18 +240,7 @@ export const sortField = <T extends kintoneAPI.Field>(aField: T, bField: T): num
       return -1;
     }
     return aNum - bNum;
-  } else if (
-    (aFieldType === 'CREATED_TIME' ||
-      aFieldType === 'UPDATED_TIME' ||
-      aFieldType === 'DATE' ||
-      aFieldType === 'DATETIME' ||
-      aFieldType === 'TIME') &&
-    (bFieldType === 'CREATED_TIME' ||
-      bFieldType === 'UPDATED_TIME' ||
-      bFieldType === 'DATE' ||
-      bFieldType === 'DATETIME' ||
-      bFieldType === 'TIME')
-  ) {
+  } else if (isDateField(aField) && isDateField(bField)) {
     const aDate = new Date(aField.value);
     const bDate = new Date(bField.value);
     if (isNaN(aDate.getTime()) && isNaN(bDate.getTime())) {
