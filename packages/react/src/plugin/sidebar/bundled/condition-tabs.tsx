@@ -3,7 +3,6 @@ import { CSS } from '@dnd-kit/utilities';
 import styled from '@emotion/styled';
 import clsx from 'clsx';
 import { ClipboardPaste, Copy, GripVertical, Trash2 } from 'lucide-react';
-import React from 'react';
 import { type PluginConditionBase, type SidebarProps } from '.';
 import {
   ContextMenu,
@@ -12,6 +11,7 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from './context-menu';
+import { useI18n } from './i18n-provider';
 
 type Props<T extends PluginConditionBase> = Pick<
   SidebarProps<T>,
@@ -89,6 +89,7 @@ const SidebarTabButton = styled.button`
 const SidebarTab = <T extends PluginConditionBase>(
   props: { condition: T; index: number } & Props<T>
 ) => {
+  const { t } = useI18n();
   const {
     condition,
     conditions,
@@ -207,7 +208,7 @@ const SidebarTab = <T extends PluginConditionBase>(
               color: '#475569',
             }}
           />
-          この設定をコピー
+          {t('contextMenu.copy')}
         </ContextMenuItem>
         <ContextMenuItem onClick={() => onPaste()}>
           <ClipboardPaste
@@ -219,7 +220,7 @@ const SidebarTab = <T extends PluginConditionBase>(
               color: '#475569',
             }}
           />
-          コピーした設定を貼り付け
+          {t('contextMenu.paste')}
         </ContextMenuItem>
         <ContextMenuSeparator />
         <ContextMenuItem
@@ -235,7 +236,7 @@ const SidebarTab = <T extends PluginConditionBase>(
               color: '#475569',
             }}
           />
-          この設定を削除
+          {t('contextMenu.delete')}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>
