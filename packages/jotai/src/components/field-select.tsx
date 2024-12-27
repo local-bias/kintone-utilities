@@ -39,10 +39,16 @@ const JotaiFieldAutocomplete: FC<Props> = ({
         <Box
           key={key}
           component='li'
-          sx={{ '& > span': { fontSize: '12px', color: '#6b7280', ml: '12px' } }}
+          sx={{
+            '& > div': { display: 'grid' },
+            '& > div > div:first-of-type': { fontSize: '12px', color: '#6b7280' },
+          }}
           {...optionProps}
         >
-          {option.label} <span>{option.code}</span>
+          <div>
+            <div>{option.code}</div>
+            {option.label}
+          </div>
         </Box>
       );
     }}
