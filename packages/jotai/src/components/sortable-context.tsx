@@ -3,13 +3,13 @@ import React, { PropsWithChildren } from 'react';
 import { Atom, useAtomValue } from 'jotai';
 
 type Props<T extends { id: string }> = {
-  state: Atom<T[]>;
+  atom: Atom<T[]>;
 };
 
 export const JotaiSortableContext = <T extends { id: string }>({
   children,
-  state,
+  atom,
 }: PropsWithChildren<Props<T>>) => {
-  const items = useAtomValue(state);
+  const items = useAtomValue(atom);
   return <SortableContext items={items}>{children}</SortableContext>;
 };
