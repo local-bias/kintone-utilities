@@ -61,6 +61,7 @@ const JotaiFieldAutocomplete: FC<Props> = ({
         color='primary'
       />
     )}
+    disabled={autocompleteProps.disabled}
   />
 );
 

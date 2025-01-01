@@ -55,6 +55,7 @@ const Select: FC<Props> = ({
         color='primary'
       />
     )}
+    disabled={autocompleteProps.disabled}
   />
 );
 Select.displayName = 'RecoilFieldSelect';
