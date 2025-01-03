@@ -3,16 +3,14 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { WritableAtom } from 'jotai';
 import { useAtomCallback } from 'jotai/utils';
-import React, { PropsWithChildren, useCallback } from 'react';
+import React, { useCallback } from 'react';
 
 type Props<T extends { id: string }> = {
   atom: WritableAtom<T[], [T[]], void>;
+  children: React.ReactNode;
 };
 
-export const JotaiDndContext = <T extends { id: string }>({
-  children,
-  atom,
-}: PropsWithChildren<Props<T>>) => {
+export const JotaiDndContext = <T extends { id: string }>({ children, atom }: Props<T>) => {
   const onDragEnd = useAtomCallback(
     useCallback(
       async (get, set, event: DragEndEvent) => {
