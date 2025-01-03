@@ -9,6 +9,7 @@ type ContainerProps = {
   onChange: (code: string) => void;
   label?: string;
   placeholder?: string;
+  fieldCodeLabelPrefix?: string;
 } & Omit<ComponentProps<typeof Autocomplete>, 'onChange' | 'value' | 'renderInput' | 'options'>;
 
 type Props = Omit<ContainerProps, 'fieldPropertiesAtom' | 'onChange' | 'fieldCode'> & {
@@ -23,6 +24,7 @@ const JotaiFieldAutocomplete: FC<Props> = ({
   onFieldChange,
   label,
   placeholder,
+  fieldCodeLabelPrefix = 'コード: ',
   ...autocompleteProps
 }) => (
   <Autocomplete
@@ -46,7 +48,10 @@ const JotaiFieldAutocomplete: FC<Props> = ({
           {...optionProps}
         >
           <div>
-            <div>{option.code}</div>
+            <div>
+              {fieldCodeLabelPrefix}
+              {option.code}
+            </div>
             {option.label}
           </div>
         </Box>
