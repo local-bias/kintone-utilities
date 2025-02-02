@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, ReactNode, SetStateAction } from 'react';
 import SidebarConditionAppendButton from './condition-addition-button';
 import SidebarConditionTabs from './condition-tabs';
 import SidebarContainer from './container';
@@ -15,7 +15,7 @@ export type PluginConditionBase = {
 };
 
 export type SidebarProps<T extends PluginConditionBase> = {
-  labelComponent: (params: { condition: T; index: number }) => JSX.Element;
+  labelComponent: (params: { condition: T; index: number }) => ReactNode;
   conditions: T[];
   setConditions: Dispatch<SetStateAction<T[]>>;
   getNewCondition: () => T;
@@ -33,7 +33,7 @@ export type SidebarProps<T extends PluginConditionBase> = {
     onPasteValidationError: (condition: T) => void;
   }>;
   contextMenuItems?: {
-    component: JSX.Element | ((condition: T) => JSX.Element);
+    component: ReactNode | ((condition: T) => ReactNode);
     onClick: (condition: T) => void;
   }[];
   lang?: string;
