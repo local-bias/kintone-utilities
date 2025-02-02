@@ -1,9 +1,9 @@
 import styled from '@emotion/styled';
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 
-type Props = JSX.IntrinsicElements['div'] & {};
+export interface PluginSidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-const Component = forwardRef<HTMLDivElement, Props>((props, ref) => {
+const Component = forwardRef<HTMLDivElement, PluginSidebarProps>((props, ref) => {
   const { children, ...divProps } = props;
   return (
     <div {...divProps} ref={ref}>
