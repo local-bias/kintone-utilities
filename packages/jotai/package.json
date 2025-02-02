@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities-jotai",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "",
   "types": "dist/index.d.ts",
   "main": "dist/index.js",
@@ -14,16 +14,16 @@
     "@dnd-kit/modifiers": "^9.0.0",
     "@dnd-kit/sortable": "^10.0.0",
     "@konomi-app/kintone-utilities": "^5.12.1",
-    "@mui/icons-material": "^6.3.0",
-    "@mui/material": "^6.3.0",
+    "@mui/icons-material": "^6.4.1",
+    "@mui/material": "^6.4.1",
     "@radix-ui/react-slot": "^1.1.1",
-    "jotai": "^2.11.0",
+    "jotai": "^2.11.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
-    "typescript": "^5.7.2"
+    "@types/react": "^19.0.7",
+    "@types/react-dom": "^19.0.3",
+    "typescript": "^5.7.3"
   }
 }
