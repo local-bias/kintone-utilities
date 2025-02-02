@@ -1,5 +1,5 @@
 import styled from '@emotion/styled';
-import React, { FC } from 'react';
+import { FC } from 'react';
 
 type Props = { url: string };
 
@@ -11,7 +11,7 @@ const Component: FC<Props & { className?: string }> = ({ url, className }) => (
   </div>
 );
 
-const StyledComponent = styled(Component)`
+export const PluginBanner = styled(Component)`
   grid-area: banner;
 
   display: none;
@@ -31,5 +31,3 @@ const StyledComponent = styled(Component)`
     }
   }
 `;
-
-export const PluginBanner = StyledComponent;
