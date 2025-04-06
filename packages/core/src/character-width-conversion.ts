@@ -1,13 +1,49 @@
+/**
+ * カタカナをひらがなに変換します。
+ *
+ * @param target - 変換対象の文字列
+ * @returns カタカナがひらがなに変換された文字列
+ *
+ * @example
+ * ```
+ * convertKatakanaToHiragana("カタカナ") // => "かたかな"
+ * convertKatakanaToHiragana("カタカナとひらがな") // => "かたかなとひらがな"
+ * ```
+ */
 export const convertKatakanaToHiragana = (target: string) => {
   return target.replace(/[\u30a1-\u30f6]/g, (match) =>
     String.fromCharCode(match.charCodeAt(0) - 0x60)
   );
 };
 
+/**
+ * 全角英数字を半角英数字に変換します。
+ *
+ * @param target - 変換対象の文字列
+ * @returns 全角英数字が半角英数字に変換された文字列
+ *
+ * @example
+ * ```
+ * convertFullwidthAlphanumericToHalfwidth("ＡＢＣ１２３") // => "ABC123"
+ * convertFullwidthAlphanumericToHalfwidth("全角英数字") // => "全角英数字"
+ * ```
+ */
 export const convertFullwidthAlphanumericToHalfwidth = (target: string) => {
   return target.replace(/[Ａ-Ｚａ-ｚ０-９]/g, (s) => String.fromCharCode(s.charCodeAt(0) - 0xfee0));
 };
 
+/**
+ * 半角カタカナを全角カタカナに変換します。
+ *
+ * @param target - 変換対象の文字列
+ * @returns 半角カタカナが全角カタカナに変換された文字列
+ *
+ * @example
+ * ```
+ * convertHalfwidthKatakanaToFullwidth("ｶﾀｶﾅ") // => "カタカナ"
+ * convertHalfwidthKatakanaToFullwidth("半角カタカナ") // => "半角カタカナ"
+ * ```
+ */
 export const convertHalfwidthKatakanaToFullwidth = (target: string) => {
   const KANA_CONVERTION_MAP = {
     ｶﾞ: 'ガ',
