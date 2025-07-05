@@ -1,4 +1,4 @@
-import React, { FC, memo, useCallback, useState } from 'react';
+import RestartAltIcon from '@mui/icons-material/RestartAlt';
 import {
   Button,
   Dialog,
@@ -9,11 +9,11 @@ import {
   IconButton,
   Tooltip,
 } from '@mui/material';
-import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import { useCallback, useState } from 'react';
 
 type Props = { reset: () => void };
 
-const Component: FC<Props> = ({ reset }) => {
+export function PluginConfigResetButton({ reset }: Props) {
   const [open, setOpen] = useState<boolean>(false);
 
   const onIconButtonClick = useCallback(() => {
@@ -54,6 +54,4 @@ const Component: FC<Props> = ({ reset }) => {
       </Tooltip>
     </>
   );
-};
-
-export const PluginConfigResetButton = memo(Component);
+}
