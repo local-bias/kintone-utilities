@@ -4,7 +4,7 @@ import { Atom, useAtomValue } from 'jotai';
 import React, { ComponentProps, FC, Suspense, useCallback } from 'react';
 
 type ContainerProps = {
-  fieldPropertiesAtom: Atom<Promise<kintoneAPI.FieldProperty[]>>;
+  fieldPropertiesAtom: Atom<kintoneAPI.FieldProperty[] | Promise<kintoneAPI.FieldProperty[]>>;
   fieldCode: string;
   onChange: (code: string) => void;
   label?: string;
