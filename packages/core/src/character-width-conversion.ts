@@ -1,3 +1,5 @@
+import { toHebon } from './character-hebon';
+
 /**
  * カタカナをひらがなに変換します。
  *
@@ -149,6 +151,8 @@ export type GetYuruCharaOptions = {
   isCaseSensitive: boolean;
   isHankakuKatakanaSensitive: boolean;
   isKatakanaSensitive: boolean;
+  isHebonSensitive: boolean;
+  isHyphenSensitive: boolean;
 };
 
 /**
@@ -167,6 +171,8 @@ export type GetYuruCharaOptions = {
  * @param options.isCaseSensitive - 大文字小文字を区別するかどうか
  * @param options.isHankakuKatakanaSensitive - 半角カタカナを全角カタカナに変換するかどうか
  * @param options.isKatakanaSensitive - カタカナをひらがなに変換するかどうか
+ * @param options.isHebonSensitive - ヘボン式ローマ字に変換するかどうか
+ * @param options.isHyphenSensitive - ハイフン、ダッシュ、長音を統一するかどうか
  * @returns 変換後の文字列
  *
  * @example
@@ -186,6 +192,8 @@ export const getYuruChara = (target: string, options?: Partial<GetYuruCharaOptio
     isCaseSensitive = false,
     isHankakuKatakanaSensitive = false,
     isKatakanaSensitive = false,
+    isHebonSensitive = false,
+    isHyphenSensitive = false,
   } = options || {};
 
   let converted = target;
@@ -193,14 +201,29 @@ export const getYuruChara = (target: string, options?: Partial<GetYuruCharaOptio
   if (!isZenkakuEisujiSensitive) {
     converted = convertFullwidthAlphanumericToHalfwidth(converted);
   }
-  if (!isCaseSensitive) {
-    converted = converted.toLowerCase();
-  }
   if (!isHankakuKatakanaSensitive) {
     converted = convertHalfwidthKatakanaToFullwidth(converted);
   }
   if (!isKatakanaSensitive) {
     converted = convertKatakanaToHiragana(converted);
   }
+
+  if (!isHebonSensitive) {
+    converted = toHebon(converted);
+  }
+
+  if (!isCaseSensitive) {
+    converted = converted.toLowerCase();
+  }
+
+  if (!isHyphenSensitive) {
+    // ハイフン、ダッシュ、長音を統一
+    // 連続する場合は、1文字にまとめる
+    converted = converted.replace(
+      /[\u002D\u2010-\u2015\u2212\u301C\u30FC\uFF0D\u005F\uFF3F\uFF5E]+/g,
+      '-'
+    );
+  }
+
   return converted;
 };
