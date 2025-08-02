@@ -1,7 +1,8 @@
 import { kintoneAPI } from '@konomi-app/kintone-utilities';
 import { Autocomplete, Box, TextField } from '@mui/material';
 import { Atom, useAtomValue } from 'jotai';
-import React, { ComponentProps, FC, Suspense, useCallback } from 'react';
+import { ComponentProps, FC, Suspense, useCallback } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 
 type ContainerProps = {
   fieldPropertiesAtom: Atom<kintoneAPI.FieldProperty[] | Promise<kintoneAPI.FieldProperty[]>>;
@@ -104,8 +105,19 @@ export const JotaiFieldSelect: FC<ContainerProps> = (props) => {
   };
 
   return (
-    <Suspense fallback={<JotaiFieldSelectPlaceHolder {...completed} />}>
-      <JotaiFieldSelectComponent {...completed} />
-    </Suspense>
+    <ErrorBoundary
+      FallbackComponent={({ error }) => (
+        <TextField
+          label={completed.label}
+          error
+          helperText={`フィールド情報が取得できませんでした: ${error.message}`}
+          disabled
+        />
+      )}
+    >
+      <Suspense fallback={<JotaiFieldSelectPlaceHolder {...completed} />}>
+        <JotaiFieldSelectComponent {...completed} />
+      </Suspense>
+    </ErrorBoundary>
   );
 };
