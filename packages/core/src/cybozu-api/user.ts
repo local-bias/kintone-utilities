@@ -8,14 +8,6 @@ export const getCybozuUsers = (): Promise<{ users: cybozu.api.User[] }> => {
   return api({ endpointName: 'users', method: 'GET', body: {} });
 };
 
-export const getCybozuGroups = (): Promise<{ groups: cybozu.api.Group[] }> => {
-  return api({ endpointName: 'groups', method: 'GET', body: {} });
-};
-
-export const getCybozuOrganizations = (): Promise<{ organizations: cybozu.api.Organization[] }> => {
-  return api({ endpointName: 'organizations', method: 'GET', body: {} });
-};
-
 /**
  * ユーザーが所属するグループを返却します
  * @param code ユーザーコード
