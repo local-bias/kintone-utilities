@@ -1,3 +1,5 @@
 # kintone-utilities
 
-[ホームページ](https://ribbit.konomi.app)
+[ホームページ](https://konomi.app)
+
+[kintone プラグイン](https://ribbit.konomi.app/kintone-plugin/)
