@@ -26,7 +26,7 @@ export const PluginLayout = styled.div<Props>`
     let result = gridTemplate(row);
 
     if (!disableBanner) {
-      row.push(['banner', '300px']);
+      row.push(['banner', '240px']);
     }
 
     result += `@media (min-width: 1520px) {${gridTemplate(row)}}`;
