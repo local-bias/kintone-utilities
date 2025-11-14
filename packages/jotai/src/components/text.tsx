@@ -1,6 +1,7 @@
 import { TextField, TextFieldProps } from '@mui/material';
 import React, { ChangeEventHandler, FC, forwardRef, Suspense } from 'react';
 import { type PrimitiveAtom, useAtom } from 'jotai';
+import { ErrorBoundary } from 'react-error-boundary';
 
 type Props = {
   atom: PrimitiveAtom<string>;
@@ -25,8 +26,18 @@ export const JotaiText: FC<Props> = (props) => {
   };
 
   return (
-    <Suspense fallback={<JotaiTextPlaceHolder {...completed} />}>
-      <JotaiTextComponent {...completed} />
-    </Suspense>
+    <ErrorBoundary
+      FallbackComponent={({ error }) => (
+        <TextField
+          label={completed.label}
+          error
+          helperText={`テキストフィールドの値が取得できませんでした: ${error.message}`}
+        />
+      )}
+    >
+      <Suspense fallback={<JotaiTextPlaceHolder {...completed} />}>
+        <JotaiTextComponent {...completed} />
+      </Suspense>
+    </ErrorBoundary>
   );
 };
