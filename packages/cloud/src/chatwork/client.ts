@@ -1,4 +1,5 @@
 // This file was automatically generated.
+import { ketch } from '@konomi-app/ketch';
 import { stringify } from 'qs';
 
 export type RateLimits = {
@@ -72,17 +73,16 @@ export class ChatworkClient {
     const requestHeaders = this.getRequestHeaders();
     this.checkApiToken(requestHeaders);
 
-    const [data, statusCode, headers] = await kintone.proxy(
-      path,
+    const response = await ketch(path, {
       method,
-      requestHeaders,
-      requestParams
-    );
+      headers: requestHeaders,
+      body: JSON.stringify(requestParams),
+    });
 
-    if (Number(statusCode) !== 200) {
-      throw new Error(`Chatwork API Error: ${statusCode} ${data}`, JSON.parse(data));
+    if (response.status !== 200) {
+      throw new Error(`Chatwork API Error: ${response.status} ${await response.text()}`);
     }
-    return { data: JSON.parse(data), headers };
+    return { data: await response.json(), headers: response.headers };
   }
 
   private async get<T>(params: { endpointName: string; requestParams?: any }): Promise<T> {
