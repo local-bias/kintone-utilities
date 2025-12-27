@@ -1,5 +1,5 @@
 import { stringify } from 'qs';
-import { kintoneFetch } from '../lib/fetch';
+import { ketch } from '@konomi-app/ketch';
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
@@ -41,13 +41,13 @@ export class KingOfTimeClient {
         header['Content-Type'] = 'application/json; charset=utf-8';
       }
 
-      const response = await kintoneFetch<T>(uri, {
+      const response = await ketch(uri, {
         method,
         headers: header,
-        body: requestParams,
+        body: JSON.stringify(requestParams),
       });
 
-      const body = await response.json();
+      const body: T = await response.json();
       if (this.#debug) {
         console.log('🕒 KING OF TIME WebAPI', { uri, method, header, requestParams, body });
       }
