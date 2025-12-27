@@ -1,6 +1,6 @@
-import { kintoneFetch } from '../lib/fetch';
-import { YahooAPIClient } from './common';
+import { ketch } from '@konomi-app/ketch';
 import { stringify } from 'querystring';
+import { YahooAPIClient } from './common';
 
 export class YahooShoppingClient extends YahooAPIClient {
   public static END_POINT = 'ShoppingWebService/V3/itemSearch';
@@ -24,8 +24,8 @@ export class YahooShoppingClient extends YahooAPIClient {
     try {
       if (this.debug) console.group('🛒 Yahoo shopping API Call');
       const url = this.createUrl(params);
-      const response = await this.useAPI(() => kintoneFetch<Yahoo.Shopping.Response>(url));
-      const json = await response.json();
+      const response = await this.useAPI(() => ketch(url));
+      const json: Yahoo.Shopping.Response = await response.json();
       return json;
     } finally {
       if (this.debug) console.groupEnd();
