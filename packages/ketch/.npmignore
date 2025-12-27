@@ -1,0 +1,8 @@
+/node_modules
+/playground
+/src
+tsconfig.json
+tsup.config.ts
+.prettierrc.yml
+jest.config.mjs
+/test-results

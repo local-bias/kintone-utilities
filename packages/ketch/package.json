@@ -1,0 +1,33 @@
+{
+  "name": "@konomi-app/ketch",
+  "version": "0.2.0",
+  "description": "kintone.proxy, kintone.plugin.proxy wrapper for Fetch API",
+  "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "clean": "rimraf dist"
+  },
+  "author": "adachi keiichiro",
+  "license": "MIT",
+  "packageManager": "pnpm@10.26.1",
+  "devDependencies": {
+    "remeda": "^2.32.0",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.0",
+    "typescript": "^5.9.3"
+  }
+}
