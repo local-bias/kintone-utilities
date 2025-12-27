@@ -1,3 +1,4 @@
+import { ketch } from '@konomi-app/ketch';
 import OpenAI from 'openai';
 
 export class OpenAIClient {
@@ -14,23 +15,22 @@ export class OpenAIClient {
     this.#debug = debug;
   }
 
-  private api = async <T>(params: { endpoint: string; method: 'GET' | 'POST'; body?: any }) => {
+  private api = async (params: { endpoint: string; method: 'GET' | 'POST'; body?: any }) => {
     const { endpoint, method, body } = params;
 
     if (this.#debug) console.log('📤 api request', params);
 
-    const [responseBody, responseCode, responseHeader] = await kintone.proxy(
-      endpoint,
+    const response = await ketch(endpoint, {
       method,
-      {
+      headers: {
         'Content-Type': 'application/json; charset=UTF-8',
         Authorization: `Bearer ${this.#apiKey}`,
       },
-      body
-    );
-    if (this.#debug) console.log('📥 api response', { responseBody, responseCode, responseHeader });
+      body: JSON.stringify(body ?? {}),
+    });
+    if (this.#debug) console.log('📥 api response', response);
 
-    return { responseBody, responseCode, responseHeader };
+    return response;
   };
 
   public fetchChatCompletion = async (
@@ -38,15 +38,15 @@ export class OpenAIClient {
   ) => {
     if (this.#debug) console.group('🧠 OPENAI API Call');
 
-    const { responseBody, responseCode } = await this.api({
+    const response = await this.api({
       endpoint: OpenAIClient.ENDPOINT_CHAT,
       method: 'POST',
       body: params,
     });
 
-    const chatCompletion: OpenAI.Chat.ChatCompletion = JSON.parse(responseBody);
+    const chatCompletion: OpenAI.Chat.ChatCompletion = await response.json();
 
-    if (responseCode !== 200) {
+    if (response.status !== 200) {
       const errorResponse = chatCompletion as any;
       if (errorResponse?.error?.message) {
         throw new Error(errorResponse.error.message);
@@ -69,15 +69,15 @@ export class OpenAIClient {
   public generateImage = async (params: OpenAI.ImageGenerateParams) => {
     if (this.#debug) console.group('🧠 OPENAI API Call');
 
-    const { responseBody, responseCode } = await this.api({
+    const response = await this.api({
       endpoint: OpenAIClient.ENDPOINT_IMAGE_GENERATION,
       method: 'POST',
       body: params,
     });
 
-    const imageGeneration: OpenAI.ImagesResponse = JSON.parse(responseBody);
+    const imageGeneration: OpenAI.ImagesResponse = await response.json();
 
-    if (responseCode !== 200) {
+    if (response.status !== 200) {
       const errorResponse = imageGeneration as any;
       if (errorResponse?.error?.message) {
         throw new Error(errorResponse.error.message);
