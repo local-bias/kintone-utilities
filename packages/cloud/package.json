@@ -10,15 +10,19 @@
     "build": "rmdir /s /q dist & tsc",
     "prepare": "npm run build"
   },
-  "dependencies": {
-    "openai": "^4",
-    "qs": "^6"
+  "peerDependencies": {
+    "@konomi-app/ketch": ">=0.2.0",
+    "openai": ">=4.0.0",
+    "qs": ">=6.0.0"
   },
   "devDependencies": {
-    "@kintone/dts-gen": "^8",
-    "@types/node": "^20",
-    "@types/qs": "^6",
-    "typescript": "^5"
+    "@kintone/dts-gen": "^9.0.0",
+    "@konomi-app/ketch": "^0.2.0",
+    "@types/node": "^25.0.3",
+    "@types/qs": "^6.14.0",
+    "openai": "^6.15.0",
+    "qs": "^6.14.0",
+    "typescript": "^5.9.3"
   },
   "prettier": {
     "printWidth": 100,
