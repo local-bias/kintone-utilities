@@ -1,4 +1,4 @@
-import { MinimalFetch } from '../lib/fetch';
+import { type Ketch } from '@konomi-app/ketch';
 
 export class RakutenAPIClient {
   public static DOMAIN = 'https://app.rakuten.co.jp/';
@@ -7,7 +7,7 @@ export class RakutenAPIClient {
   readonly #applicationId: string;
   readonly #applicationSecret: string;
   readonly #affiliateId: string | undefined;
-  readonly #fetch: MinimalFetch;
+  readonly #fetch: Ketch;
 
   /** APIを最後に実行した時刻 */
   #lastRequested = 0;
@@ -16,7 +16,7 @@ export class RakutenAPIClient {
     applicationId: string;
     applicationSecret: string;
     affiliateId?: string;
-    fetch: MinimalFetch;
+    fetch: Ketch;
     debug?: boolean;
   }) {
     const { applicationId, applicationSecret, affiliateId, fetch, debug = false } = params;
