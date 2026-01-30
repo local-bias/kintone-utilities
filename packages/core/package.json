@@ -1,13 +1,30 @@
 {
   "name": "@konomi-app/kintone-utilities",
-  "version": "5.17.0",
-  "types": "dist/index.d.ts",
-  "main": "dist/index.js",
+  "version": "6.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "repository": "https://github.com/local-bias/kintone-utilities.git",
   "author": "Ribbit",
   "license": "MIT",
   "scripts": {
-    "build": "rmdir dist /s /q & tsc",
+    "build": "tsup",
     "play": "cd playground && npm run dev",
     "test": "jest"
   },
@@ -35,6 +52,7 @@
     "jest": "^30.2.0",
     "jest-html-reporters": "^3.1.7",
     "ts-jest": "^29.4.6",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3",
     "zod": "^4.2.1"
   }
