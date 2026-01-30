@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/ketch",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "description": "kintone.proxy, kintone.plugin.proxy wrapper for Fetch API",
   "type": "module",
   "main": "dist/index.cjs",
