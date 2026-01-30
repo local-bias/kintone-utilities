@@ -50,8 +50,8 @@ export const getNumberFieldValueAsString = (params: {
         minimumFractionDigits: displayScale ?? undefined,
       })
     : displayScale
-      ? Number(scaled).toFixed(displayScale)
-      : scaled;
+    ? Number(scaled).toFixed(displayScale)
+    : scaled;
 
   if (property?.unit) {
     if (property.unitPosition === 'BEFORE') {
@@ -179,15 +179,18 @@ const isDateField = (
   | kintoneAPI.field.CreatedTime
   | kintoneAPI.field.UpdatedTime
   | kintoneAPI.field.Date
-  | kintoneAPI.field.DateTime
-  | kintoneAPI.field.Time => {
+  | kintoneAPI.field.DateTime => {
   return (
     field.type === 'CREATED_TIME' ||
     field.type === 'UPDATED_TIME' ||
     field.type === 'DATE' ||
-    field.type === 'DATETIME' ||
-    field.type === 'TIME'
+    field.type === 'DATETIME'
   );
+};
+
+/** 受け取ったフィールドが時間フィールドであれば`true`を返します */
+const isTimeField = (field: kintoneAPI.Field): field is kintoneAPI.field.Time => {
+  return field.type === 'TIME';
 };
 
 /**
@@ -253,6 +256,27 @@ export const sortField = <T extends kintoneAPI.Field>(aField: T, bField: T): num
       return -1;
     }
     return aDate.getTime() - bDate.getTime();
+  } else if (isTimeField(aField) && isTimeField(bField)) {
+    // TIME フィールドは "HH:mm" 形式の文字列なので、分に変換して比較する
+    const parseTime = (value: string): number => {
+      const [hours, minutes] = value.split(':').map(Number);
+      if (isNaN(hours) || isNaN(minutes)) {
+        return NaN;
+      }
+      return hours * 60 + minutes;
+    };
+    const aTime = parseTime(aField.value);
+    const bTime = parseTime(bField.value);
+    if (isNaN(aTime) && isNaN(bTime)) {
+      return 0;
+    }
+    if (isNaN(aTime)) {
+      return 1;
+    }
+    if (isNaN(bTime)) {
+      return -1;
+    }
+    return aTime - bTime;
   } else if (
     (aFieldType === 'CATEGORY' || aFieldType === 'CHECK_BOX' || aFieldType === 'MULTI_SELECT') &&
     (bFieldType === 'CATEGORY' || bFieldType === 'CHECK_BOX' || bFieldType === 'MULTI_SELECT')
@@ -413,7 +437,7 @@ export const getDefaultValue = (property: kintoneAPI.FieldProperty) => {
     case 'DROP_DOWN':
     case 'RADIO_BUTTON':
     case 'LINK':
-      return 'defaultValue' in property ? (property.defaultValue ?? '') : '';
+      return 'defaultValue' in property ? property.defaultValue ?? '' : '';
     case 'DATE':
       const { defaultValue, defaultNowValue } = property;
       if (defaultValue) {
