@@ -111,17 +111,18 @@ export const restorePluginConfig = <T = any>(
 /**
  * アプリにプラグインの設定情報を保存します
  * @param target プラグインの設定情報
- * @param callback 保存成功後に実行する処理. 省略すると、アプリ設定のプラグインの一覧画面に遷移し、設定完了メッセージを表示します。指定すると、アプリ設定のプラグインの一覧画面には遷移しません。
+ * @param options.flatProperties 分割保存するプロパティ名の配列
+ * @param options.debug デバッグモードを有効にするかどうか
+ * @returns 保存完了後に解決されるPromise。callbackを指定しない場合、アプリ設定のプラグインの一覧画面に遷移し、設定完了メッセージを表示します。
  */
 export const storePluginConfig = <T extends Record<string, any> = Record<string, any>>(
   target: T,
   options?: {
-    callback?: () => void;
     flatProperties?: (keyof T)[];
     debug?: boolean;
   }
-): void => {
-  const { callback, flatProperties = [], debug = false } = options || {};
+): Promise<void> => {
+  const { flatProperties = [], debug = false } = options || {};
   const meta: PluginConfigMetadata = {
     v: 1,
     flat: [],
@@ -165,5 +166,36 @@ export const storePluginConfig = <T extends Record<string, any> = Record<string,
 
   debug && console.log('[config] 📦 Converted:', result);
 
-  kintone.plugin.app.setConfig(result, callback);
+  return new Promise<void>((resolve) => {
+    kintone.plugin.app.setConfig(result, () => {
+      resolve();
+    });
+  });
 };
+
+type PrimitiveSetPluginProxyConfig = typeof kintone.plugin.app.setProxyConfig;
+
+type PrimitiveSetPluginProxyConfigArgs = Parameters<PrimitiveSetPluginProxyConfig>;
+
+/**
+ * `kintone.plugin.app.setProxyConfig`のラッパー関数
+ *
+ * 引数の`callback`を省略して、Promiseを返すように変更したものです
+ *
+ * @example
+ * ```ts
+ * await setPluginProxyConfig('https://example.com', 'POST', { "Authorization": "Bearer XXXXXXXXX"}, { "provider": "kintone"});
+ * ```
+ */
+export function setPluginProxyConfig(
+  url: PrimitiveSetPluginProxyConfigArgs[0],
+  method: PrimitiveSetPluginProxyConfigArgs[1],
+  headers: PrimitiveSetPluginProxyConfigArgs[2],
+  data: PrimitiveSetPluginProxyConfigArgs[3]
+) {
+  return new Promise<void>((resolve) => {
+    kintone.plugin.app.setProxyConfig(url, method, headers, data, () => {
+      resolve();
+    });
+  });
+}
