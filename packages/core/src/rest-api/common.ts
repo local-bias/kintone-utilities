@@ -24,14 +24,11 @@ export const api = async <T = any>(params: {
     checkBrowser();
     const path = buildPath({ endpointName, guestSpaceId, preview });
     if (debug) {
-      console.groupCollapsed(
-        `%ckintone REST API %c(${endpointName})`,
-        'color: #1e40af;',
-        'color: #aaa'
-      );
-      console.log(`path: ${path}`);
-      console.log(`method: ${method}`);
-      console.log('body', body);
+      console.log(`%ckintone REST API %c(${endpointName})`, 'color: #1e40af;', 'color: #aaa', {
+        path,
+        method,
+        body,
+      });
     }
     const response: T = await kintone.api(path, method, body);
     if (debug) {
