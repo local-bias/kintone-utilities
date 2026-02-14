@@ -1,13 +1,30 @@
 {
   "name": "@konomi-app/kintone-utilities-cloud",
-  "version": "1.9.0",
-  "types": "dist/index.d.ts",
-  "main": "dist/index.js",
+  "version": "2.0.0",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "files": [
+    "dist"
+  ],
   "repository": "https://github.com/local-bias/kintone-cloud-connector.git",
   "author": "adachi",
   "license": "MIT",
   "scripts": {
-    "build": "rmdir /s /q dist & tsc",
+    "build": "tsup",
     "prepare": "npm run build"
   },
   "peerDependencies": {
@@ -22,6 +39,7 @@
     "@types/qs": "^6.14.0",
     "openai": "^6.15.0",
     "qs": "^6.14.0",
+    "tsup": "^8.5.1",
     "typescript": "^5.9.3"
   },
   "prettier": {

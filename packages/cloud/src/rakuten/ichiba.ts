@@ -32,7 +32,7 @@ export class RakutenIchibaClient extends RakutenAPIClient {
     if (this.debug) console.group('API Request', params);
 
     const url = this.createUrl(params);
-    const response = await this.useAPI(() => this.fetch<Rakuten.Ichiba.Response>(url));
+    const response = await this.useAPI(() => this.fetch(url));
 
     const json = await response.json();
 
