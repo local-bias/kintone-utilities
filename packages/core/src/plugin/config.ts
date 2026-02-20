@@ -9,25 +9,6 @@ type PluginConfigMetadata = {
 };
 
 /**
- * プラグインがアプリ単位で保存している設定情報を返却します
- *
- * 設定情報の取得に失敗した場合は、nullを返却します
- * @param id プラグインID
- * @returns プラグインの設定情報
- * @deprecated 代わりに{@link restorePluginConfig}を使用してください
- */
-export const restoreStorage = <T = any>(id: string): T | null => {
-  const config: Record<string, string> = kintone.plugin.app.getConfig(id);
-  if (!Object.keys(config).length) {
-    return null;
-  }
-  return Object.entries(config).reduce<any>(
-    (acc, [key, value]) => ({ ...acc, [key]: JSON.parse(value) }),
-    {}
-  );
-};
-
-/**
  * アプリにプラグインの設定情報を保存します
  * @param target プラグインの設定情報
  * @param callback 保存成功後に実行する処理. 省略すると、アプリ設定のプラグインの一覧画面に遷移し、設定完了メッセージを表示します。指定すると、アプリ設定のプラグインの一覧画面には遷移しません。
@@ -68,10 +49,9 @@ export const restorePluginConfig = <T = any>(
 
   if (!(META_PROPERTY_KEY in config)) {
     debug && console.warn('[config] Meta property is not found. Fallback to normal config.');
-    return Object.entries(config).reduce<any>(
-      (acc, [key, value]) => ({ ...acc, [key]: JSON.parse(value) }),
-      {}
-    );
+    return Object.fromEntries(
+      Object.entries(config).map(([key, value]) => [key, JSON.parse(value)])
+    ) as T;
   }
 
   const meta: PluginConfigMetadata = JSON.parse(config[META_PROPERTY_KEY]);
