@@ -1,0 +1,30 @@
+import { defineConfig } from 'tsup';
+
+export default defineConfig({
+  entry: ['src/index.ts'],
+  format: ['cjs', 'esm'],
+  dts: true,
+  clean: true,
+  sourcemap: true,
+  splitting: false,
+  treeshake: true,
+  external: [
+    'react',
+    'react-dom',
+    'react/jsx-runtime',
+    '@dnd-kit/core',
+    '@dnd-kit/modifiers',
+    '@dnd-kit/sortable',
+    '@dnd-kit/utilities',
+    '@emotion/react',
+    '@emotion/styled',
+    '@konomi-app/kintone-utilities',
+    '@mui/icons-material',
+    '@mui/material',
+    '@radix-ui/react-context-menu',
+    'clsx',
+    'lucide-react',
+    'nanoid',
+    'tiny-invariant',
+  ],
+});
