@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities",
-  "version": "6.0.1",
+  "version": "6.1.0",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
