@@ -19,6 +19,29 @@ const API_LIMIT_BULK_REQUEST = 20;
 type BulkRequestProgressParams = { total: number; done: number };
 type WithBulkRequestCallback<T> = T & { onProgress?: (params: BulkRequestProgressParams) => void };
 
+/**
+ * バックドア（プロキシ経由）でkintone REST APIを呼び出します。
+ *
+ * APIトークン認証を使い、`kintone.proxy()` を通じてリクエストを送信します。
+ * アプリAのカスタマイズからアプリBのレコードを操作するようなケースで使用します。
+ *
+ * @param params.apiToken - APIトークン
+ * @param params.method - HTTPメソッド
+ * @param params.path - APIエンドポイントのパス
+ * @param params.body - リクエストボディ（省略可）
+ * @returns APIレスポンス（JSONパース済み）
+ * @throws レスポンスのステータスコードが200でない場合
+ *
+ * @example
+ * ```ts
+ * const record = await backdoor({
+ *   apiToken: 'YOUR_API_TOKEN',
+ *   method: 'GET',
+ *   path: 'record',
+ *   body: { app: 1, id: 100 },
+ * });
+ * ```
+ */
 export const backdoor = async (params: {
   apiToken: string;
   method: kintoneAPI.rest.Method;
@@ -27,6 +50,7 @@ export const backdoor = async (params: {
 }): Promise<any> => {
   checkBrowser();
   const { apiToken, method, path, body } = params;
+
   const header: Record<string, string> = {
     'X-Cybozu-API-Token': apiToken,
   };
@@ -51,6 +75,22 @@ export type RecordGetRequest = {
 };
 type GetRecordParams = WithCommonRequestParams<RecordGetRequest>;
 
+/**
+ * 指定したIDのレコードを1件取得します。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.id - レコードID
+ * @param params.guestSpaceId - ゲストスペースID（省略可）
+ * @param params.debug - デバッグログを出力する場合は `true`
+ * @returns レコードデータ
+ *
+ * @example
+ * ```ts
+ * const record = await getRecord({ app: 1, id: 100 });
+ * console.log(record['フィールドコード'].value);
+ * ```
+ */
 export const getRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: GetRecordParams
 ): Promise<T> => {
@@ -64,6 +104,24 @@ export const getRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.Rec
   });
   return record;
 };
+/**
+ * バックドア（APIトークン認証）を使用してレコードを1件取得します。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.id - レコードID
+ * @param params.apiToken - APIトークン
+ * @returns レコードデータ
+ *
+ * @example
+ * ```ts
+ * const record = await backdoorGetRecord({
+ *   app: 1,
+ *   id: 100,
+ *   apiToken: 'YOUR_API_TOKEN',
+ * });
+ * ```
+ */
 export const backdoorGetRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: RecordGetRequest & { apiToken: string }
 ): Promise<T> => {
@@ -77,6 +135,28 @@ export const backdoorGetRecord = async <T extends kintoneAPI.rest.Frame = kinton
   return record;
 };
 
+/**
+ * 複数のレコードを一度に取得します（最大500件）。
+ *
+ * クエリでフィルタリングやソートが可能です。500件を超える場合は `getAllRecords` を使用してください。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.query - クエリ文字列（省略可）
+ * @param params.fields - 取得するフィールドコードの配列（省略可）
+ * @param params.totalCount - トータルカウントを取得する場合は `true`
+ * @returns レコード配列とトータルカウント
+ *
+ * @example
+ * ```ts
+ * const { records, totalCount } = await getRecords({
+ *   app: 1,
+ *   query: 'ステータス in ("未処理")',
+ *   fields: ['$id', 'タイトル'],
+ *   totalCount: true,
+ * });
+ * ```
+ */
 export const getRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: GetRecordsParams
 ): Promise<kintoneAPI.rest.RecordsGetResponse<T>> => {
@@ -107,6 +187,28 @@ export type RecordPutRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Record
 export type UpdateRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   WithCommonRequestParams<RecordPutRequest<T>>;
 
+/**
+ * レコードを1件更新します。
+ *
+ * `id` または `updateKey`（重複禁止フィールド）で更新対象を指定できます。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.id - 更新対象のレコードID（`id` または `updateKey` のどちらか一方を指定）
+ * @param params.updateKey - 重複禁止フィールドによる更新キー
+ * @param params.record - 更新内容
+ * @param params.revision - リビジョン番号（楽観的排他制御）
+ * @returns 更新後のリビジョン番号
+ *
+ * @example
+ * ```ts
+ * await updateRecord({
+ *   app: 1,
+ *   id: 100,
+ *   record: { タイトル: { value: '更新済み' } },
+ * });
+ * ```
+ */
 export const updateRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: UpdateRecordParams<T>
 ): Promise<kintoneAPI.rest.RecordPutResponse> => {
@@ -127,6 +229,25 @@ export type RecordPostRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Recor
 export type AddRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   WithCommonRequestParams<RecordPostRequest<T>>;
 
+/**
+ * レコードを1件追加します。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.record - 追加するレコードデータ
+ * @param params.guestSpaceId - ゲストスペースID（省略可）
+ * @param params.debug - デバッグログを出力する場合は `true`
+ * @returns 追加されたレコードのIDとリビジョン
+ *
+ * @example
+ * ```ts
+ * const { id } = await addRecord({
+ *   app: 1,
+ *   record: { タイトル: { value: '新規レコード' } },
+ * });
+ * console.log(`作成されたレコードID: ${id}`);
+ * ```
+ */
 export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: AddRecordParams<T>
 ): Promise<kintoneAPI.rest.RecordPostResponse> => {
@@ -140,6 +261,27 @@ export const addRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.Rec
   });
 };
 
+/**
+ * 複数レコードを一度に追加します（最大100件）。
+ *
+ * 100件を超える場合は `addAllRecords` を使用してください。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.records - 追加するレコードの配列
+ * @returns 追加されたレコードのID配列とリビジョン配列
+ *
+ * @example
+ * ```ts
+ * const { ids } = await addRecords({
+ *   app: 1,
+ *   records: [
+ *     { タイトル: { value: 'レコード1' } },
+ *     { タイトル: { value: 'レコード2' } },
+ *   ],
+ * });
+ * ```
+ */
 export const addRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: WithCommonRequestParams<RecordsPostRequest<T>>
 ): Promise<kintoneAPI.rest.RecordsPostResponse> => {
@@ -160,6 +302,26 @@ export type RecordUpsertRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Rec
 };
 export type UpsertRecordParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   WithCommonRequestParams<RecordUpsertRequest<T>>;
+/**
+ * レコードのアップサート（存在すれば更新、なければ追加）を行います。
+ *
+ * `updateKey` で指定した重複禁止フィールドの値に基づき、既存レコードを検索して分岐します。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.record - 追加または更新するレコードデータ
+ * @param params.updateKey - 重複禁止フィールドによるキー
+ * @returns 追加または更新されたレコードのIDとリビジョン
+ *
+ * @example
+ * ```ts
+ * const result = await upsertRecord({
+ *   app: 1,
+ *   updateKey: { field: '社員番号', value: 'EMP001' },
+ *   record: { 氏名: { value: '山田太郎' } },
+ * });
+ * ```
+ */
 export const upsertRecord = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: UpsertRecordParams<T>
 ): Promise<kintoneAPI.rest.RecordPostResponse> => {
@@ -203,6 +365,29 @@ export type RecordsPutRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Recor
 export type UpdateAllRecordsParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   WithBulkRequestCallback<WithCommonRequestParams<RecordsPutRequest<T>>>;
 
+/**
+ * 大量のレコードを一括更新します。
+ *
+ * 内部で `bulkRequest` を使用し、API制限ごとに自動分割してリクエストを送信します。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.records - 更新するレコードの配列（`id` または `updateKey` と `record` を含む）
+ * @param params.onProgress - 進捗コールバック（`{ total, done }` を受け取る）
+ * @returns 更新されたレコードのIDとリビジョンの配列
+ *
+ * @example
+ * ```ts
+ * await updateAllRecords({
+ *   app: 1,
+ *   records: [
+ *     { id: 1, record: { ステータス: { value: '完了' } } },
+ *     { id: 2, record: { ステータス: { value: '完了' } } },
+ *   ],
+ *   onProgress: ({ total, done }) => console.log(`${done}/${total}`),
+ * });
+ * ```
+ */
 export const updateAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: UpdateAllRecordsParams<T>
 ): Promise<kintoneAPI.rest.RecordsPutResponse> => {
@@ -230,6 +415,30 @@ export type RecordsPostRequest<T extends kintoneAPI.rest.Frame = kintoneAPI.Reco
 export type AddAllRecordsParams<T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData> =
   WithBulkRequestCallback<WithCommonRequestParams<RecordsPostRequest<T>>>;
 
+/**
+ * 大量のレコードを一括追加します。
+ *
+ * 内部で `bulkRequest` を使用し、API制限ごとに自動分割してリクエストを送信します。
+ * 空配列を渡した場合は何もせず空の結果を返します。
+ *
+ * @typeParam T - レコードの型
+ * @param params.app - アプリID
+ * @param params.records - 追加するレコードの配列
+ * @param params.limit - 1リクエストあたりのレコード数上限（デフォルト: 100）
+ * @param params.onProgress - 進捗コールバック
+ * @returns 追加されたレコードのID配列とリビジョン配列
+ *
+ * @example
+ * ```ts
+ * const { ids } = await addAllRecords({
+ *   app: 1,
+ *   records: Array.from({ length: 500 }, (_, i) => ({
+ *     タイトル: { value: `レコード${i + 1}` },
+ *   })),
+ * });
+ * console.log(`${ids.length}件追加しました`);
+ * ```
+ */
 export const addAllRecords = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: AddAllRecordsParams<T>
 ): Promise<kintoneAPI.rest.RecordsPostResponse> => {
@@ -269,6 +478,25 @@ export type DeleteAllRecordsParams = WithBulkRequestCallback<
   WithCommonRequestParams<RecordsDeleteRequest>
 >;
 
+/**
+ * 大量のレコードを一括削除します。
+ *
+ * 内部で `bulkRequest` を使用し、API制限ごとに自動分割して削除リクエストを送信します。
+ *
+ * @param params.app - アプリID
+ * @param params.ids - 削除対象のレコードIDの配列
+ * @param params.revisions - リビジョン番号の配列（楽観的排他制御、省略可）
+ * @param params.onProgress - 進捗コールバック
+ * @returns バルクリクエストの結果
+ *
+ * @example
+ * ```ts
+ * await deleteAllRecords({
+ *   app: 1,
+ *   ids: [1, 2, 3, 4, 5],
+ * });
+ * ```
+ */
 export const deleteAllRecords = async (
   params: DeleteAllRecordsParams
 ): Promise<{ results: kintoneAPI.rest.RecordsDeleteResponse[] }> => {
@@ -281,6 +509,24 @@ export const deleteAllRecords = async (
   });
 };
 
+/**
+ * クエリに一致する全レコードを削除します。
+ *
+ * 指定したクエリで全レコードを取得した後、そのIDを使って一括削除を実行します。
+ *
+ * @param params.app - アプリID
+ * @param params.query - 削除対象をフィルタリングするクエリ文字列
+ * @param params.onProgress - 進捗コールバック
+ * @returns バルクリクエストの結果
+ *
+ * @example
+ * ```ts
+ * await deleteAllRecordsByQuery({
+ *   app: 1,
+ *   query: 'ステータス in ("削除済み")',
+ * });
+ * ```
+ */
 export const deleteAllRecordsByQuery = async (
   params: WithBulkRequestCallback<
     WithCommonRequestParams<{
@@ -514,6 +760,26 @@ export type RecordAssigneesPutRequest = {
 };
 export type UpdateRecordAssigneesParams = WithCommonRequestParams<RecordAssigneesPutRequest>;
 
+/**
+ * レコードの作業者（アサイニー）を更新します。
+ *
+ * プロセス管理が有効なアプリで、レコードの作業者を変更する際に使用します。
+ *
+ * @param params.app - アプリID
+ * @param params.id - レコードID
+ * @param params.assignees - 作業者のログイン名の配列
+ * @param params.revision - リビジョン番号（省略可）
+ * @returns 更新後のリビジョン情報
+ *
+ * @example
+ * ```ts
+ * await updateRecordAssignees({
+ *   app: 1,
+ *   id: 100,
+ *   assignees: ['user1', 'user2'],
+ * });
+ * ```
+ */
 export const updateRecordAssignees = async (
   params: UpdateRecordAssigneesParams
 ): Promise<kintoneAPI.rest.RecordAssigneesPutResponse> => {
@@ -539,6 +805,26 @@ export type RecordStatusPutRequest = {
 } & RecordStatusToPut;
 export type UpdateRecordStatusParams = WithCommonRequestParams<RecordStatusPutRequest>;
 
+/**
+ * レコードのプロセスステータスを1件更新します。
+ *
+ * @param params.app - アプリID
+ * @param params.action - 実行するアクション名
+ * @param params.assignee - 次の作業者のログイン名（省略可）
+ * @param params.id - レコードID
+ * @param params.revision - リビジョン番号（省略可）
+ * @returns 更新後のリビジョン情報
+ *
+ * @example
+ * ```ts
+ * await updateRecordStatus({
+ *   app: 1,
+ *   id: 100,
+ *   action: '承認する',
+ *   assignee: 'manager1',
+ * });
+ * ```
+ */
 export const updateRecordStatus = async (
   params: UpdateRecordStatusParams
 ): Promise<kintoneAPI.rest.RecordStatusPutResponse> => {
@@ -560,6 +846,27 @@ export type UpdateAllRecordStatusesParams = WithBulkRequestCallback<
   WithCommonRequestParams<RecordStatusesPutRequest>
 >;
 
+/**
+ * 複数レコードのプロセスステータスを一括更新します。
+ *
+ * 内部で `bulkRequest` を使用し、API制限ごとに自動分割してリクエストを送信します。
+ *
+ * @param params.app - アプリID
+ * @param params.records - 更新対象のレコード配列（`action`, `id` 等を含む）
+ * @param params.onProgress - 進捗コールバック
+ * @returns 更新されたレコードの配列
+ *
+ * @example
+ * ```ts
+ * await updateAllRecordStatuses({
+ *   app: 1,
+ *   records: [
+ *     { id: 1, action: '承認する' },
+ *     { id: 2, action: '承認する' },
+ *   ],
+ * });
+ * ```
+ */
 export const updateAllRecordStatuses = async (
   params: UpdateAllRecordStatusesParams
 ): Promise<kintoneAPI.rest.RecordStatusesPutResponse> => {
@@ -587,6 +894,23 @@ export type RecordACLEvaluateGetRequest = {
 };
 export type GetRecordACLEvaluateParams = WithCommonRequestParams<RecordACLEvaluateGetRequest>;
 
+/**
+ * レコードのアクセス権を評価します。
+ *
+ * 指定したレコードIDに対して、現在のユーザーのアクセス権情報を取得します。
+ *
+ * @param params.app - アプリID
+ * @param params.ids - 評価対象のレコードIDの配列
+ * @returns 各レコードのアクセス権評価結果
+ *
+ * @example
+ * ```ts
+ * const result = await getRecordACLEvaluate({
+ *   app: 1,
+ *   ids: [1, 2, 3],
+ * });
+ * ```
+ */
 export const getRecordACLEvaluate = async (
   params: GetRecordACLEvaluateParams
 ): Promise<kintoneAPI.rest.RecordACLEvaluateGetResponse> => {
@@ -654,6 +978,28 @@ export type BulkRequestParams<T extends kintoneAPI.rest.Frame = kintoneAPI.Recor
     limit?: number;
   }>;
 
+/**
+ * 複数のAPIリクエストを一括で実行します（バルクリクエスト）。
+ *
+ * API制限ごとにリクエストを自動分割し、チャンクごとに順次実行します。
+ * レコードの追加・更新・削除・ステータス更新などの操作を混在させることができます。
+ *
+ * @typeParam T - レコードの型
+ * @param params.requests - 実行するリクエストの配列（type と params を持つ）
+ * @param params.onProgress - 進捗コールバック
+ * @param params.limit - 1回のバルクリクエストあたりのリクエスト数上限（デフォルト: 20）
+ * @returns 全リクエストの実行結果
+ *
+ * @example
+ * ```ts
+ * const result = await bulkRequest({
+ *   requests: [
+ *     { type: 'addAllRecords', params: { app: 1, records: [...] } },
+ *     { type: 'deleteRecords', params: { app: 2, ids: [1, 2, 3] } },
+ *   ],
+ * });
+ * ```
+ */
 export const bulkRequest = async <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
   params: BulkRequestParams<T>
 ): Promise<kintoneAPI.rest.BulkResponse> => {
