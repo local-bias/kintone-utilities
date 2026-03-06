@@ -45,6 +45,22 @@ export const withSpaceIdFallback = async <T extends (...args: any) => any>(param
   }
 };
 
+/**
+ * REST APIでアクセスする先のアプリがゲストスペースに存在するかどうかを判定します。
+ *
+ * ゲストスペースIDなしでアクセスし、`GAIA_IL23` エラーが返るかどうかで判定します。
+ *
+ * @param appId - 判定対象のアプリID
+ * @returns ゲストスペースのアプリであれば `true`
+ *
+ * @example
+ * ```ts
+ * const guest = await isGuestSpace('123');
+ * if (guest) {
+ *   console.log('ゲストスペースのアプリです');
+ * }
+ * ```
+ */
 export const isGuestSpace = async (appId: string): Promise<boolean> => {
   try {
     await getRecords({ app: appId });
@@ -112,18 +128,3 @@ export const useQuery = <T>(
   }
   return mergedCondition;
 };
-
-/**
- * 受け取った配列を指定したサイズで分割します
- *
- * @example
- * ```ts
- * const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9];
- * const result = chunk(arr, 3);
- * console.log(result); // [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
- * ```
- */
-export const chunk = <T>(arr: T[], size: number): T[][] =>
-  Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
-    arr.slice(i * size, i * size + size)
-  );
