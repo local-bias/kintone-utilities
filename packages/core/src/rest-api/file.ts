@@ -1,10 +1,31 @@
 import { WithCommonRequestParams, buildPath } from './common';
 
 /**
- * kintoneへファイルをアップロードします
+ * kintoneへファイルをアップロードします。
  *
- * @param params
- * @returns
+ * `FormData` を使用し、`fetch` APIでファイルをアップロードします。
+ * アップロード成功後、返された `fileKey` をレコードの添付ファイルフィールドの値として使用できます。
+ *
+ * @param params.file.name - ファイル名
+ * @param params.file.data - ファイルデータ（Blob）
+ * @param params.guestSpaceId - ゲストスペースID（省略可）
+ * @param params.debug - デバッグログを出力する場合は `true`
+ * @returns アップロードされたファイルの `fileKey`
+ *
+ * @example
+ * ```ts
+ * const blob = new Blob(['テスト内容'], { type: 'text/plain' });
+ * const { fileKey } = await uploadFile({
+ *   file: { name: 'test.txt', data: blob },
+ * });
+ *
+ * // レコード更新時に使用
+ * await updateRecord({
+ *   app: 1,
+ *   id: 100,
+ *   record: { 添付ファイル: { value: [{ fileKey }] } },
+ * });
+ * ```
  */
 export const uploadFile = async (
   params: WithCommonRequestParams<{
@@ -26,6 +47,22 @@ export const uploadFile = async (
   return response.json();
 };
 
+/**
+ * kintoneからファイルをダウンロードします。
+ *
+ * `fileKey` を指定して、添付ファイルをBlobとして取得します。
+ *
+ * @param params.fileKey - ダウンロード対象のファイルキー
+ * @param params.guestSpaceId - ゲストスペースID（省略可）
+ * @param params.debug - デバッグログを出力する場合は `true`
+ * @returns ファイルデータ（Blob）
+ *
+ * @example
+ * ```ts
+ * const blob = await downloadFile({ fileKey: 'xxxx-xxxx-xxxx' });
+ * const url = URL.createObjectURL(blob);
+ * ```
+ */
 export const downloadFile = async (
   params: WithCommonRequestParams<{ fileKey: string }>
 ): Promise<Blob> => {
