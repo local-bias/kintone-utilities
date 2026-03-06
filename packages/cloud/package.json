@@ -32,6 +32,14 @@
     "openai": ">=4.0.0",
     "qs": ">=6.0.0"
   },
+  "peerDependenciesMeta": {
+    "openai": {
+      "optional": true
+    },
+    "qs": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@kintone/dts-gen": "^9.0.0",
     "@konomi-app/ketch": "^0.2.0",
