@@ -83,6 +83,9 @@ importers:
       '@dnd-kit/sortable':
         specifier: ^10.0.0
         version: 10.0.0(@dnd-kit/core@6.3.1(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
+      '@emotion/styled':
+        specifier: ^11.14.1
+        version: 11.14.1(@emotion/react@11.14.0(@types/react@19.2.7)(react@19.2.3))(@types/react@19.2.7)(react@19.2.3)
       '@konomi-app/kintone-utilities':
         specifier: ^5.17.0
         version: 5.17.0
@@ -104,6 +107,9 @@ importers:
       jotai:
         specifier: ^2.16.0
         version: 2.16.0(@babel/core@7.28.5)(@babel/template@7.27.2)(@types/react@19.2.7)(react@19.2.3)
+      nanoid:
+        specifier: ^5.1.6
+        version: 5.1.6
       react:
         specifier: ^19.2.3
         version: 19.2.3
@@ -4445,7 +4451,6 @@ snapshots:
       '@types/react': 19.2.7
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   '@emotion/serialize@1.3.3':
     dependencies:
@@ -4502,7 +4507,6 @@ snapshots:
       '@types/react': 19.2.7
     transitivePeerDependencies:
       - supports-color
-    optional: true
 
   '@emotion/unitless@0.10.0': {}
 
@@ -4514,7 +4518,6 @@ snapshots:
   '@emotion/use-insertion-effect-with-fallbacks@1.2.0(react@19.2.3)':
     dependencies:
       react: 19.2.3
-    optional: true
 
   '@emotion/use-insertion-effect-with-fallbacks@1.2.0(react@19.2.4)':
     dependencies:

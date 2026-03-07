@@ -1,6 +1,7 @@
 export * from './dnd-context';
 export * from './field-select';
 export * from './number';
+export * from './query-builder';
 export * from './radio';
 export * from './sortable-context';
 export * from './switch';
