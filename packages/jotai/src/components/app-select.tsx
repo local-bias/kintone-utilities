@@ -1,53 +1,50 @@
-import React, { ComponentProps, FC, Suspense, useCallback } from 'react';
-import { useAtomValue, type Atom, } from 'jotai';
-import { TextField, Autocomplete } from '@mui/material';
 import { kintoneAPI } from '@konomi-app/kintone-utilities';
+import { Autocomplete, TextField } from '@mui/material';
+import { useAtomValue, type Atom } from 'jotai';
+import { ComponentProps, Suspense, useCallback } from 'react';
 
-type ContainerProps = {
-  appsState: Atom<kintoneAPI.App[]>;
+interface ContainerProps extends Omit<
+  ComponentProps<typeof Autocomplete>,
+  'onChange' | 'value' | 'renderInput' | 'options'
+> {
+  appsAtom: Atom<kintoneAPI.App[] | Promise<kintoneAPI.App[]>>;
   appId: string;
   onChange: (appId: string) => void;
   label?: string;
   placeholder?: string;
-} & Omit<ComponentProps<typeof Autocomplete>, 'onChange' | 'value' | 'renderInput' | 'options'>;
+}
 
-type Props = Omit<ContainerProps, 'appsState' | 'onChange' | 'appId'> & {
+interface Props extends Omit<ContainerProps, 'appsAtom' | 'onChange' | 'appId'> {
   value: kintoneAPI.App | null;
   apps: kintoneAPI.App[];
   onAppChange: (_: any, app: kintoneAPI.App | null) => void;
-};
+}
 
-const Select: FC<Props> = ({
-  apps,
-  value,
-  onAppChange,
-  label,
-  placeholder,
-  ...autocompleteProps
-}) => (
-  <Autocomplete
-    value={value}
-    options={apps}
-    isOptionEqualToValue={(option, v) => option.appId === v.appId}
-    getOptionLabel={(option) => `${option.name}(${option.appId})`}
-    onChange={onAppChange}
-    sx={autocompleteProps.sx}
-    fullWidth={autocompleteProps.fullWidth}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label={label}
-        placeholder={placeholder}
-        variant='outlined'
-        color='primary'
-      />
-    )}
-  />
-);
-Select.displayName = 'JotaiAppSelect';
+function Select({ apps, value, onAppChange, label, placeholder, ...autocompleteProps }: Props) {
+  return (
+    <Autocomplete
+      value={value}
+      options={apps}
+      isOptionEqualToValue={(option, v) => option.appId === v.appId}
+      getOptionLabel={(option) => `${option.name}(${option.appId})`}
+      onChange={onAppChange}
+      sx={autocompleteProps.sx}
+      fullWidth={autocompleteProps.fullWidth}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          placeholder={placeholder}
+          variant='outlined'
+          color='primary'
+        />
+      )}
+    />
+  );
+}
 
-const Component: FC<ContainerProps> = ({ appsState, onChange, appId, ...rest }) => {
-  const apps = useAtomValue(appsState);
+function JotaiAppSelectContent({ appsAtom, onChange, appId, ...rest }: ContainerProps) {
+  const apps = useAtomValue(appsAtom);
 
   const value = apps.find((app) => app.appId === appId) ?? null;
 
@@ -57,15 +54,21 @@ const Component: FC<ContainerProps> = ({ appsState, onChange, appId, ...rest }) 
   );
 
   return <Select {...{ onAppChange, value, apps, ...rest }} />;
-};
-Component.displayName = 'JotaiAppSelectComponent';
+}
 
-const PlaceHolder: FC<ContainerProps> = ({ label, placeholder, ...autocompleteProps }) => (
-  <TextField label={label} placeholder={placeholder} value='' sx={autocompleteProps.sx} disabled />
-);
-PlaceHolder.displayName = 'JotaiAppSelectPlaceHolder';
+function PlaceHolder({ label, placeholder, ...autocompleteProps }: ContainerProps) {
+  return (
+    <TextField
+      label={label}
+      placeholder={placeholder}
+      value=''
+      sx={autocompleteProps.sx}
+      disabled
+    />
+  );
+}
 
-const Container: FC<ContainerProps> = (props) => {
+export function JotaiAppSelect(props: ContainerProps) {
   const completed: ContainerProps = {
     sx: { width: 400 },
     label: '対象アプリ',
@@ -75,10 +78,7 @@ const Container: FC<ContainerProps> = (props) => {
 
   return (
     <Suspense fallback={<PlaceHolder {...completed} />}>
-      <Component {...completed} />
+      <JotaiAppSelectContent {...completed} />
     </Suspense>
   );
-};
-Container.displayName = 'JotaiAppSelectContainer';
-
-export const JotaiAppSelect = Container;
+}
