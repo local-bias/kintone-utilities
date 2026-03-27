@@ -4,6 +4,7 @@ import { JotaiFieldSelect } from '../field-select';
 import AddIcon from '@mui/icons-material/Add';
 import DeleteIcon from '@mui/icons-material/Delete';
 import {
+  Alert,
   Button,
   Chip,
   FormControl,
@@ -25,6 +26,7 @@ import React, { memo, Suspense, useCallback, useEffect, useMemo, useRef, useStat
 import type { QueryBuilderLocale, QueryBuilderMessageKey, QueryBuilderOperatorLabel } from './i18n';
 import { getQueryBuilderI18n } from './i18n';
 import { QueryBuilderModeToggle } from './mode-toggle';
+import { ErrorBoundary } from 'react-error-boundary';
 
 type OperatorType =
   | '='
@@ -1252,12 +1254,23 @@ function QueryBuilder({ queryAtom, fieldsAtom, locale }: QueryBuilderProps) {
       {isRawMode ? (
         <RawMode queryAtom={queryAtom} t={t} placeholder={rawPlaceholder} />
       ) : (
-        <BuilderMode
-          queryAtom={queryAtom}
-          fieldsAtom={fieldsAtom}
-          operatorLabels={operatorLabels}
-          t={t}
-        />
+        <ErrorBoundary
+          FallbackComponent={({ error }) => (
+            <Alert severity='error'>
+              {t('parseError')}
+              <Typography variant='caption' sx={{ mt: 1, whiteSpace: 'pre-wrap' }}>
+                {error instanceof Error ? error.message : String(error)}
+              </Typography>
+            </Alert>
+          )}
+        >
+          <BuilderMode
+            queryAtom={queryAtom}
+            fieldsAtom={fieldsAtom}
+            operatorLabels={operatorLabels}
+            t={t}
+          />
+        </ErrorBoundary>
       )}
     </div>
   );
