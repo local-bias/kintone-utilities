@@ -1,3 +1,4 @@
+export * from './action-select';
 export * from './app-select';
 export * from './dnd-context';
 export * from './field-multi-select';
@@ -6,6 +7,7 @@ export * from './number';
 export * from './query-builder';
 export * from './radio';
 export * from './sortable-context';
+export * from './status-select';
 export * from './switch';
 export * from './text';
 export * from './toggle-panel';
