@@ -9,6 +9,7 @@ const API_ENDPOINT_VIEWS = 'app/views';
 const API_ENDPOINT_FORM_FIELDS = 'app/form/fields';
 const API_ENDPOINT_FORM_LAYOUT = 'app/form/layout';
 const API_ENDPOINT_APP_SETTINGS = 'app/settings';
+const API_ENDPOINT_STATUS = 'app/status';
 
 /**
  * 指定したIDのアプリ情報を1件取得します。
@@ -259,6 +260,43 @@ export const getAppSettings = async (
     endpointName: API_ENDPOINT_APP_SETTINGS,
     method: 'GET',
     body: { app },
+    preview,
+    debug,
+    guestSpaceId,
+  });
+};
+
+/**
+ * 指定アプリのプロセス管理設定を取得します。
+ *
+ * @param params.app - アプリID
+ * @param params.lang - 取得する言語（デフォルト: `'default'`）
+ * @param params.preview - プレビュー環境の設定を取得する場合は `true`
+ * @param params.guestSpaceId - ゲストスペースID（省略可）
+ * @param params.debug - デバッグログを出力する場合は `true`
+ * @returns プロセス管理設定オブジェクト（有効フラグ、ステータス一覧、アクション一覧）
+ *
+ * @example
+ * ```ts
+ * const status = await getAppStatus({ app: 1 });
+ * if (status.enable) {
+ *   console.log(Object.keys(status.states ?? {})); // ステータス名一覧
+ *   status.actions?.forEach((action) => console.log(action.name));
+ * }
+ * ```
+ */
+export const getAppStatus = async (
+  params: WithCommonRequestParams<{
+    app: kintoneAPI.IDToRequest;
+    lang?: kintoneAPI.rest.Lang;
+    preview?: boolean;
+  }>
+): Promise<kintoneAPI.AppStatus> => {
+  const { app, lang = 'default', preview = false, debug, guestSpaceId } = params;
+  return api({
+    endpointName: API_ENDPOINT_STATUS,
+    method: 'GET',
+    body: { app, lang },
     preview,
     debug,
     guestSpaceId,

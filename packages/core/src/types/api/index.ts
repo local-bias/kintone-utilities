@@ -266,6 +266,57 @@ export declare namespace kintoneAPI {
     revision: string;
   };
 
+  type AppStatusAssigneeEntityType =
+    | 'USER'
+    | 'GROUP'
+    | 'ORGANIZATION'
+    | 'FIELD_ENTITY'
+    | 'CREATOR'
+    | 'CUSTOM_FIELD';
+
+  type AppStatusAssigneeEntity = {
+    entity: {
+      type: AppStatusAssigneeEntityType;
+      code: string | null;
+    };
+    includeSubs: boolean;
+  };
+
+  type AppStatusState = {
+    name: string;
+    index: string;
+    assignee: {
+      type: 'ONE' | 'ALL' | 'ANY';
+      entities: AppStatusAssigneeEntity[];
+    };
+  };
+
+  type AppStatusExecutableUserEntityType = 'USER' | 'GROUP' | 'ORGANIZATION' | 'FIELD_ENTITY';
+
+  type AppStatusAction = {
+    name: string;
+    from: string;
+    to: string;
+    filterCond: string;
+    type: 'PRIMARY' | 'SECONDARY';
+    executableUser?: {
+      entities: {
+        entity: {
+          type: AppStatusExecutableUserEntityType;
+          code: string;
+        };
+        includeSubs: boolean;
+      }[];
+    };
+  };
+
+  type AppStatus = {
+    enable: boolean;
+    states: Record<string, AppStatusState> | null;
+    actions: AppStatusAction[] | null;
+    revision: string;
+  };
+
   namespace response {
     type App = { readonly app?: kintoneAPI.App; readonly fields?: FieldProperties };
   }
