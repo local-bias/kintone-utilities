@@ -31,7 +31,7 @@ export const JotaiText: FC<Props> = (props) => {
         <TextField
           label={completed.label}
           error
-          helperText={`テキストフィールドの値が取得できませんでした: ${error.message}`}
+          helperText={`テキストフィールドの値が取得できませんでした: ${error instanceof Error ? error.message : String(error)}`}
         />
       )}
     >
