@@ -2,6 +2,7 @@ export type QueryBuilderMessageKey =
   | 'addCondition'
   | 'addGroup'
   | 'addValue'
+  | 'builderMode'
   | 'deleteCondition'
   | 'deleteGroup'
   | 'field'
@@ -11,9 +12,11 @@ export type QueryBuilderMessageKey =
   | 'noConditions'
   | 'operator'
   | 'rawLabel'
+  | 'rawMode'
   | 'switchToBuilder'
   | 'switchToRaw'
-  | 'value';
+  | 'value'
+  | 'parseError';
 
 export type QueryBuilderOperatorLabel<TValue extends string = string> = {
   value: TValue;
@@ -38,6 +41,7 @@ const QUERY_BUILDER_MESSAGES = {
     addCondition: '条件を追加',
     addGroup: '条件グループを追加',
     addValue: '追加',
+    builderMode: 'フォーム',
     deleteCondition: '条件を削除',
     deleteGroup: 'グループを削除',
     field: 'フィールド',
@@ -48,14 +52,17 @@ const QUERY_BUILDER_MESSAGES = {
       '条件が設定されていません。条件を追加すると、対象のレコードを絞り込むことができます。',
     operator: '演算子',
     rawLabel: 'クエリ',
+    rawMode: 'クエリ',
     switchToBuilder: '条件入力フォームに切り替える',
     switchToRaw: 'クエリを直接入力する',
     value: '値',
+    parseError: 'クエリの解析に失敗しました。代わりにクエリを直接編集してください。',
   },
   en: {
     addCondition: 'Add condition',
     addGroup: 'Add group',
     addValue: 'Add',
+    builderMode: 'Builder',
     deleteCondition: 'Delete condition',
     deleteGroup: 'Delete group',
     field: 'Field',
@@ -65,14 +72,17 @@ const QUERY_BUILDER_MESSAGES = {
     noConditions: 'No conditions are configured. Add one to start filtering records.',
     operator: 'Operator',
     rawLabel: 'Query',
+    rawMode: 'Raw',
     switchToBuilder: 'Switch to builder mode',
     switchToRaw: 'Edit raw query',
     value: 'Value',
+    parseError: 'Failed to parse query. Please edit the query directly.',
   },
   zh: {
     addCondition: '添加条件',
     addGroup: '添加条件组',
     addValue: '添加',
+    builderMode: '表单',
     deleteCondition: '删除条件',
     deleteGroup: '删除组',
     field: '字段',
@@ -82,14 +92,17 @@ const QUERY_BUILDER_MESSAGES = {
     noConditions: '尚未配置条件。添加条件后即可筛选目标记录。',
     operator: '运算符',
     rawLabel: '查询',
+    rawMode: '查询',
     switchToBuilder: '切换到条件表单',
     switchToRaw: '直接编辑查询',
     value: '值',
+    parseError: '查询解析失败。请直接编辑查询。',
   },
   'zh-tw': {
     addCondition: '新增條件',
     addGroup: '新增條件群組',
     addValue: '新增',
+    builderMode: '表單',
     deleteCondition: '刪除條件',
     deleteGroup: '刪除群組',
     field: '欄位',
@@ -99,14 +112,17 @@ const QUERY_BUILDER_MESSAGES = {
     noConditions: '尚未設定條件。新增條件後即可篩選目標記錄。',
     operator: '運算子',
     rawLabel: '查詢',
+    rawMode: '查詢',
     switchToBuilder: '切換到條件輸入表單',
     switchToRaw: '直接編輯查詢',
     value: '值',
+    parseError: '查詢解析失敗。請直接編輯查詢。',
   },
   es: {
     addCondition: 'Agregar condición',
     addGroup: 'Agregar grupo',
     addValue: 'Agregar',
+    builderMode: 'Formulario',
     deleteCondition: 'Eliminar condición',
     deleteGroup: 'Eliminar grupo',
     field: 'Campo',
@@ -116,14 +132,17 @@ const QUERY_BUILDER_MESSAGES = {
     noConditions: 'No hay condiciones configuradas. Agregue una para empezar a filtrar registros.',
     operator: 'Operador',
     rawLabel: 'Consulta',
+    rawMode: 'Texto',
     switchToBuilder: 'Cambiar al formulario de condiciones',
     switchToRaw: 'Editar consulta directamente',
     value: 'Valor',
+    parseError: 'Error al analizar la consulta. Por favor, edite la consulta directamente.',
   },
   'pt-br': {
     addCondition: 'Adicionar condição',
     addGroup: 'Adicionar grupo',
     addValue: 'Adicionar',
+    builderMode: 'Formulário',
     deleteCondition: 'Excluir condição',
     deleteGroup: 'Excluir grupo',
     field: 'Campo',
@@ -134,14 +153,17 @@ const QUERY_BUILDER_MESSAGES = {
       'Nenhuma condição foi configurada. Adicione uma para começar a filtrar registros.',
     operator: 'Operador',
     rawLabel: 'Consulta',
+    rawMode: 'Texto',
     switchToBuilder: 'Alternar para o formulário de condições',
-    switchToRaw: 'Editar consulta diretamente',
+    switchToRaw: 'Editar consulta directamente',
     value: 'Valor',
+    parseError: 'Falha ao analisar a consulta. Por favor, edite a consulta diretamente.',
   },
   th: {
     addCondition: 'เพิ่มเงื่อนไข',
     addGroup: 'เพิ่มกลุ่มเงื่อนไข',
     addValue: 'เพิ่ม',
+    builderMode: 'ฟอร์ม',
     deleteCondition: 'ลบเงื่อนไข',
     deleteGroup: 'ลบกลุ่ม',
     field: 'ฟิลด์',
@@ -151,9 +173,11 @@ const QUERY_BUILDER_MESSAGES = {
     noConditions: 'ยังไม่ได้ตั้งค่าเงื่อนไข เพิ่มเงื่อนไขเพื่อเริ่มกรองเรกคอร์ด',
     operator: 'ตัวดำเนินการ',
     rawLabel: 'คิวรี',
+    rawMode: 'คิวรี',
     switchToBuilder: 'สลับไปยังแบบฟอร์มกำหนดเงื่อนไข',
     switchToRaw: 'แก้ไขคิวรีโดยตรง',
     value: 'ค่า',
+    parseError: 'ไม่สามารถแยกวิเคราะห์คิวรีได้ กรุณาแก้ไขคิวรีโดยตรง',
   },
 } satisfies TranslationMap<QueryBuilderLocale, QueryBuilderMessageKey>;
 
