@@ -1,4 +1,6 @@
+export * from './app-select';
 export * from './dnd-context';
+export * from './field-multi-select';
 export * from './field-select';
 export * from './number';
 export * from './query-builder';
