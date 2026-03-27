@@ -1,25 +1,28 @@
 import { kintoneAPI } from '@konomi-app/kintone-utilities';
 import { Autocomplete, Box, TextField } from '@mui/material';
 import { Atom, useAtomValue } from 'jotai';
-import { ComponentProps, FC, Suspense, useCallback } from 'react';
+import { ComponentProps, Suspense, useCallback } from 'react';
 import { ErrorBoundary } from 'react-error-boundary';
 
-type ContainerProps = {
+interface ContainerProps extends Omit<
+  ComponentProps<typeof Autocomplete>,
+  'onChange' | 'value' | 'renderInput' | 'options'
+> {
   fieldPropertiesAtom: Atom<kintoneAPI.FieldProperty[] | Promise<kintoneAPI.FieldProperty[]>>;
   fieldCode: string;
   onChange: (code: string) => void;
   label?: string;
   placeholder?: string;
   fieldCodeLabelPrefix?: string;
-} & Omit<ComponentProps<typeof Autocomplete>, 'onChange' | 'value' | 'renderInput' | 'options'>;
+}
 
-type Props = Omit<ContainerProps, 'fieldPropertiesAtom' | 'onChange' | 'fieldCode'> & {
+interface Props extends Omit<ContainerProps, 'fieldPropertiesAtom' | 'onChange' | 'fieldCode'> {
   value: kintoneAPI.FieldProperty | null;
   fieldProperties: kintoneAPI.FieldProperty[];
   onFieldChange: (_: any, field: kintoneAPI.FieldProperty | null) => void;
-};
+}
 
-const JotaiFieldAutocomplete: FC<Props> = ({
+function JotaiFieldAutocomplete({
   fieldProperties,
   value,
   onFieldChange,
@@ -27,56 +30,58 @@ const JotaiFieldAutocomplete: FC<Props> = ({
   placeholder,
   fieldCodeLabelPrefix = 'コード: ',
   ...autocompleteProps
-}) => (
-  <Autocomplete
-    value={value}
-    options={fieldProperties}
-    isOptionEqualToValue={(option, v) => option.code === v.code}
-    getOptionLabel={(option) => `${option.label}(${option.code})`}
-    onChange={onFieldChange}
-    sx={autocompleteProps.sx}
-    fullWidth={autocompleteProps.fullWidth}
-    renderOption={(props, option) => {
-      const { key, ...optionProps } = props;
-      return (
-        <Box
-          key={key}
-          component='li'
-          sx={{
-            '& > div': { display: 'grid' },
-            '& > div > div:first-of-type': { fontSize: '12px', color: '#6b7280' },
-          }}
-          {...optionProps}
-        >
-          <div>
+}: Props) {
+  return (
+    <Autocomplete
+      value={value}
+      options={fieldProperties}
+      isOptionEqualToValue={(option, v) => option.code === v.code}
+      getOptionLabel={(option) => `${option.label}(${option.code})`}
+      onChange={onFieldChange}
+      sx={autocompleteProps.sx}
+      fullWidth={autocompleteProps.fullWidth}
+      renderOption={(props, option) => {
+        const { key, ...optionProps } = props;
+        return (
+          <Box
+            key={key}
+            component='li'
+            sx={{
+              '& > div': { display: 'grid' },
+              '& > div > div:first-of-type': { fontSize: '12px', color: '#6b7280' },
+            }}
+            {...optionProps}
+          >
             <div>
-              {fieldCodeLabelPrefix}
-              {option.code}
+              <div>
+                {fieldCodeLabelPrefix}
+                {option.code}
+              </div>
+              {option.label}
             </div>
-            {option.label}
-          </div>
-        </Box>
-      );
-    }}
-    renderInput={(params) => (
-      <TextField
-        {...params}
-        label={label}
-        placeholder={placeholder}
-        variant='outlined'
-        color='primary'
-      />
-    )}
-    disabled={autocompleteProps.disabled}
-  />
-);
+          </Box>
+        );
+      }}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label={label}
+          placeholder={placeholder}
+          variant='outlined'
+          color='primary'
+        />
+      )}
+      disabled={autocompleteProps.disabled}
+    />
+  );
+}
 
-const JotaiFieldSelectComponent: FC<ContainerProps> = ({
+function JotaiFieldSelectComponent({
   fieldPropertiesAtom,
   onChange,
   fieldCode,
   ...rest
-}) => {
+}: ContainerProps) {
   const fieldProperties = useAtomValue(fieldPropertiesAtom);
   const value = fieldProperties.find((field) => field.code === fieldCode) ?? null;
 
@@ -86,17 +91,21 @@ const JotaiFieldSelectComponent: FC<ContainerProps> = ({
   );
 
   return <JotaiFieldAutocomplete {...{ onFieldChange, value, fieldProperties, ...rest }} />;
-};
+}
 
-const JotaiFieldSelectPlaceHolder: FC<ContainerProps> = ({
-  label,
-  placeholder,
-  ...autocompleteProps
-}) => (
-  <TextField label={label} placeholder={placeholder} value='' sx={autocompleteProps.sx} disabled />
-);
+function JotaiFieldSelectPlaceHolder({ label, placeholder, ...autocompleteProps }: ContainerProps) {
+  return (
+    <TextField
+      label={label}
+      placeholder={placeholder}
+      value=''
+      sx={autocompleteProps.sx}
+      disabled
+    />
+  );
+}
 
-export const JotaiFieldSelect: FC<ContainerProps> = (props) => {
+export function JotaiFieldSelect(props: ContainerProps) {
   const completed: ContainerProps = {
     label: '対象フィールド',
     placeholder: 'フィールドを選択してください',
@@ -110,7 +119,7 @@ export const JotaiFieldSelect: FC<ContainerProps> = (props) => {
         <TextField
           label={completed.label}
           error
-          helperText={`フィールド情報が取得できませんでした: ${error.message}`}
+          helperText={`フィールド情報が取得できませんでした: ${error instanceof Error ? error.message : String(error)}`}
           disabled
         />
       )}
@@ -120,4 +129,4 @@ export const JotaiFieldSelect: FC<ContainerProps> = (props) => {
       </Suspense>
     </ErrorBoundary>
   );
-};
+}
