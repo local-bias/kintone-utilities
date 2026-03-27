@@ -11,6 +11,8 @@ export type Row<T extends Field.OneOf[]> = {
   fields: T;
 };
 
+export type LayoutRow<T extends Field.OneOf[]> = Row<T>;
+
 export type Subtable<T extends Field.InSubtable[]> = {
   type: 'SUBTABLE';
   code: string;

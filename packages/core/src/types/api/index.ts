@@ -60,7 +60,7 @@ import type {
   UserSelect as DefaultLayoutUserSelect,
 } from './fieldLayout';
 import type { Layout as DefaultLayout } from './form';
-import type { Group as DefaultGroup, Row as DefaultRow } from './layout';
+import type { Group as DefaultGroup, LayoutRow } from './layout';
 import type {
   Calc as CalcProperty,
   Category as CategoryProperty,
@@ -74,12 +74,12 @@ import type {
   GroupSelect as GroupSelectProperty,
   InSubtable as InSubtableProperty,
   Link as LinkProperty,
+  Lookup as LookupProperty,
   Modifier as ModifierProperty,
   MultiLineText as MultiLineTextProperty,
   MultiSelect as MultiSelectProperty,
   Number as NumberProperty,
   OneOf as OneOfProperty,
-  Lookup as LookupProperty,
   OrganizationSelect as OrganizationSelectProperty,
   RadioButton as RadioButtonProperty,
   RecordNumber as RecordNumberProperty,
@@ -206,7 +206,7 @@ export declare namespace kintoneAPI {
   type LayoutField = DefaultLayoutField;
   namespace layout {
     type Label = DefaultLayoutLabel;
-    type Row = DefaultRow<LayoutField[]>;
+    type Row = LayoutRow<LayoutField[]>;
     type Group = DefaultGroup<Row[]>;
     type Spacer = DefaultLayoutSpacer;
     type HR = DefaultLayoutHR;
