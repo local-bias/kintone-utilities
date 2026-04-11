@@ -1,3 +1,4 @@
+export * from './components';
 export * from './event-listener';
 export * from './lib';
 export * from './plugin';
