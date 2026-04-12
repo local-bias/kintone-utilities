@@ -5,13 +5,7 @@ import type { SxProps, Theme } from '@mui/material';
 export type EmbeddableItemType = 'fieldCode' | 'app';
 
 /** Keys of kintoneAPI.App that can be embedded */
-export type AppPropertyKey =
-  | 'appId'
-  | 'code'
-  | 'name'
-  | 'description'
-  | 'spaceId'
-  | 'threadId';
+export type AppPropertyKey = 'appId' | 'code' | 'name' | 'description' | 'spaceId' | 'threadId';
 
 /** An embedded item that has been placed into the input */
 export interface EmbeddedItem {
@@ -65,6 +59,8 @@ export interface EmbeddableInputProps {
   placeholder?: string;
   /** Whether the input is disabled */
   disabled?: boolean;
+  /** Height size: small=40px, medium=56px (default: medium) */
+  size?: 'small' | 'medium';
   /** MUI sx prop */
   sx?: SxProps<Theme>;
 }

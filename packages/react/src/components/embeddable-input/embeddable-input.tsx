@@ -47,6 +47,7 @@ export function EmbeddableInput({
   label,
   placeholder,
   disabled = false,
+  size = 'medium',
   sx,
 }: EmbeddableInputProps) {
   const [focused, setFocused] = useState(false);
@@ -173,8 +174,8 @@ export function EmbeddableInput({
       <Box
         sx={{
           '& .tiptap': {
-            minHeight: 40,
-            py: '8.5px',
+            minHeight: size === 'small' ? 40 : 56,
+            py: size === 'small' ? '8.5px' : '16.5px',
             px: '14px',
             border: focused ? 2 : 1,
             borderStyle: 'solid',
