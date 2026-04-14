@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/kintone-utilities-react",
-  "version": "3.5.1",
+  "version": "3.5.3",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
