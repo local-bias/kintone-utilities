@@ -1,4 +1,4 @@
-import { toHebon } from './character-hebon';
+import { toIMERoman } from './character-ime-roman';
 
 /**
  * カタカナをひらがなに変換します。
@@ -209,7 +209,7 @@ export const getYuruChara = (target: string, options?: Partial<GetYuruCharaOptio
   }
 
   if (!isHebonSensitive) {
-    converted = toHebon(converted);
+    converted = toIMERoman(converted);
   }
 
   if (!isCaseSensitive) {

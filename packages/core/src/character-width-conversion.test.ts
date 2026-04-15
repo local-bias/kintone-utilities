@@ -75,4 +75,55 @@ describe('Yuru Chara', () => {
     expect(getYuruChara('あいうえお', { isHebonSensitive: true })).not.toBe('aiueo');
     expect(getYuruChara('あいうえお', { isCaseSensitive: true })).not.toBe('aiueo');
   });
+
+  test('プレフィックス安定性: 「ん」の後にB/M/Pが続く場合', () => {
+    // 「ん」は後続文字に関わらず常に "NN" であること
+    expect(getYuruChara('さんばん')).toBe('sannbann');
+    expect(getYuruChara('さんぽ')).toBe('sannpo');
+    expect(getYuruChara('しんぶん')).toBe('sinnbunn');
+    expect(getYuruChara('せんぱい')).toBe('sennpai');
+
+    // プレフィックスマッチが成立すること
+    expect(getYuruChara('さんばん').startsWith(getYuruChara('さん'))).toBe(true);
+    expect(getYuruChara('さんぽ').startsWith(getYuruChara('さん'))).toBe(true);
+    expect(getYuruChara('しんぶん').startsWith(getYuruChara('しん'))).toBe(true);
+    expect(getYuruChara('せんぱい').startsWith(getYuruChara('せん'))).toBe(true);
+  });
+
+  test('プレフィックス安定性: 「っ」の処理', () => {
+    // っ は固定で XTU に変換される
+    expect(getYuruChara('いっき')).toBe('ixtuki');
+    expect(getYuruChara('はっぴょう')).toBe('haxtupixyou');
+    expect(getYuruChara('いっち')).toBe('ixtuti');
+
+    // プレフィックスマッチが成立すること
+    expect(getYuruChara('いっきょく').startsWith(getYuruChara('いっき'))).toBe(true);
+    expect(getYuruChara('はっぴょう').startsWith(getYuruChara('はっぴ'))).toBe(true);
+  });
+
+  test('プレフィックス安定性: 拗音（きゃ、しょ等）', () => {
+    // 各文字が独立して変換されるため、拗音の途中でもプレフィックスが崩れない
+    expect(getYuruChara('きょうと')).toBe('kixyouto');
+    expect(getYuruChara('きょうとし').startsWith(getYuruChara('きょうと'))).toBe(true);
+    expect(getYuruChara('きょうと').startsWith(getYuruChara('きょ'))).toBe(true);
+    expect(getYuruChara('きょ').startsWith(getYuruChara('き'))).toBe(true);
+  });
+
+  test('ハイフン、ダッシュ、長音の統一', () => {
+    const hyphens = ['-', 'ー', '－', '—'];
+    for (const h of hyphens) {
+      const withoutCurrentHyphen = hyphens.filter((x) => x !== h).join('');
+      for (const otherHyphen of withoutCurrentHyphen) {
+        expect(getYuruChara(`あ${h}い`, { isHyphenSensitive: false })).toBe(
+          getYuruChara(`あ${otherHyphen}い`, { isHyphenSensitive: false })
+        );
+        expect(getYuruChara(`あ${h}い`, { isHyphenSensitive: true })).not.toBe(
+          getYuruChara(`あ${otherHyphen}い`, { isHyphenSensitive: true })
+        );
+      }
+    }
+    expect(getYuruChara('あーい', { isHyphenSensitive: false })).toBe('a-i');
+    expect(getYuruChara('あ－い', { isHyphenSensitive: false })).toBe('a-i');
+    expect(getYuruChara('あ—い', { isHyphenSensitive: false })).toBe('a-i');
+  });
 });

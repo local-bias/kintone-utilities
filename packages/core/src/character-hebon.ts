@@ -166,6 +166,14 @@ export function toHebon(s: string): string {
           hr.h = nextHr.h.substring(0, 1);
         }
       }
+    } else if (hr.c === 'ん') {
+      // B,M,P の前の 'ん' は 'M' とする。
+      const nextHr = getHebon(s, i + 1);
+      if (nextHr.h !== null && 'BMP'.indexOf(nextHr.h.charAt(0)) !== -1) {
+        hr.h = 'M';
+      } else {
+        hr.h = 'N';
+      }
     } else if (hr.c === 'ー') {
       // 長音は無視
       hr.h = '';
