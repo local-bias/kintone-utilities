@@ -17,7 +17,6 @@ import {
   KintoneGetProcessManagementResponseSchema,
   KintoneGetViewsResponseSchema,
   KintoneGetGeneralSettingsResponseSchema,
-  KintoneGetActionSettingsResponseSchema,
   KintoneGetAppResponseSchema,
   type KintoneGetCommentsResponse,
   type KintoneComment,
