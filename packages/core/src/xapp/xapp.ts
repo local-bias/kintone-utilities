@@ -1,5 +1,12 @@
 import { kintoneAPI } from '../types/api';
 
+const getKintone = (): typeof kintone => {
+  if (typeof kintone === 'undefined') {
+    throw new Error('kintone グローバルオブジェクトが利用できません。kintone 環境内で実行してください。');
+  }
+  return kintone;
+};
+
 /**
  * kintone javascript APIから実行環境を取得し、モバイル端末である場合はTrueを返却します
  *
@@ -18,7 +25,7 @@ export const isMobile = (eventType?: string): boolean => {
   if (eventType) {
     return /^mobile\./.test(eventType);
   }
-  return kintone.app.getId() === null;
+  return getKintone().app.getId() === null;
 };
 
 /**
@@ -35,8 +42,10 @@ export const isMobile = (eventType?: string): boolean => {
  * @param eventType イベントタイプ
  * @returns kintone javascript APIのルートオブジェクト
  */
-export const getAppObject = (eventType?: string): typeof kintone.mobile.app | typeof kintone.app =>
-  isMobile(eventType) ? kintone.mobile.app : kintone.app;
+export const getAppObject = (eventType?: string): typeof kintone.mobile.app | typeof kintone.app => {
+  const kintoneObject = getKintone();
+  return isMobile(eventType) ? kintoneObject.mobile.app : kintoneObject.app;
+};
 
 /**
  * kintone javascript APIを使用し、現在のアプリIDを返却します
@@ -172,12 +181,13 @@ export const setFieldShown = <T = Record<string, unknown>>(code: keyof T, visibl
  * @returns レコードデータ、またはnull
  */
 export const getHeaderSpace = (eventType: string): HTMLElement | null => {
+  const kintoneObject = getKintone();
   if (isMobile(eventType)) {
-    kintone.mobile.app.getHeaderSpaceElement();
-  } else if (!~eventType.indexOf('index')) {
-    return kintone.app.record.getHeaderMenuSpaceElement();
+    return kintoneObject.mobile.app.getHeaderSpaceElement();
+  } else if (!eventType.includes('index')) {
+    return kintoneObject.app.record.getHeaderMenuSpaceElement();
   }
-  return kintone.app.getHeaderMenuSpaceElement();
+  return kintoneObject.app.getHeaderMenuSpaceElement();
 };
 
 /**
