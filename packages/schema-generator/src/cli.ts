@@ -38,6 +38,14 @@ interface CLIOptions extends GenerateOptions {
   outputDir: string;
 }
 
+interface EnvironmentConfig {
+  baseUrl: string;
+  username: string;
+  password: string;
+  basicUsername?: string;
+  basicPassword?: string;
+}
+
 // =============================================================================
 // CLI Implementation
 // =============================================================================
@@ -131,15 +139,54 @@ function parseArgs(args: string[]): {
   };
 }
 
-async function main(): Promise<void> {
-  // dotenvがインストールされている場合は読み込む
-  try {
-    const dotenv = await import('dotenv');
-    dotenv.config();
-  } catch {
-    // dotenvがない場合は無視
+function loadEnvironmentConfig(): EnvironmentConfig | null {
+  const {
+    KINTONE_BASE_URL: rawBaseUrl,
+    KINTONE_USERNAME: rawUsername,
+    KINTONE_PASSWORD: password,
+    KINTONE_BASIC_USERNAME: basicUsername,
+    KINTONE_BASIC_PASSWORD: basicPassword,
+  } = process.env;
+
+  const baseUrl = rawBaseUrl?.trim();
+  const username = rawUsername?.trim();
+
+  if (!baseUrl || !username || !password?.trim()) {
+    console.error('Error: Required environment variables are not set.');
+    console.error('Please set: KINTONE_BASE_URL, KINTONE_USERNAME, KINTONE_PASSWORD');
+    return null;
   }
 
+  let parsedBaseUrl: URL;
+  try {
+    parsedBaseUrl = new URL(baseUrl);
+  } catch {
+    console.error('Error: KINTONE_BASE_URL must be a valid URL.');
+    return null;
+  }
+
+  if (parsedBaseUrl.protocol !== 'https:') {
+    console.error('Error: KINTONE_BASE_URL must start with https://');
+    return null;
+  }
+
+  const hasBasicUsername = Boolean(basicUsername?.trim());
+  const hasBasicPassword = Boolean(basicPassword?.trim());
+  if (hasBasicUsername !== hasBasicPassword) {
+    console.error('Error: KINTONE_BASIC_USERNAME and KINTONE_BASIC_PASSWORD must be set together.');
+    return null;
+  }
+
+  return {
+    baseUrl,
+    username,
+    password,
+    basicUsername,
+    basicPassword,
+  };
+}
+
+async function main(): Promise<void> {
   const parsed = parseArgs(process.argv.slice(2));
 
   if (!parsed) {
@@ -147,22 +194,22 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  // dotenvがインストールされている場合は読み込む
+  try {
+    const dotenv = await import('dotenv');
+    dotenv.config({ quiet: true });
+  } catch {
+    // dotenvがない場合は無視
+  }
+
   const { appId, outputName, options } = parsed;
 
-  // 環境変数チェック
-  const {
-    KINTONE_BASE_URL: baseUrl,
-    KINTONE_USERNAME: username,
-    KINTONE_PASSWORD: password,
-    KINTONE_BASIC_USERNAME: basicUsername,
-    KINTONE_BASIC_PASSWORD: basicPassword,
-  } = process.env;
-
-  if (!baseUrl || !username || !password) {
-    console.error('Error: Required environment variables are not set.');
-    console.error('Please set: KINTONE_BASE_URL, KINTONE_USERNAME, KINTONE_PASSWORD');
+  const environmentConfig = loadEnvironmentConfig();
+  if (!environmentConfig) {
     process.exit(1);
   }
+
+  const { baseUrl, username, password, basicUsername, basicPassword } = environmentConfig;
 
   try {
     console.log(`Generating schema for app ${appId}...`);
