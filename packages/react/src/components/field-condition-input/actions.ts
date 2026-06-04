@@ -4,6 +4,19 @@
  */
 import { getFieldValueAsString, type kintoneAPI } from '@konomi-app/kintone-utilities';
 import {
+  addDays,
+  addMonths,
+  addYears,
+  endOfMonth,
+  endOfWeek,
+  endOfYear,
+  format,
+  startOfDay,
+  startOfMonth,
+  startOfWeek,
+  startOfYear,
+} from 'date-fns';
+import {
   type DatePreset,
   type DateRelativeUnit,
   type DateValueCondition,
@@ -14,6 +27,14 @@ import {
 } from './types';
 
 // ─── 内部ヘルパー ─────────────────────────────────────────────────────────────
+
+type DateRange = {
+  start: string;
+  end: string;
+};
+
+const DATE_FORMAT = 'yyyy-MM-dd';
+const MONDAY_START_WEEK_OPTIONS = { weekStartsOn: 1 } as const;
 
 /**
  * kintone クエリ文字列に埋め込む文字列値をエスケープする。
@@ -79,104 +100,112 @@ function resolveDateQueryValue(condition: DateValueCondition): string {
   }
 }
 
+function createDateRange(start: Date, end: Date): DateRange {
+  return {
+    start: format(start, DATE_FORMAT),
+    end: format(end, DATE_FORMAT),
+  };
+}
+
+function createSingleDateRange(date: Date): DateRange {
+  return createDateRange(date, date);
+}
+
+function createWeekRange(date: Date): DateRange {
+  return createDateRange(
+    startOfWeek(date, MONDAY_START_WEEK_OPTIONS),
+    endOfWeek(date, MONDAY_START_WEEK_OPTIONS)
+  );
+}
+
+function createMonthRange(date: Date, offset: number): DateRange {
+  const targetDate = addMonths(date, offset);
+  return createDateRange(startOfMonth(targetDate), endOfMonth(targetDate));
+}
+
+function createYearRange(date: Date, offset: number): DateRange {
+  const targetDate = addYears(date, offset);
+  return createDateRange(startOfYear(targetDate), endOfYear(targetDate));
+}
+
 /**
- * DatePreset からクライアントサイド評価用の YYYY-MM-DD 文字列を返す。
+ * DatePreset からクライアントサイド評価用の日付範囲を返す。
  * week 系プリセットは週の開始日（月曜日）を基準とする。
  */
-function resolveDatePreset(preset: DatePreset): string {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const toISO = (d: Date): string => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  };
+function resolveDatePresetRange(preset: DatePreset): DateRange {
+  const today = startOfDay(new Date());
 
   switch (preset) {
     case 'today':
-      return toISO(today);
-    case 'yesterday': {
-      const d = new Date(today);
-      d.setDate(d.getDate() - 1);
-      return toISO(d);
-    }
-    case 'tomorrow': {
-      const d = new Date(today);
-      d.setDate(d.getDate() + 1);
-      return toISO(d);
-    }
-    case 'lastWeek': {
-      const d = new Date(today);
-      d.setDate(d.getDate() - 7);
-      return toISO(d);
-    }
+      return createSingleDateRange(today);
+    case 'yesterday':
+      return createSingleDateRange(addDays(today, -1));
+    case 'tomorrow':
+      return createSingleDateRange(addDays(today, 1));
+    case 'lastWeek':
+      return createWeekRange(addDays(today, -7));
     case 'thisWeek':
-      return toISO(today);
-    case 'nextWeek': {
-      const d = new Date(today);
-      d.setDate(d.getDate() + 7);
-      return toISO(d);
-    }
-    case 'lastMonth': {
-      const d = new Date(today);
-      d.setMonth(d.getMonth() - 1);
-      return toISO(d);
-    }
+      return createWeekRange(today);
+    case 'nextWeek':
+      return createWeekRange(addDays(today, 7));
+    case 'lastMonth':
+      return createMonthRange(today, -1);
     case 'thisMonth':
-      return toISO(today);
-    case 'nextMonth': {
-      const d = new Date(today);
-      d.setMonth(d.getMonth() + 1);
-      return toISO(d);
-    }
-    case 'lastYear': {
-      const d = new Date(today);
-      d.setFullYear(d.getFullYear() - 1);
-      return toISO(d);
-    }
+      return createMonthRange(today, 0);
+    case 'nextMonth':
+      return createMonthRange(today, 1);
+    case 'lastYear':
+      return createYearRange(today, -1);
     case 'thisYear':
-      return toISO(today);
-    case 'nextYear': {
-      const d = new Date(today);
-      d.setFullYear(d.getFullYear() + 1);
-      return toISO(d);
-    }
+      return createYearRange(today, 0);
+    case 'nextYear':
+      return createYearRange(today, 1);
   }
 }
 
 /**
- * DateValueCondition からクライアントサイド評価用の比較日付文字列（YYYY-MM-DD）を返す。
+ * DateValueCondition からクライアントサイド評価用の比較日付範囲を返す。
  */
-function resolveComparisonDate(condition: DateValueCondition): string {
+function resolveComparisonDateRange(condition: DateValueCondition): DateRange {
   switch (condition.dateValueType) {
     case 'fixed':
-      return condition.dateValue;
+      return { start: condition.dateValue, end: condition.dateValue };
     case 'relative': {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const today = startOfDay(new Date());
       const offset = Number(condition.dateRelativeValue) || 0;
       switch (condition.dateRelativeUnit) {
         case 'day':
-          today.setDate(today.getDate() + offset);
-          break;
+          return createSingleDateRange(addDays(today, offset));
         case 'month':
-          today.setMonth(today.getMonth() + offset);
-          break;
+          return createSingleDateRange(addMonths(today, offset));
         case 'year':
-          today.setFullYear(today.getFullYear() + offset);
-          break;
+          return createSingleDateRange(addYears(today, offset));
       }
-      const y = today.getFullYear();
-      const m = String(today.getMonth() + 1).padStart(2, '0');
-      const d = String(today.getDate()).padStart(2, '0');
-      return `${y}-${m}-${d}`;
     }
     case 'preset':
-      return resolveDatePreset(condition.datePreset);
-    default:
-      return '';
+      return resolveDatePresetRange(condition.datePreset);
+  }
+}
+
+function evaluateDateCondition(
+  datePart: string,
+  conditionType: DateValueCondition['conditionType'],
+  comparisonRange: DateRange
+): boolean {
+  // YYYY-MM-DD strings compare in chronological order lexicographically.
+  switch (conditionType) {
+    case 'dateEqual':
+      return comparisonRange.start <= datePart && datePart <= comparisonRange.end;
+    case 'dateNotEqual':
+      return datePart < comparisonRange.start || comparisonRange.end < datePart;
+    case 'dateBefore':
+      return datePart < comparisonRange.start;
+    case 'dateBeforeOrEqual':
+      return datePart <= comparisonRange.end;
+    case 'dateAfter':
+      return comparisonRange.end < datePart;
+    case 'dateAfterOrEqual':
+      return comparisonRange.start <= datePart;
   }
 }
 
@@ -330,22 +359,9 @@ export function evaluateCondition(
   if (isDateValueCondition(condition)) {
     const datePart = extractDatePart(fieldValue);
     if (!datePart) return false;
-    const comparisonDate = resolveComparisonDate(condition);
-    if (!comparisonDate) return false;
-    switch (conditionType) {
-      case 'dateEqual':
-        return datePart === comparisonDate;
-      case 'dateNotEqual':
-        return datePart !== comparisonDate;
-      case 'dateBefore':
-        return datePart < comparisonDate;
-      case 'dateBeforeOrEqual':
-        return datePart <= comparisonDate;
-      case 'dateAfter':
-        return datePart > comparisonDate;
-      case 'dateAfterOrEqual':
-        return datePart >= comparisonDate;
-    }
+    const comparisonRange = resolveComparisonDateRange(condition);
+    if (!comparisonRange.start || !comparisonRange.end) return false;
+    return evaluateDateCondition(datePart, condition.conditionType, comparisonRange);
   }
 
   if (isSelectValueCondition(condition)) {
