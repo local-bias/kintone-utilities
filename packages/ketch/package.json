@@ -1,6 +1,6 @@
 {
   "name": "@konomi-app/ketch",
-  "version": "0.4.0",
+  "version": "1.0.0",
   "description": "kintone.proxy, kintone.plugin.proxy wrapper for Fetch API",
   "type": "module",
   "main": "dist/index.cjs",
@@ -19,14 +19,17 @@
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
+    "test": "jest",
     "clean": "rimraf dist"
   },
   "author": "adachi keiichiro",
   "license": "MIT",
   "packageManager": "pnpm@10.26.1",
   "devDependencies": {
-    "remeda": "^2.32.0",
+    "@types/jest": "^30.0.0",
+    "jest": "^30.2.0",
     "rimraf": "^6.0.1",
+    "ts-jest": "^29.4.6",
     "tsup": "^8.3.0",
     "typescript": "^5.9.3"
   }
