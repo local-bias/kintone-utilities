@@ -24,7 +24,8 @@
   "author": "Ribbit",
   "license": "MIT",
   "scripts": {
-    "build": "tsup"
+    "build": "tsup",
+    "check-types": "tsc --noEmit"
   },
   "peerDependencies": {
     "@dnd-kit/core": ">=6.0.0",
