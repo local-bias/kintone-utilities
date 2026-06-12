@@ -4,3 +4,4 @@ export * from './lib';
 export * from './plugin';
 export * from './plugin-config';
 export * from './component-manager';
+export * from './theme';
