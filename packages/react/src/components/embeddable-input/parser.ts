@@ -54,7 +54,7 @@ export function parseEmbeddableString(
     }
 
     const type = match[1] as EmbeddedItem['type'];
-    const value = match[2];
+    const value = match[2] ?? '';
     const label = resolveLabel?.(type, value) ?? value;
 
     segments.push({ kind: 'embedded', item: { type, value, label } });
@@ -109,6 +109,7 @@ export function serializeEditorToString(editor: Editor): string {
       result += `{{${node.attrs.type}:${node.attrs.value}}}`;
       return false;
     }
+    return true;
   });
   return result;
 }
