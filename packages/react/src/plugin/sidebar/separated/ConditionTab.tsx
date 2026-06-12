@@ -1,5 +1,5 @@
 import { Tab, TabProps } from '@mui/material';
-import React, { FC, PropsWithChildren } from 'react';
+import { FC, PropsWithChildren } from 'react';
 
 type Props = Omit<TabProps, 'children'> & { index: number };
 

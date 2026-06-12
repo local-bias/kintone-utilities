@@ -1,6 +1,6 @@
 import AddIcon from '@mui/icons-material/Add';
 import { Button, ButtonProps } from '@mui/material';
-import React, { forwardRef } from 'react';
+import { forwardRef } from 'react';
 import { SidebarProps } from '.';
 
 export type SidebarConditionAppendButtonProps = ButtonProps &

@@ -1,4 +1,4 @@
-import React, { FC, useContext } from 'react';
+import { FC, useContext } from 'react';
 import { PluginConfigContext } from '../../context';
 import Alert from './alert';
 import { useNewVersion } from './hooks';

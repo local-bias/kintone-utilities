@@ -1,6 +1,5 @@
 import styled from '@emotion/styled';
 import clsx from 'clsx';
-import React from 'react';
 import { PluginConditionBase, SidebarProps } from '.';
 
 type SidebarCommonTabProps<T extends PluginConditionBase> = Pick<

@@ -1,5 +1,5 @@
 import { SortableContext } from '@dnd-kit/sortable';
-import React, { PropsWithChildren } from 'react';
+import { PropsWithChildren } from 'react';
 import { PluginConditionBase, SidebarProps } from '.';
 
 const SidebarSortableContext = <T extends PluginConditionBase>(

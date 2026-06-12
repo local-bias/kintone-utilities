@@ -1,4 +1,4 @@
-import React, { FC, memo } from 'react';
+import { FC, memo } from 'react';
 import { IconButton, Tooltip } from '@mui/material';
 import DownloadIcon from '@mui/icons-material/Download';
 

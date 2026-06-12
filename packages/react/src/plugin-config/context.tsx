@@ -1,4 +1,4 @@
-import React, { createContext, FC, PropsWithChildren } from 'react';
+import { createContext, FC, PropsWithChildren } from 'react';
 import { PluginConfig } from '@konomi-app/kintone-utilities';
 
 type Props = {

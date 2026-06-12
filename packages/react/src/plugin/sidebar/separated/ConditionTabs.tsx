@@ -1,5 +1,5 @@
 import { Tabs, TabsProps } from '@mui/material';
-import React, { FC, PropsWithChildren } from 'react';
+import { FC, PropsWithChildren } from 'react';
 import styled from '@emotion/styled';
 
 type Props = TabsProps & { className?: string; tabIndex: number };

@@ -1,7 +1,7 @@
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import React, { PropsWithChildren } from 'react';
+import { PropsWithChildren } from 'react';
 import { PluginConditionBase, SidebarProps } from '.';
 
 const SidebarDndContext = <T extends PluginConditionBase>(

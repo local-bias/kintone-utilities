@@ -1,4 +1,4 @@
-import React, { ChangeEventHandler, FC, memo } from 'react';
+import { ChangeEventHandler, FC, memo } from 'react';
 import { IconButton, Tooltip } from '@mui/material';
 import UploadIcon from '@mui/icons-material/Upload';
 

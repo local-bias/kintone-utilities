@@ -1,5 +1,5 @@
 import { Alert, AlertTitle, Button } from '@mui/material';
-import React, { FC } from 'react';
+import { FC } from 'react';
 import { usePluginConfig } from '../../hooks';
 import styled from '@emotion/styled';
 
