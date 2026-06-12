@@ -143,7 +143,11 @@ const SidebarTab = <T extends PluginConditionBase>(
       setConditions((conditions) => {
         const conditionIndex = conditions.findIndex((c) => c.id === condition.id);
         const newConditions = [...conditions];
-        newConditions[conditionIndex] = { ...newCondition, id: newConditions[conditionIndex].id };
+        const target = newConditions[conditionIndex];
+        if (!target) {
+          return conditions;
+        }
+        newConditions[conditionIndex] = { ...newCondition, id: target.id };
         return newConditions;
       });
       if (context.onPaste) {
