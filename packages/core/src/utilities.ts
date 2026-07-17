@@ -422,9 +422,11 @@ export const getEmptyValue = (
           ),
         }));
       }
-    default:
-      //@ts-expect-error
-      throw new Error(`未対応のフィールドタイプです: ${field.type}`);
+      return [];
+    default: {
+      const unexpectedType: never = type;
+      throw new Error(`未対応のフィールドタイプです: ${String(unexpectedType)}`);
+    }
   }
 };
 
