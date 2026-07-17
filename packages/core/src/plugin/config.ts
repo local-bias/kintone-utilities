@@ -65,7 +65,7 @@ export const restorePluginConfig = <T = any>(
       .map((id) => ({ id, key: createFlatPropertyKey(property, id) }))
       .filter(({ key }) => {
         if (!(key in config)) {
-          console.warn(`[config] Property "${key}" is not found.`);
+          debug && console.warn(`[config] Property "${key}" is not found.`);
           return false;
         }
         return true;
