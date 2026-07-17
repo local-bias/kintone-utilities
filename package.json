@@ -4,14 +4,22 @@
   "description": "https://ribbit.konomi.app",
   "repository": {
     "type": "git",
-    "url": "@local-bias/kintone-utilities"
+    "url": "https://github.com/local-bias/kintone-utilities.git"
   },
   "author": "Adachi Keiichiro",
   "license": "ISC",
+  "private": true,
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm -r test",
+    "pack:dry-run": "pnpm -r exec npm pack --dry-run",
+    "changeset": "changeset"
+  },
   "devDependencies": {
+    "@changesets/cli": "^2.27.1",
     "@konomi-app/prettier-config": "^1.1.2"
   },
   "prettier": "@konomi-app/prettier-config"
