@@ -68,7 +68,7 @@ export class KintoneEventManager {
       } catch (error) {
         return await this.#commonErrorHandler(error, { event });
       } finally {
-        this.tarminate();
+        this.terminate();
       }
     });
   };
@@ -91,7 +91,7 @@ export class KintoneEventManager {
       } catch (error) {
         return this.#commonErrorHandler(error, { event });
       } finally {
-        this.tarminate();
+        this.terminate();
       }
     });
   };
@@ -257,7 +257,7 @@ export class KintoneEventManager {
     }
   };
 
-  private tarminate = () => {
+  private terminate = () => {
     window.removeEventListener('beforeunload', this.beforeunload);
     if (!this.#logDisabled) {
       console.groupEnd();
@@ -280,6 +280,6 @@ export class KintoneEventManager {
 }
 
 /**
- * @deprecated 代わりに`KintoneEventListener`を使用してください
+ * @deprecated 代わりに`KintoneEventManager`を使用してください
  */
 export const KintoneEventListener = KintoneEventManager;
