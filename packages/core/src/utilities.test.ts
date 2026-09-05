@@ -1,3 +1,4 @@
+import { describe, expect, test, vi } from 'vitest';
 import {
   getEmptyValue,
   getFieldValueAsString,
@@ -116,7 +117,7 @@ describe('getEmptyValue', () => {
   });
 
   test('CALCなどクリア不可なフィールドはfield指定時に元の値を返却しwarnする', () => {
-    const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
     const field = { type: 'CALC', value: '100' } as kintoneAPI.Field;
     expect(getEmptyValue({ field })).toBe('100');
     expect(warnSpy).toHaveBeenCalled();

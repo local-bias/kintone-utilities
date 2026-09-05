@@ -1,11 +1,12 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { restorePluginConfig, storePluginConfig } from './config';
 
 const mockPluginApp = (storedConfig: Record<string, string> = {}) => {
-  const setConfig = jest.fn((config: Record<string, string>, callback?: () => void) => {
+  const setConfig = vi.fn((config: Record<string, string>, callback?: () => void) => {
     Object.assign(storedConfig, config);
     callback?.();
   });
-  const getConfig = jest.fn(() => storedConfig);
+  const getConfig = vi.fn(() => storedConfig);
 
   (globalThis as { kintone?: unknown }).kintone = {
     plugin: { app: { setConfig, getConfig } },
@@ -17,7 +18,7 @@ const mockPluginApp = (storedConfig: Record<string, string> = {}) => {
 describe('plugin config', () => {
   afterEach(() => {
     delete (globalThis as { kintone?: unknown }).kintone;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('storePluginConfig → restorePluginConfig のラウンドトリップ', async () => {

@@ -1,7 +1,8 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { useApi } from './client';
 
 const mockKintoneApi = () => {
-  const api = jest.fn(async (_path: string, _method: string, _body: unknown) => ({
+  const api = vi.fn(async (_path: string, _method: string, _body: unknown) => ({
     id: '1',
     revision: '1',
   }));
@@ -14,7 +15,7 @@ describe('useApi', () => {
   afterEach(() => {
     delete (globalThis as { kintone?: unknown }).kintone;
     delete (globalThis as { window?: unknown }).window;
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   test('guestSpaceId(正しいprop名)を指定するとゲストスペースのパスにリクエストする', async () => {

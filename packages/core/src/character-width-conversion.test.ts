@@ -1,3 +1,4 @@
+import { describe, expect, test } from 'vitest';
 import { getYuruChara } from './character-width-conversion';
 
 describe('Yuru Chara', () => {

@@ -1,17 +1,18 @@
-declare const require: (path: string) => unknown;
+import { beforeEach, describe, expect, test, vi } from 'vitest';
 
 describe('public entrypoint', () => {
   beforeEach(() => {
     delete (globalThis as { kintone?: unknown }).kintone;
-    jest.resetModules();
+    // 各テストでエントリポイントを評価し直す
+    vi.resetModules();
   });
 
-  test('loads without the kintone global object', () => {
-    expect(() => require('./index')).not.toThrow();
+  test('loads without the kintone global object', async () => {
+    await expect(import('./index')).resolves.toBeDefined();
   });
 
-  test('exports xapp without resolving the kintone global object immediately', () => {
-    const publicApi = require('./index') as typeof import('./index');
+  test('exports xapp without resolving the kintone global object immediately', async () => {
+    const publicApi = await import('./index');
 
     expect(publicApi.xapp).toBeDefined();
     expect(() => publicApi.xapp.getId()).toThrow(
