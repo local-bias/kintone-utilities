@@ -1,3 +1,4 @@
+import { afterEach, describe, expect, test, vi } from 'vitest';
 import { isGuestSpace, isKintoneApiError, useQuery, withSpaceIdFallback } from './utility';
 
 describe('useQuery', () => {
@@ -44,7 +45,7 @@ describe('isKintoneApiError', () => {
 
 describe('withSpaceIdFallback', () => {
   test('GAIA_IL23/25エラー時はguestSpaceIdを付与して再実行する', async () => {
-    const func = jest
+    const func = vi
       .fn()
       .mockRejectedValueOnce({ code: 'GAIA_IL23' })
       .mockResolvedValueOnce('ok');
@@ -57,7 +58,7 @@ describe('withSpaceIdFallback', () => {
 
   test('それ以外のエラーはそのまま再スローする', async () => {
     const error = new Error('network error');
-    const func = jest.fn().mockRejectedValueOnce(error);
+    const func = vi.fn().mockRejectedValueOnce(error);
 
     await expect(
       withSpaceIdFallback({ spaceId: '5', func, funcParams: { app: 1 } })
@@ -68,7 +69,7 @@ describe('withSpaceIdFallback', () => {
 describe('isGuestSpace', () => {
   const mockKintoneApi = (impl: (...args: unknown[]) => unknown) => {
     (globalThis as { window?: unknown }).window = globalThis;
-    (globalThis as { kintone?: unknown }).kintone = { api: jest.fn(impl) };
+    (globalThis as { kintone?: unknown }).kintone = { api: vi.fn(impl) };
   };
 
   afterEach(() => {
