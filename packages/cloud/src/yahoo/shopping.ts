@@ -1,13 +1,9 @@
 import { ketch } from '@konomi-app/ketch';
-import { stringify } from 'querystring';
+import { stringifyQuery } from '../query-string';
 import { YahooAPIClient } from './common';
 
 export class YahooShoppingClient extends YahooAPIClient {
   public static END_POINT = 'ShoppingWebService/V3/itemSearch';
-
-  public constructor(params: ConstructorParameters<typeof YahooAPIClient>[0]) {
-    super(params);
-  }
 
   private createUrl(params: Omit<Yahoo.Shopping.RequestParams, 'appid'>): string {
     const urlOptions: Yahoo.Shopping.RequestParams = {
@@ -15,7 +11,7 @@ export class YahooShoppingClient extends YahooAPIClient {
       appid: this.clientId,
     };
 
-    return `${YahooAPIClient.DOMAIN}${YahooShoppingClient.END_POINT}?${stringify(urlOptions)}`;
+    return `${YahooAPIClient.DOMAIN}${YahooShoppingClient.END_POINT}?${stringifyQuery(urlOptions)}`;
   }
 
   async search(

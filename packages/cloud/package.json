@@ -5,6 +5,7 @@
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": {
@@ -14,6 +15,16 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./*": {
+      "import": {
+        "types": "./dist/*.d.ts",
+        "default": "./dist/*.js"
+      },
+      "require": {
+        "types": "./dist/*.d.cts",
+        "default": "./dist/*.cjs"
       }
     }
   },
@@ -25,7 +36,7 @@
   "license": "MIT",
   "scripts": {
     "build": "tsup",
-    "prepare": "npm run build"
+    "prepare": "pnpm build"
   },
   "peerDependencies": {
     "@konomi-app/ketch": ">=0.2.0",
@@ -48,7 +59,8 @@
     "openai": "^6.15.0",
     "qs": "^6.14.0",
     "tsup": "^8.5.1",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "4.1.11"
   },
   "prettier": {
     "printWidth": 100,

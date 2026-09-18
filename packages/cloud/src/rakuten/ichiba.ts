@@ -1,13 +1,9 @@
+import { stringifyQuery } from '../query-string';
 import { RakutenAPIClient } from './common';
-import { stringify } from 'querystring';
 
 export class RakutenIchibaClient extends RakutenAPIClient {
   public static END_POINT = 'services/api/IchibaItem/Search/20220601';
   public static PAGE_LIMIT = 100;
-
-  public constructor(params: ConstructorParameters<typeof RakutenAPIClient>[0]) {
-    super(params);
-  }
 
   private createUrl(
     params: Omit<Rakuten.Ichiba.RequestParams, 'applicationId' | 'affiliateId'>
@@ -23,7 +19,7 @@ export class RakutenIchibaClient extends RakutenAPIClient {
       availability: params?.availability || 1,
     };
 
-    return `${RakutenAPIClient.DOMAIN}${RakutenIchibaClient.END_POINT}?${stringify(urlOptions)}`;
+    return `${RakutenAPIClient.DOMAIN}${RakutenIchibaClient.END_POINT}?${stringifyQuery(urlOptions)}`;
   }
 
   private async searchItems(
