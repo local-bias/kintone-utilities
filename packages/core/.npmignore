@@ -3,5 +3,5 @@
 /src
 tsconfig.json
 .prettierrc.yml
-jest.config.mjs
+vitest.config.ts
 /test-results
