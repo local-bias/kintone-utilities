@@ -2,35 +2,61 @@
   "name": "@konomi-app/ketch",
   "version": "1.0.0",
   "description": "kintone.proxy, kintone.plugin.proxy wrapper for Fetch API",
+  "keywords": [
+    "kintone",
+    "proxy",
+    "fetch",
+    "plugin",
+    "typescript"
+  ],
   "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
     }
   },
   "files": [
     "dist"
   ],
-  "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
-    "test": "jest",
-    "clean": "rimraf dist"
+  "repository": "https://github.com/local-bias/kintone-utilities.git",
+  "homepage": "https://github.com/local-bias/kintone-utilities#readme",
+  "bugs": {
+    "url": "https://github.com/local-bias/kintone-utilities/issues"
   },
   "author": "adachi keiichiro",
   "license": "MIT",
-  "packageManager": "pnpm@10.26.1",
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prepublishOnly": "pnpm build && pnpm test",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
   "devDependencies": {
-    "@types/jest": "^30.0.0",
-    "jest": "^30.2.0",
+    "@vitest/coverage-v8": "^4.1.11",
     "rimraf": "^6.0.1",
-    "ts-jest": "^29.4.6",
-    "tsup": "^8.3.0",
-    "typescript": "^5.9.3"
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.11"
   }
 }

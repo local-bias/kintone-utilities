@@ -1,9 +1,11 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // Headers/URLSearchParamsのイテレータを型付けするためdom.iterableを追加
+    // (libは基底設定を上書きするため、継承分も明示的に列挙する)
+    "lib": ["ESNext", "dom", "dom.iterable"],
     "outDir": "./dist",
-    "rootDir": "./src",
-    "baseUrl": "."
+    "rootDir": "./src"
   },
   "include": ["src/**/*.ts"],
   "exclude": ["dist", "node_modules"]

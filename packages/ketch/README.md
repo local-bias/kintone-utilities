@@ -63,3 +63,10 @@ Because ketch runs through `kintone.proxy`, request bodies are sent as strings a
 - Fetch API globals (`Request`, `Response`, and `Headers`) must be available.
 - HTTP methods are limited to the methods supported by `kintone.proxy`: `GET`, `POST`, `PUT`, and `DELETE`.
 - Request bodies are sent only for `POST` and `PUT`, following `kintone.proxy` behavior.
+- Responses with a null-body status (`204`, `205`, `304`) are returned with a `null` body, as required by the Fetch specification.
+
+## Types
+
+ketch does **not** declare a global `kintone` variable, so it will not conflict with the
+`kintone` namespace provided by `@kintone/dts-gen` or `cybozu.d.ts`. Install those types
+separately if you need them in your own code.
