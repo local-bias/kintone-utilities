@@ -1,12 +1,27 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: {
+    index: 'src/index.ts',
+    hooks: 'src/hooks/index.ts',
+    'hooks/use-array': 'src/hooks/use-array.ts',
+    components: 'src/components/index.ts',
+    'components/app-select': 'src/components/app-select.tsx',
+    'components/dnd-context': 'src/components/dnd-context.tsx',
+    'components/field-select': 'src/components/field-select.tsx',
+    'components/number': 'src/components/number.tsx',
+    'components/radio': 'src/components/radio.tsx',
+    'components/select': 'src/components/select.tsx',
+    'components/sortable-context': 'src/components/sortable-context.tsx',
+    'components/switch': 'src/components/switch.tsx',
+    'components/text': 'src/components/text.tsx',
+    'components/toggle-panel': 'src/components/toggle-panel.tsx',
+  },
   format: ['cjs', 'esm'],
   dts: true,
   clean: true,
   sourcemap: true,
-  splitting: false,
+  splitting: true,
   treeshake: true,
   jsx: 'automatic',
   external: [
