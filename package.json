@@ -14,13 +14,15 @@
   ],
   "scripts": {
     "build": "pnpm -r build",
+    "check:bundle-size": "node scripts/check-bundle-sizes.mjs",
     "test": "pnpm -r test",
-    "pack:dry-run": "pnpm -r exec npm pack --dry-run",
+    "pack:dry-run": "pnpm -r pack --dry-run",
     "changeset": "changeset"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.1",
-    "@konomi-app/prettier-config": "^1.1.2"
+    "@konomi-app/prettier-config": "^1.1.2",
+    "esbuild": "0.27.7"
   },
   "prettier": "@konomi-app/prettier-config"
 }
