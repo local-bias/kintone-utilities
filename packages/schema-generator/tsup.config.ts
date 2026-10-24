@@ -5,12 +5,13 @@ export default defineConfig([
   {
     entry: {
       index: 'src/index.ts',
+      generator: 'src/generator.ts',
       client: 'src/client/index.ts',
     },
     format: ['esm', 'cjs'],
     dts: true,
     clean: true,
-    splitting: false,
+    splitting: true,
     sourcemap: true,
     shims: true,
   },

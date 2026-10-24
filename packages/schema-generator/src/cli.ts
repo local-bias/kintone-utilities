@@ -28,7 +28,8 @@
 
 import * as fs from 'node:fs';
 import * as path from 'node:path';
-import { generateSchema, type GenerateOptions } from './generator';
+import { generateSchema } from './generate-schema';
+import type { GenerateOptions } from './generator';
 
 // =============================================================================
 // Types
@@ -224,7 +225,7 @@ async function main(): Promise<void> {
       },
       appId,
       outputName,
-      options
+      options,
     );
 
     // 出力ディレクトリ作成
@@ -242,7 +243,7 @@ async function main(): Promise<void> {
     console.log(`Field count: ${result.fieldCount}`);
     console.log(`\nUsage example:`);
     console.log(
-      `  import { ${result.schemaName}RecordSchema, type ${result.schemaName}Record } from "./${outputName}";`
+      `  import { ${result.schemaName}RecordSchema, type ${result.schemaName}Record } from "./${outputName}";`,
     );
 
     if (options.full) {

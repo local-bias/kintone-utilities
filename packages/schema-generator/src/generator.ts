@@ -6,11 +6,12 @@
 
 import type {
   KintoneFieldProperty,
+  KintoneGetGeneralSettingsResponse,
   KintoneGetProcessManagementResponse,
   KintoneGetViewsResponse,
-  KintoneGetGeneralSettingsResponse,
 } from './client';
-import { KintoneClient, type KintoneClientConfig } from './client';
+import { docComment, lit, propertyKey } from './emit';
+import { assertValidTypeScript } from './validate';
 
 // =============================================================================
 // Types
@@ -50,23 +51,6 @@ function getOptionsFromField(field: KintoneFieldProperty): string[] {
   return Object.values(field.options)
     .sort((a, b) => Number(a.index) - Number(b.index))
     .map((opt) => opt.label);
-}
-
-/**
- * 文字列内のダブルクォートをエスケープ
- */
-function escapeQuotes(str: string): string {
-  return str.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-}
-
-/**
- * フィールドコードをTypeScript変数名として安全な形式に変換
- */
-function sanitizeFieldCode(code: string): string {
-  if (/^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(code)) {
-    return code;
-  }
-  return `"${code}"`;
 }
 
 /**
@@ -133,10 +117,12 @@ function getZodSchemaForField(field: KintoneFieldProperty): string {
       return `z.object({ type: z.literal("${type}"), value: z.string() })`;
 
     case 'RADIO_BUTTON': {
+      // 初期値が未設定の場合や、既存レコードがある状態でフィールドを追加した場合、
+      // kintoneは空文字を返すため DROP_DOWN と同様に許容する
       const options = getOptionsFromField(field);
       if (options.length > 0) {
-        const enumValues = options.map((o) => `"${escapeQuotes(o)}"`).join(', ');
-        return `z.object({ type: z.literal("${type}"), value: z.enum([${enumValues}]) })`;
+        const enumValues = options.map((o) => lit(o)).join(', ');
+        return `z.object({ type: z.literal("${type}"), value: z.union([z.literal(""), z.enum([${enumValues}])]) })`;
       }
       return `z.object({ type: z.literal("${type}"), value: z.string() })`;
     }
@@ -144,7 +130,7 @@ function getZodSchemaForField(field: KintoneFieldProperty): string {
     case 'DROP_DOWN': {
       const options = getOptionsFromField(field);
       if (options.length > 0) {
-        const enumValues = options.map((o) => `"${escapeQuotes(o)}"`).join(', ');
+        const enumValues = options.map((o) => lit(o)).join(', ');
         return `z.object({ type: z.literal("${type}"), value: z.union([z.literal(""), z.enum([${enumValues}])]) })`;
       }
       return `z.object({ type: z.literal("${type}"), value: z.string() })`;
@@ -154,7 +140,7 @@ function getZodSchemaForField(field: KintoneFieldProperty): string {
     case 'MULTI_SELECT': {
       const options = getOptionsFromField(field);
       if (options.length > 0) {
-        const enumValues = options.map((o) => `"${escapeQuotes(o)}"`).join(', ');
+        const enumValues = options.map((o) => lit(o)).join(', ');
         return `z.object({ type: z.literal("${type}"), value: z.array(z.enum([${enumValues}])) })`;
       }
       return `z.object({ type: z.literal("${type}"), value: z.array(z.string()) })`;
@@ -198,7 +184,7 @@ function getZodSchemaForField(field: KintoneFieldProperty): string {
         const subtableFields = Object.entries(field.fields as Record<string, KintoneFieldProperty>)
           .map(
             ([fc, f]) =>
-              `    ${sanitizeFieldCode(fc)}: ${getZodSchemaForField(f as KintoneFieldProperty)}`
+              `    ${propertyKey(fc)}: ${getZodSchemaForField(f as KintoneFieldProperty)}`,
           )
           .join(',\n');
         return `z.object({
@@ -244,8 +230,8 @@ function getZodSchemaForFieldValueOnly(field: KintoneFieldProperty): string {
     case 'RADIO_BUTTON': {
       const options = getOptionsFromField(field);
       if (options.length > 0) {
-        const enumValues = options.map((o) => `"${escapeQuotes(o)}"`).join(', ');
-        return `z.object({ value: z.enum([${enumValues}]) })`;
+        const enumValues = options.map((o) => lit(o)).join(', ');
+        return `z.object({ value: z.union([z.literal(""), z.enum([${enumValues}])]) })`;
       }
       return `z.object({ value: z.string() })`;
     }
@@ -253,7 +239,7 @@ function getZodSchemaForFieldValueOnly(field: KintoneFieldProperty): string {
     case 'DROP_DOWN': {
       const options = getOptionsFromField(field);
       if (options.length > 0) {
-        const enumValues = options.map((o) => `"${escapeQuotes(o)}"`).join(', ');
+        const enumValues = options.map((o) => lit(o)).join(', ');
         return `z.object({ value: z.union([z.literal(""), z.enum([${enumValues}])]) })`;
       }
       return `z.object({ value: z.string() })`;
@@ -263,7 +249,7 @@ function getZodSchemaForFieldValueOnly(field: KintoneFieldProperty): string {
     case 'MULTI_SELECT': {
       const options = getOptionsFromField(field);
       if (options.length > 0) {
-        const enumValues = options.map((o) => `"${escapeQuotes(o)}"`).join(', ');
+        const enumValues = options.map((o) => lit(o)).join(', ');
         return `z.object({ value: z.array(z.enum([${enumValues}])) })`;
       }
       return `z.object({ value: z.array(z.string()) })`;
@@ -289,9 +275,7 @@ function getZodSchemaForFieldValueOnly(field: KintoneFieldProperty): string {
         const subtableFields = Object.entries(field.fields as Record<string, KintoneFieldProperty>)
           .map(
             ([fc, f]) =>
-              `    ${sanitizeFieldCode(fc)}: ${getZodSchemaForFieldValueOnly(
-                f as KintoneFieldProperty
-              )}`
+              `    ${propertyKey(fc)}: ${getZodSchemaForFieldValueOnly(f as KintoneFieldProperty)}`,
           )
           .join(',\n');
         return `z.object({
@@ -320,17 +304,17 @@ ${subtableFields}
 
 function generateProcessManagementSchema(
   processManagement: KintoneGetProcessManagementResponse,
-  schemaName: string
+  schemaName: string,
 ): string {
   if (!processManagement.enable || !processManagement.states) {
     return '';
   }
 
   const statusNames = Object.keys(processManagement.states);
-  const statusEnumValues = statusNames.map((s) => `"${escapeQuotes(s)}"`).join(', ');
+  const statusEnumValues = statusNames.map((s) => lit(s)).join(', ');
 
   const actionNames = processManagement.actions?.map((a) => a.name) || [];
-  const actionEnumValues = actionNames.map((a) => `"${escapeQuotes(a)}"`).join(', ');
+  const actionEnumValues = actionNames.map((a) => lit(a)).join(', ');
 
   let output = `
 // =============================================================================
@@ -375,8 +359,8 @@ export const ${schemaName.toUpperCase()}_ACTIONS = [${actionEnumValues}] as cons
 
     const transitionMapEntries = Object.entries(transitions)
       .map(([from, actions]) => {
-        const actionsStr = actions.map((a) => `'${escapeQuotes(a)}'`).join(', ');
-        return `  '${escapeQuotes(from)}': [${actionsStr}] as const`;
+        const actionsStr = actions.map((a) => lit(a)).join(', ');
+        return `  ${lit(from)}: [${actionsStr}] as const`;
       })
       .join(',\n');
 
@@ -406,19 +390,19 @@ function generateViewsSchema(views: KintoneGetViewsResponse, schemaName: string)
     return '';
   }
 
-  const viewEnumValues = viewNames.map((v) => `"${escapeQuotes(v)}"`).join(', ');
+  const viewEnumValues = viewNames.map((v) => lit(v)).join(', ');
 
   const viewInfoEntries = Object.entries(views.views)
     .sort((a, b) => Number(a[1].index) - Number(b[1].index))
     .map(([name, view]) => {
-      const fields = view.fields ? `[${view.fields.map((f) => `'${f}'`).join(', ')}]` : 'undefined';
-      return `  '${escapeQuotes(name)}': {
-    id: '${view.id}',
-    type: '${view.type}',
-    index: ${view.index},
+      const fields = view.fields ? `[${view.fields.map((f) => lit(f)).join(', ')}]` : 'undefined';
+      return `  ${lit(name)}: {
+    id: ${lit(view.id)},
+    type: ${lit(view.type)},
+    index: ${lit(view.index)},
     fields: ${fields},
-    filterCond: ${view.filterCond ? `'${escapeQuotes(view.filterCond)}'` : 'undefined'},
-    sort: ${view.sort ? `'${escapeQuotes(view.sort)}'` : 'undefined'},
+    filterCond: ${view.filterCond ? lit(view.filterCond) : 'undefined'},
+    sort: ${view.sort ? lit(view.sort) : 'undefined'},
   }`;
     })
     .join(',\n');
@@ -457,15 +441,15 @@ export function get${schemaName}ViewNameById(viewId: string): ${schemaName}ViewN
 
 function generateFieldConstants(
   fields: Record<string, KintoneFieldProperty>,
-  schemaName: string
+  schemaName: string,
 ): string {
   const fieldEntries = Object.entries(fields)
     .filter(([, f]) => f.type !== 'GROUP' && f.type !== 'REFERENCE_TABLE')
     .map(([code, field]) => {
-      return `  ${sanitizeFieldCode(code)}: {
-    code: '${code}',
-    type: '${field.type}',
-    label: '${escapeQuotes(field.label || '')}',
+      return `  ${propertyKey(code)}: {
+    code: ${lit(code)},
+    type: ${lit(field.type)},
+    label: ${lit(field.label || '')},
     required: ${field.required || false},
   }`;
     })
@@ -476,7 +460,7 @@ function generateFieldConstants(
       const field = fields[code];
       return field.type !== 'GROUP' && field.type !== 'REFERENCE_TABLE';
     })
-    .map((code) => `'${code}'`)
+    .map((code) => lit(code))
     .join(' | ');
 
   return `
@@ -512,7 +496,7 @@ export function get${schemaName}FieldLabel(code: ${schemaName}FieldCode): string
 
 function generateSelectionOptions(
   fields: Record<string, KintoneFieldProperty>,
-  schemaName: string
+  schemaName: string,
 ): string {
   const selectFields = Object.entries(fields).filter(([, field]) => {
     return (
@@ -531,7 +515,7 @@ function generateSelectionOptions(
   const optionsEntries = selectFields
     .map(([code, field]) => {
       const options = getOptionsFromField(field);
-      const optionsStr = options.map((o) => `'${escapeQuotes(o)}'`).join(', ');
+      const optionsStr = options.map((o) => lit(o)).join(', ');
 
       let constName = toConstantName(code, field.label || code);
 
@@ -542,7 +526,7 @@ function generateSelectionOptions(
       }
       usedNames.add(constName);
 
-      const comment = field.label ? `/** ${field.label} (${code}) */\n` : '';
+      const comment = field.label ? docComment(`${field.label} (${code})`) : '';
       return `${comment}export const ${schemaName.toUpperCase()}_${constName}_OPTIONS = [${optionsStr}] as const;`;
     })
     .join('\n\n');
@@ -559,7 +543,7 @@ ${optionsEntries}
 function generateAppMetadata(
   appId: string,
   generalSettings: KintoneGetGeneralSettingsResponse | null,
-  schemaName: string
+  schemaName: string,
 ): string {
   const appName = generalSettings?.name || schemaName;
   const description = generalSettings?.description || '';
@@ -572,17 +556,17 @@ function generateAppMetadata(
 /**
  * アプリID
  */
-export const ${schemaName.toUpperCase()}_APP_ID = '${appId}';
+export const ${schemaName.toUpperCase()}_APP_ID = ${lit(appId)};
 
 /**
  * アプリ名
  */
-export const ${schemaName.toUpperCase()}_APP_NAME = '${escapeQuotes(appName)}';
+export const ${schemaName.toUpperCase()}_APP_NAME = ${lit(appName)};
 
 /**
  * アプリ説明
  */
-export const ${schemaName.toUpperCase()}_APP_DESCRIPTION = \`${description.replace(/`/g, '\\`')}\`;
+export const ${schemaName.toUpperCase()}_APP_DESCRIPTION = ${lit(description)};
 `;
 }
 
@@ -615,7 +599,7 @@ const FIELD_TYPE_OPERATORS: Record<string, string[]> = {
 
 function generateQueryHelpers(
   fields: Record<string, KintoneFieldProperty>,
-  schemaName: string
+  schemaName: string,
 ): string {
   const textFields: string[] = [];
   const multiLineTextFields: string[] = [];
@@ -683,7 +667,7 @@ function generateQueryHelpers(
 
   const formatFieldType = (fieldList: string[], name: string) => {
     if (fieldList.length === 0) return '';
-    return `export type ${schemaName}${name} = ${fieldList.map((f) => `'${f}'`).join(' | ')};\n`;
+    return `export type ${schemaName}${name} = ${fieldList.map((f) => lit(f)).join(' | ')};\n`;
   };
 
   const textFieldType = textFields.length > 0 ? `${schemaName}TextField` : 'never';
@@ -695,7 +679,7 @@ function generateQueryHelpers(
   const userFieldType = userFields.length > 0 ? `${schemaName}UserField` : 'never';
   const statusFieldType = statusFields.length > 0 ? `${schemaName}StatusField` : 'never';
 
-  const allFieldsStr = allSearchableFields.map((f) => `'${f}'`).join(' | ');
+  const allFieldsStr = allSearchableFields.map((f) => lit(f)).join(' | ');
 
   return `
 // =============================================================================
@@ -704,15 +688,15 @@ function generateQueryHelpers(
 
 // フィールドタイプ別の型定義
 ${formatFieldType(textFields, 'TextField')}${formatFieldType(
-    multiLineTextFields,
-    'MultiLineTextField'
-  )}${formatFieldType(numberFields, 'NumberField')}${formatFieldType(
-    selectFields,
-    'SelectField'
-  )}${formatFieldType(dateFields, 'DateField')}${formatFieldType(
-    userFields,
-    'UserField'
-  )}${formatFieldType(statusFields, 'StatusField')}
+  multiLineTextFields,
+  'MultiLineTextField',
+)}${formatFieldType(numberFields, 'NumberField')}${formatFieldType(
+  selectFields,
+  'SelectField',
+)}${formatFieldType(dateFields, 'DateField')}${formatFieldType(
+  userFields,
+  'UserField',
+)}${formatFieldType(statusFields, 'StatusField')}
 /**
  * 全検索可能フィールド
  */
@@ -785,7 +769,7 @@ export function generateSchemaCode(
     processManagement?: KintoneGetProcessManagementResponse | null;
     views?: KintoneGetViewsResponse | null;
     generalSettings?: KintoneGetGeneralSettingsResponse | null;
-  } = {}
+  } = {},
 ): GenerateResult {
   const zodImportPath = options.zodImportPath || 'zod';
   const schemaName = toPascalCase(outputName);
@@ -793,8 +777,8 @@ export function generateSchemaCode(
   const fieldSchemas = Object.entries(fields)
     .filter(([, f]) => f.type !== 'GROUP' && f.type !== 'REFERENCE_TABLE')
     .map(([code, field]) => {
-      const comment = field.label ? `  /** ${field.label} */\n` : '';
-      return `${comment}  ${sanitizeFieldCode(code)}: ${getZodSchemaForField(field)}`;
+      const comment = docComment(field.label, '  ');
+      return `${comment}  ${propertyKey(code)}: ${getZodSchemaForField(field)}`;
     })
     .join(',\n');
 
@@ -808,11 +792,11 @@ export function generateSchemaCode(
     .filter(([, f]) => f.type !== 'GROUP' && f.type !== 'REFERENCE_TABLE' && f.type !== 'CALC')
     .filter(([, f]) => !isSystemField(f))
     .map(([code, field]) => {
-      const comment = field.label ? `  /** ${field.label} */\n` : '';
+      const comment = docComment(field.label, '  ');
       const isRequired = field.required === true;
       const schema = getZodSchemaForFieldValueOnly(field);
       const optionalSuffix = isRequired ? '' : '.optional()';
-      return `${comment}  ${sanitizeFieldCode(code)}: ${schema}${optionalSuffix}`;
+      return `${comment}  ${propertyKey(code)}: ${schema}${optionalSuffix}`;
     })
     .join(',\n');
 
@@ -820,9 +804,9 @@ export function generateSchemaCode(
     .filter(([, f]) => f.type !== 'GROUP' && f.type !== 'REFERENCE_TABLE' && f.type !== 'CALC')
     .filter(([, f]) => !isSystemField(f))
     .map(([code, field]) => {
-      const comment = field.label ? `  /** ${field.label} */\n` : '';
+      const comment = docComment(field.label, '  ');
       const schema = getZodSchemaForFieldValueOnly(field);
-      return `${comment}  ${sanitizeFieldCode(code)}: ${schema}.optional()`;
+      return `${comment}  ${propertyKey(code)}: ${schema}.optional()`;
     })
     .join(',\n');
 
@@ -852,7 +836,7 @@ export function generateSchemaCode(
  * Re-generate with: kintone-schema-generate ${appId} ${outputName}${options.full ? ' --full' : ''}
  */
 
-import { z } from "${zodImportPath}";
+import { z } from ${lit(zodImportPath)};
 
 // =============================================================================
 // Record Schemas (レコードスキーマ)
@@ -892,92 +876,16 @@ ${updateRecordFields}
 export type ${schemaName}RecordForUpdate = z.infer<typeof ${schemaName}RecordForUpdateSchema>;
 ${additionalSchemas}`;
 
+  // 生成器の不具合による壊れたコードを書き出さないための最終ゲート。
+  // kintoneのラベルや選択肢には任意の文字列が入りうるため、エスケープ漏れは
+  // 生成コードの構文エラーとして必ずここで検出される。
+  assertValidTypeScript(code, `${outputName}.ts`);
+
   return {
     code,
     schemaName,
     fieldCount: Object.keys(fields).filter(
-      (code) => fields[code].type !== 'GROUP' && fields[code].type !== 'REFERENCE_TABLE'
+      (code) => fields[code].type !== 'GROUP' && fields[code].type !== 'REFERENCE_TABLE',
     ).length,
   };
-}
-
-/**
- * kintone APIからスキーマを生成
- */
-export async function generateSchema(
-  clientConfig: KintoneClientConfig,
-  appId: string,
-  outputName: string,
-  options: GenerateOptions = {}
-): Promise<GenerateResult> {
-  const client = new KintoneClient(clientConfig);
-
-  if (options.verbose) {
-    console.log(`Fetching form fields for app ${appId}...`);
-  }
-
-  const fields = await client.getFormFields(appId);
-
-  if (options.verbose) {
-    console.log(`Found ${Object.keys(fields).length} fields.`);
-  }
-
-  let processManagement: KintoneGetProcessManagementResponse | null = null;
-  let views: KintoneGetViewsResponse | null = null;
-  let generalSettings: KintoneGetGeneralSettingsResponse | null = null;
-
-  if (options.full) {
-    if (options.verbose) {
-      console.log('Fetching additional app settings...');
-    }
-
-    try {
-      processManagement = await client.getProcessManagement(appId, {
-        preview: options.preview,
-        lang: 'ja',
-      });
-      if (options.verbose) {
-        console.log('  - Process management settings fetched');
-      }
-    } catch (error) {
-      if (options.verbose) {
-        console.warn('  - Could not fetch process management settings:', error);
-      }
-    }
-
-    try {
-      views = await client.getViews(appId, {
-        preview: options.preview,
-        lang: 'ja',
-      });
-      if (options.verbose) {
-        console.log('  - View settings fetched');
-      }
-    } catch (error) {
-      if (options.verbose) {
-        console.warn('  - Could not fetch view settings:', error);
-      }
-    }
-
-    try {
-      generalSettings = await client.getGeneralSettings(appId, {
-        preview: options.preview,
-        lang: 'ja',
-      });
-      if (options.verbose) {
-        console.log('  - General settings fetched');
-      }
-    } catch (error) {
-      if (options.verbose) {
-        console.warn('  - Could not fetch general settings:', error);
-      }
-    }
-  }
-
-  return generateSchemaCode(appId, outputName, fields, {
-    ...options,
-    processManagement,
-    views,
-    generalSettings,
-  });
 }

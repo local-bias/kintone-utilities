@@ -88,8 +88,12 @@ console.log(result.fieldCount); // フィールド数
 
 ### フィールド定義からスキーマコードを生成（API を使わない場合）
 
+生成機能だけを明示して読み込む場合は `generator` サブパスも利用できます。既存のルート
+import も引き続き利用できます。
+
 ```typescript
-import { generateSchemaCode, KintoneClient } from 'kintone-schema-generator';
+import { generateSchemaCode } from '@konomi-app/kintone-schema-generator/generator';
+import { KintoneClient } from '@konomi-app/kintone-schema-generator/client';
 
 // フィールド定義を取得
 const client = new KintoneClient({
