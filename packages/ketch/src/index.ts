@@ -1,84 +1,97 @@
-declare global {
-  var kintone: unknown;
-}
-
 type KintoneProxyBody = Record<string, unknown> | string;
 type KintoneProxyMethod = 'GET' | 'POST' | 'PUT' | 'DELETE';
 
-const KINTONE_PROXY_METHODS: readonly KintoneProxyMethod[] = ['GET', 'POST', 'PUT', 'DELETE'];
-const SENSITIVE_HEADER_NAMES = new Set([
+/** `kintone.proxy`が返す`[body, status, headers]`のタプル */
+type KintoneProxyResult = [body: string, status: number, headers: Record<string, string>];
+
+/**
+ * `kintone.proxy`の型
+ *
+ * {@link https://cybozu.dev/ja/kintone/docs/js-api/proxy/kintone-proxy/|外部のAPIを実行する - cybozu developer network}
+ */
+type KintoneProxyFunction = (
+  url: string,
+  method: KintoneProxyMethod,
+  headers: Record<string, string>,
+  body: KintoneProxyBody
+) => Promise<KintoneProxyResult>;
+
+/**
+ * `kintone.plugin.app.proxy`の型。`kintone.proxy`の引数の先頭にプラグインIDが付く
+ *
+ * {@link https://cybozu.dev/ja/kintone/docs/js-api/plugin/proxy/|プラグインから外部のAPIを実行する - cybozu developer network}
+ */
+type KintonePluginProxyFunction = (
+  pluginId: string,
+  ...args: Parameters<KintoneProxyFunction>
+) => Promise<KintoneProxyResult>;
+
+/**
+ * ketchが利用するグローバル`kintone`オブジェクトの部分型
+ *
+ * グローバル宣言(`declare global`)は行わない。`@kintone/dts-gen`等が提供する
+ * `declare namespace kintone`と識別子が衝突するため。
+ */
+type KintoneGlobal = {
+  proxy?: KintoneProxyFunction;
+  plugin?: {
+    app?: {
+      proxy?: KintonePluginProxyFunction;
+    };
+  };
+};
+
+const KINTONE_PROXY_METHODS: ReadonlySet<string> = new Set<KintoneProxyMethod>([
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+]);
+
+/** `kintone.proxy`がリクエストボディを送信するメソッド */
+const METHODS_WITH_BODY: ReadonlySet<string> = new Set<KintoneProxyMethod>(['POST', 'PUT']);
+
+/**
+ * ボディを持てないステータス。`new Response()`はこれらに空文字を渡してもTypeErrorを投げる
+ *
+ * {@link https://fetch.spec.whatwg.org/#null-body-status|null body status - Fetch Standard}
+ */
+const NULL_BODY_STATUSES: ReadonlySet<number> = new Set([204, 205, 304]);
+
+const SENSITIVE_HEADER_NAMES: ReadonlySet<string> = new Set([
   'authorization',
   'cookie',
   'proxy-authorization',
   'set-cookie',
   'x-api-key',
 ]);
-const SENSITIVE_QUERY_KEYS = new Set(['access_token', 'api_key', 'apikey', 'key', 'password', 'token']);
 
-/**
- * kintone.plugin.app.proxyの型
- *
- * {@link https://cybozu.dev/ja/kintone/docs/js-api/proxy/kintone-proxy/|外部のAPIを実行する - cybozu developer network}
- */
-interface KintonePluginProxyFunction {
-  (
-    pluginId: string,
-    url: string,
-    method: string,
-    headers: Record<string, string>,
-    body: KintoneProxyBody
-  ): Promise<[string, number, Record<string, string>]>;
+const SENSITIVE_QUERY_KEYS: ReadonlySet<string> = new Set([
+  'access_token',
+  'api_key',
+  'apikey',
+  'key',
+  'password',
+  'token',
+]);
+
+function getKintoneGlobal(): KintoneGlobal | null {
+  const { kintone } = globalThis as typeof globalThis & { kintone?: KintoneGlobal };
+  return typeof kintone === 'object' && kintone !== null ? kintone : null;
 }
 
-interface KintoneProxyFunction {
-  (
-    url: string,
-    method: string,
-    headers: Record<string, string>,
-    body: KintoneProxyBody
-  ): Promise<[string, number, Record<string, string>]>;
-}
-
-interface KintoneHost {
-  proxy?: KintoneProxyFunction;
-}
-
-interface KintonePluginHost {
-  plugin?: {
-    app?: {
-      proxy?: KintonePluginProxyFunction;
-    };
-  };
-}
-
-function getProxy(init: { pluginId?: string } | undefined): KintoneProxyFunction | null {
-  if (init?.pluginId) {
-    const { pluginId } = init;
-    const proxy = (kintone as KintonePluginHost).plugin?.app?.proxy;
+function getProxy(kintone: KintoneGlobal, pluginId: string | undefined): KintoneProxyFunction | null {
+  if (pluginId) {
+    const proxy = kintone.plugin?.app?.proxy;
     return typeof proxy === 'function'
       ? (url, method, headers, body) => proxy(pluginId, url, method, headers, body)
       : null;
   }
-  const proxy = (kintone as KintoneHost).proxy;
-  return typeof proxy === 'function' ? proxy : null;
-}
-
-function parseHeaderInit(headers: HeadersInit | undefined): Record<string, string> {
-  const result: Record<string, string> = {};
-  if (typeof Headers !== 'undefined' && headers instanceof Headers) {
-    headers.forEach((value, key) => {
-      result[key] = value;
-    });
-  } else if (Array.isArray(headers)) {
-    headers.forEach(([key, value]) => {
-      result[key] = value;
-    });
-  } else if (typeof headers === 'object' && headers !== null) {
-    Object.entries(headers).forEach(([key, value]) => {
-      result[key] = value;
-    });
-  }
-  return result;
+  const proxy = kintone.proxy;
+  // `kintone`をレシーバとして呼び出すため、メソッドを切り離さずラップする
+  return typeof proxy === 'function'
+    ? (url, method, headers, body) => proxy.call(kintone, url, method, headers, body)
+    : null;
 }
 
 function sanitizeHeaders(headers: Record<string, string>): Record<string, string> {
@@ -92,11 +105,11 @@ function sanitizeHeaders(headers: Record<string, string>): Record<string, string
 
 function sanitizeUrl(url: string): string {
   const sanitizedUrl = new URL(url);
-  sanitizedUrl.searchParams.forEach((_, key) => {
+  for (const key of new Set(sanitizedUrl.searchParams.keys())) {
     if (SENSITIVE_QUERY_KEYS.has(key.toLowerCase())) {
       sanitizedUrl.searchParams.set(key, '[REDACTED]');
     }
-  });
+  }
   return sanitizedUrl.toString();
 }
 
@@ -112,23 +125,22 @@ function assertFetchGlobals(): void {
 
 function parseProxyMethod(method: string): KintoneProxyMethod {
   const normalizedMethod = method.toUpperCase();
-  if (KINTONE_PROXY_METHODS.includes(normalizedMethod as KintoneProxyMethod)) {
-    return normalizedMethod as KintoneProxyMethod;
+  if (!KINTONE_PROXY_METHODS.has(normalizedMethod)) {
+    throw new Error(
+      `⛵ ketch does not support the ${method} method because kintone.proxy only supports GET, POST, PUT, and DELETE.`
+    );
   }
-  throw new Error(
-    `⛵ ketch does not support the ${method} method because kintone.proxy only supports GET, POST, PUT, and DELETE.`
-  );
+  return normalizedMethod as KintoneProxyMethod;
 }
 
 async function getProxyBody(request: Request): Promise<KintoneProxyBody> {
-  if ((request.method !== 'POST' && request.method !== 'PUT') || !request.body) {
+  if (!METHODS_WITH_BODY.has(request.method) || !request.body) {
     return {};
   }
   try {
     return await request.text();
   } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`⛵ ketch failed to read the request body: ${message}`);
+    throw new Error('⛵ ketch failed to read the request body.', { cause: error });
   }
 }
 
@@ -166,50 +178,51 @@ export type Ketch = (input: string | URL | Request, init?: RequestInit) => Promi
  * ```
  */
 export function createKetch(options: CreateKetchOptions = {}): Ketch {
-  const { debug = false } = options;
+  const { pluginId, debug = false } = options;
 
-  const log = (...args: unknown[]) => {
+  // ペイロードの組み立てはdebug時のみ行う
+  const log = (label: string, getPayload: () => unknown): void => {
     if (debug) {
-      console.log('⛵ ketch:', ...args);
+      console.log('⛵ ketch:', label, getPayload());
     }
   };
-  // kintoneオブジェクトが存在するか確認
-  if (typeof kintone !== 'object' || !kintone) {
+
+  const kintone = getKintoneGlobal();
+  if (!kintone) {
     throw new Error('⛵ ketch can only be used in the kintone environment.');
   }
 
-  // `proxy`が存在するか確認
   // `options.pluginId`が指定されている場合は`kintone.plugin.app.proxy`を使用
-  const proxyFunction = getProxy(options);
-
+  const proxyFunction = getProxy(kintone, pluginId);
   if (!proxyFunction) {
-    throw new Error(
-      '⛵ ketch could not find a valid proxy function in the kintone environment.'
-    );
+    throw new Error('⛵ ketch could not find a valid proxy function in the kintone environment.');
   }
 
-  return async (input: string | URL | Request, init?: RequestInit): Promise<Response> => {
+  return async (input, init) => {
     assertFetchGlobals();
     const request = new Request(input, init);
-    const url = request.url;
+    const { url } = request;
     const method = parseProxyMethod(request.method);
-    const parsedHeaders = parseHeaderInit(request.headers);
+    // `request.headers`は必ずHeadersインスタンスなので、そのまま列挙できる
+    const headers = Object.fromEntries(request.headers);
     const reqBody = await getProxyBody(request);
 
-    log('Request:', {
+    log('Request:', () => ({
       url: sanitizeUrl(url),
       method,
-      headers: sanitizeHeaders(parsedHeaders),
+      headers: sanitizeHeaders(headers),
       body: '[REDACTED]',
-    });
+    }));
 
-    // kintoneのproxy関数を使用してリクエストを送信
-    const [resBody, status, resHeaders] = await proxyFunction(url, method, parsedHeaders, reqBody);
+    const [resBody, status, resHeaders] = await proxyFunction(url, method, headers, reqBody);
 
-    log('Response:', { status, headers: sanitizeHeaders(resHeaders), body: '[REDACTED]' });
+    log('Response:', () => ({
+      status,
+      headers: sanitizeHeaders(resHeaders),
+      body: '[REDACTED]',
+    }));
 
-    // Responseオブジェクトを作成して返す
-    return new Response(resBody, {
+    return new Response(NULL_BODY_STATUSES.has(status) ? null : resBody, {
       status,
       headers: resHeaders,
     });
@@ -228,6 +241,5 @@ export async function ketch(
   }
 ): Promise<Response> {
   const { pluginId, ...requestInit } = init ?? {};
-  const ketchFn = createKetch({ pluginId });
-  return ketchFn(input, requestInit);
+  return createKetch({ pluginId })(input, requestInit);
 }
