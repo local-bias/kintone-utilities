@@ -1,10 +1,11 @@
 {
   "name": "@konomi-app/kintone-utilities-react",
-  "version": "3.6.0",
+  "version": "4.0.0",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "sideEffects": false,
   "exports": {
     ".": {
       "import": {
@@ -14,6 +15,106 @@
       "require": {
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
+      }
+    },
+    "./lib": {
+      "import": {
+        "types": "./dist/lib.d.ts",
+        "default": "./dist/lib.js"
+      },
+      "require": {
+        "types": "./dist/lib.d.cts",
+        "default": "./dist/lib.cjs"
+      }
+    },
+    "./event-listener": {
+      "import": {
+        "types": "./dist/event-listener.d.ts",
+        "default": "./dist/event-listener.js"
+      },
+      "require": {
+        "types": "./dist/event-listener.d.cts",
+        "default": "./dist/event-listener.cjs"
+      }
+    },
+    "./component-manager": {
+      "import": {
+        "types": "./dist/component-manager.d.ts",
+        "default": "./dist/component-manager.js"
+      },
+      "require": {
+        "types": "./dist/component-manager.d.cts",
+        "default": "./dist/component-manager.cjs"
+      }
+    },
+    "./theme": {
+      "import": {
+        "types": "./dist/theme.d.ts",
+        "default": "./dist/theme.js"
+      },
+      "require": {
+        "types": "./dist/theme.d.cts",
+        "default": "./dist/theme.cjs"
+      }
+    },
+    "./components": {
+      "import": {
+        "types": "./dist/components.d.ts",
+        "default": "./dist/components.js"
+      },
+      "require": {
+        "types": "./dist/components.d.cts",
+        "default": "./dist/components.cjs"
+      }
+    },
+    "./components/*": {
+      "import": {
+        "types": "./dist/components/*.d.ts",
+        "default": "./dist/components/*.js"
+      },
+      "require": {
+        "types": "./dist/components/*.d.cts",
+        "default": "./dist/components/*.cjs"
+      }
+    },
+    "./plugin": {
+      "import": {
+        "types": "./dist/plugin.d.ts",
+        "default": "./dist/plugin.js"
+      },
+      "require": {
+        "types": "./dist/plugin.d.cts",
+        "default": "./dist/plugin.cjs"
+      }
+    },
+    "./plugin/*": {
+      "import": {
+        "types": "./dist/plugin/*.d.ts",
+        "default": "./dist/plugin/*.js"
+      },
+      "require": {
+        "types": "./dist/plugin/*.d.cts",
+        "default": "./dist/plugin/*.cjs"
+      }
+    },
+    "./plugin-config": {
+      "import": {
+        "types": "./dist/plugin-config.d.ts",
+        "default": "./dist/plugin-config.js"
+      },
+      "require": {
+        "types": "./dist/plugin-config.d.cts",
+        "default": "./dist/plugin-config.cjs"
+      }
+    },
+    "./plugin-config/*": {
+      "import": {
+        "types": "./dist/plugin-config/*.d.ts",
+        "default": "./dist/plugin-config/*.js"
+      },
+      "require": {
+        "types": "./dist/plugin-config/*.d.cts",
+        "default": "./dist/plugin-config/*.cjs"
       }
     }
   },
@@ -25,6 +126,8 @@
   "license": "MIT",
   "scripts": {
     "build": "tsup",
+    "check:bundle-size": "node scripts/check-bundle-size.mjs",
+    "test": "pnpm build && pnpm check:bundle-size",
     "check-types": "tsc --noEmit"
   },
   "peerDependencies": {
@@ -72,6 +175,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "clsx": "^2.1.1",
+    "esbuild": "0.27.7",
     "lucide-react": "^0.574.0",
     "nanoid": "^5.1.6",
     "react": "^19.2.4",
