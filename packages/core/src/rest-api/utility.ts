@@ -22,6 +22,13 @@ export const filterFieldProperties = (
   return reduced;
 };
 
+/** kintone REST APIがエラー時に返却するレスポンスの最小限の型ガードです */
+export const isKintoneApiError = (error: unknown): error is { code: string } =>
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  typeof (error as { code: unknown }).code === 'string';
+
 /**
  * REST APIでアクセスする先のアプリがゲストスペースに存在するものかどうかのつかない時、
  *
@@ -36,8 +43,8 @@ export const withSpaceIdFallback = async <T extends (...args: any) => any>(param
   try {
     const response = await func(funcParams);
     return response;
-  } catch (error: any) {
-    if (['GAIA_IL23', 'GAIA_IL25'].includes(error.code)) {
+  } catch (error: unknown) {
+    if (isKintoneApiError(error) && ['GAIA_IL23', 'GAIA_IL25'].includes(error.code)) {
       const response = await func({ ...funcParams, guestSpaceId: spaceId });
       return response;
     }
@@ -52,6 +59,7 @@ export const withSpaceIdFallback = async <T extends (...args: any) => any>(param
  *
  * @param appId - 判定対象のアプリID
  * @returns ゲストスペースのアプリであれば `true`
+ * @throws kintone APIエラー以外の例外（ネットワーク障害など）はそのまま再スローされます
  *
  * @example
  * ```ts
@@ -64,8 +72,11 @@ export const withSpaceIdFallback = async <T extends (...args: any) => any>(param
 export const isGuestSpace = async (appId: string): Promise<boolean> => {
   try {
     await getRecords({ app: appId });
-  } catch (error: any) {
-    return error.code === 'GAIA_IL23';
+  } catch (error: unknown) {
+    if (isKintoneApiError(error)) {
+      return error.code === 'GAIA_IL23';
+    }
+    throw error;
   }
   return false;
 };

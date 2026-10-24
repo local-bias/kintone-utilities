@@ -16,7 +16,7 @@ import {
  *
  * @typeParam T - レコードの型
  * @param props.app - アプリID
- * @param props.guestsSpaceId - ゲストスペースID（省略可）
+ * @param props.guestSpaceId - ゲストスペースID（省略可）
  * @param props.debug - デバッグログを出力する場合は `true`
  * @returns レコード操作用のメソッドを持つオブジェクト
  *
@@ -31,9 +31,17 @@ import {
  */
 export const useApi = <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(props: {
   app: kintoneAPI.IDToRequest;
+  guestSpaceId?: string;
+  /**
+   * @deprecated タイポのため非推奨です。代わりに `guestSpaceId` を使用してください。次のメジャーバージョンで削除されます。
+   */
   guestsSpaceId?: string;
   debug?: boolean;
 }) => {
+  const { app, debug } = props;
+  const guestSpaceId = props.guestSpaceId ?? props.guestsSpaceId;
+  const commonParams = { app, guestSpaceId, debug };
+
   return {
     records: {
       $post: async (
@@ -41,15 +49,17 @@ export const useApi = <T extends kintoneAPI.rest.Frame = kintoneAPI.RecordData>(
       ): Promise<kintoneAPI.rest.RecordsPostResponse> => {
         const { limit = API_LIMIT_POST, ...requestParams } = params;
         if (requestParams.records.length === 1) {
-          return addRecord<T>({ ...props, record: requestParams.records[0] }).then((res) => ({
-            ids: [res.id],
-            revisions: [res.revision],
-          }));
+          return addRecord<T>({ ...commonParams, record: requestParams.records[0] }).then(
+            (res) => ({
+              ids: [res.id],
+              revisions: [res.revision],
+            })
+          );
         }
         if (requestParams.records.length <= limit) {
-          return addRecords({ ...props, ...params });
+          return addRecords({ ...commonParams, ...requestParams });
         }
-        return addAllRecords({ ...props, ...params });
+        return addAllRecords({ ...commonParams, ...requestParams, limit });
       },
     },
   };
